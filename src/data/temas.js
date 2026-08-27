@@ -7,48 +7,58 @@ export const unidades = [
   {
     id: 'limites',
     titulo: 'Límites y Continuidad',
-    descripcion: 'Comprende el comportamiento de las funciones cuando la variable independiente se aproxima a un valor específico. Fundamento esencial para todo el cálculo diferencial.',
+    descripcion: '¿Qué sucede cuando nos acercamos cada vez más a un punto? Los límites te permiten descubrir y comprender qué ocurre cerca de un valor determinado, incluso cuando no llegamos exactamente a él. Aquí comienza el camino hacia el cálculo diferencial.',
     icono: '∞',
     color: '#0047CC',
     temas: [
       {
         id: '1.1',
         titulo: 'Introducción – Definición de límite',
-        descripcion: 'El concepto de límite responde a la pregunta: ¿A qué valor se acerca una función cuando x se aproxima a cierto número?',
+        descripcion: 'El concepto de límite se explica mediante un ejemplo paso a paso: analizar qué valor toma una función cuando la variable se aproxima a un punto donde no está definida.',
         contenido: `
-## Concepto
+## Introducción
 
-El concepto de límite es uno de los pilares fundamentales del cálculo diferencial, ya que permite estudiar el comportamiento de una función cuando la variable independiente se aproxima a un valor específico.
+Considere la función:
 
-No siempre importa el valor exacto de la función en ese punto, sino cómo se comporta alrededor de él.
+$$f(x) = \\frac{16 - x^2}{4 - x}$$
 
-## Definición formal
+Su dominio es todos los números reales excepto $x = 4$. Al intentar evaluar $f(4)$ obtenemos $\\frac{0}{0}$, una indeterminación. Pero, ¿qué pasa cuando $x$ está *muy cerca* de 4?
 
-lim(x→a) f(x) = L
+## Tabla de valores por la izquierda
 
-Esto significa que cuando x toma valores cada vez más cercanos a a, entonces f(x) se aproxima a L.
+| $x$ | $f(x)$ |
+|-----|--------|
+| 3.9 | 7.9 |
+| 3.99 | 7.99 |
+| 3.999 | 7.999 |
+| 3.9999 | 7.9999 |
 
-## Condiciones para que exista un límite
+## Tabla de valores por la derecha
 
-1. La función debe acercarse a un único valor.
-2. Ese valor debe ser el mismo por ambos lados.
-3. No es obligatorio que la función esté definida en ese punto.
+| $x$ | $f(x)$ |
+|-----|--------|
+| 4.1 | 8.1 |
+| 4.01 | 8.01 |
+| 4.001 | 8.001 |
+| 4.0001 | 8.0001 |
 
-## Ejemplo práctico: Sustitución directa
+## Observación
 
-Sea f(x) = x + 4
+Cuando $x$ tiende a 4 por la izquierda o por la derecha, los valores de $f(x)$ tienden a **8**.
 
-Calcular: lim(x→2) (x + 4) = 2 + 4 = 6
+## Simplificación algebraica
 
-## Ejemplo práctico: Indeterminación
+Podemos simplificar la función factorizando el numerador:
 
-lim(x→2) (x² - 4)/(x - 2) = 0/0 → Indeterminación
+$$f(x) = \\frac{16 - x^2}{4 - x} = \\frac{(4 - x)(4 + x)}{4 - x} = 4 + x$$
 
-Factorizamos: (x - 2)(x + 2)/(x - 2) = x + 2
+Para todo $x \\neq 4$, la función se reduce a $f(x) = 4 + x$.
 
-Ahora: lim(x→2) (x + 2) = 4
+## Conclusión
 
-El límite existe y vale 4.
+$$\\lim_{x \\to 4} \\frac{16 - x^2}{4 - x} = \\lim_{x \\to 4} (4 + x) = 8$$
+
+El límite existe y vale **8**, aunque $f(4)$ no esté definida.
         `
       },
       {
@@ -56,28 +66,35 @@ El límite existe y vale 4.
         titulo: 'Propiedades de los límites de funciones',
         descripcion: 'Las propiedades permiten simplificar cálculos complejos sin resolver toda la función desde cero.',
         contenido: `
-## Concepto
+## Introducción
 
-Si lim(x→a) f(x) = L y lim(x→a) g(x) = M, entonces:
+Si conocemos los límites de dos [funciones](/saberes-previos#funciones), podemos calcular límites más complejos usando propiedades algebraicas.
 
-### 1. Propiedad de suma
-lim(x→a) [f(x) + g(x)] = L + M
+## Propiedades
 
-### 2. Propiedad de resta
-lim(x→a) [f(x) - g(x)] = L - M
+Sean $\\lim_{x \\to a} f(x) = L$ y $\\lim_{x \\to a} g(x) = M$:
+
+### 1. Suma
+$$\\lim_{x \\to a} [f(x) + g(x)] = L + M$$
+
+### 2. Resta
+$$\\lim_{x \\to a} [f(x) - g(x)] = L - M$$
 
 ### 3. Multiplicación
-lim(x→a) [f(x) · g(x)] = L · M
+$$\\lim_{x \\to a} [f(x) \\cdot g(x)] = L \\cdot M$$
 
 ### 4. Cociente
-lim(x→a) [f(x)/g(x)] = L/M,  M ≠ 0
+$$\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\frac{L}{M}, \\quad M \\neq 0$$
 
 ### 5. Potencias
-lim(x→a) [f(x)]ⁿ = Lⁿ
+$$\\lim_{x \\to a} [f(x)]^n = L^n$$
 
-## Ejemplo práctico completo
+## Ejemplo práctico
 
-lim(x→2) (x³ + 4x - 1) = 8 + 8 - 1 = 15
+Calcular: $\\lim_{x \\to 2} (x^3 + 4x - 1)$
+
+Usando la propiedad de suma:
+$$\\lim_{x \\to 2} x^3 + \\lim_{x \\to 2} 4x - \\lim_{x \\to 2} 1 = 8 + 8 - 1 = 15$$
         `
       },
       {
@@ -85,30 +102,37 @@ lim(x→2) (x³ + 4x - 1) = 8 + 8 - 1 = 15
         titulo: 'Límites laterales',
         descripcion: 'Estudian el comportamiento de la función desde un solo lado: por la izquierda o por la derecha.',
         contenido: `
-## Concepto
+## Introducción
 
-Los límites laterales estudian el comportamiento de la función desde un solo lado.
+Los [límites](/calculo1/limites/1.1) laterales estudian el comportamiento de una [función](/saberes-previos#funciones) desde un solo lado: por la izquierda o por la derecha.
+
+## Definición
 
 ### Límite por la izquierda
-lim(x→a⁻) f(x) — Valores menores que a.
+$$\\lim_{x \\to a^-} f(x)$$
+Valores menores que $a$.
 
 ### Límite por la derecha
-lim(x→a⁺) f(x) — Valores mayores que a.
+$$\\lim_{x \\to a^+} f(x)$$
+Valores mayores que $a$.
 
 ## Condición de existencia
 
-lim(x→a⁻) f(x) = lim(x→a⁺) f(x) = L
-
-Entonces lim(x→a) f(x) = L
+El [límite](/calculo1/limites/1.1) general existe si y solo si:
+$$\\lim_{x \\to a^-} f(x) = \\lim_{x \\to a^+} f(x) = L$$
 
 ## Ejemplo práctico
 
-f(x) = { 3 si x < 2; 7 si x > 2 }
+Consideremos la [función](/saberes-previos#funciones) por partes:
+$$f(x) = \\begin{cases} 3 & \\text{si } x < 2 \\\\ 7 & \\text{si } x > 2 \\end{cases}$$
 
-Izquierda: lim(x→2⁻) f(x) = 3
-Derecha: lim(x→2⁺) f(x) = 7
+**Límite por la izquierda:**
+$$\\lim_{x \\to 2^-} f(x) = 3$$
 
-Conclusión: No existe límite general.
+**Límite por la derecha:**
+$$\\lim_{x \\to 2^+} f(x) = 7$$
+
+**Conclusión:** Como $3 \\neq 7$, el [límite](/calculo1/limites/1.1) general no existe.
         `
       },
       {
@@ -116,24 +140,29 @@ Conclusión: No existe límite general.
         titulo: 'Límites al infinito y en infinito',
         descripcion: 'Analizan el comportamiento extremo de una función cuando x crece o decrece sin límite.',
         contenido: `
-## Concepto
+## Introducción
 
-Analizan el comportamiento extremo de una función.
+Analizan el comportamiento extremo de una [función](/saberes-previos#funciones) cuando la [variable independiente](/saberes-previos#variables) crece o decrece sin límite.
 
-### Límite al infinito
-Cuando x crece o decrece sin límite.
+## Límite al infinito
 
-Ejemplo: lim(x→∞) 1/x = 0
+Cuando $x$ crece o decrece sin límite:
 
-### Límite en infinito
-Cuando una función crece indefinidamente cerca de un punto.
+$$\\lim_{x \\to \\infty} \\frac{1}{x} = 0$$
 
-Ejemplo: lim(x→0⁺) 1/x = ∞
+## Límite en infinito
 
-## Interpretación
-- Crecimiento poblacional
-- Intereses financieros
-- Sistemas físicos
+Cuando una [función](/saberes-previos#funciones) crece indefinidamente cerca de un punto:
+
+$$\\lim_{x \\to 0^+} \\frac{1}{x} = +\\infty$$
+
+$$\\lim_{x \\to 0^-} \\frac{1}{x} = -\\infty$$
+
+## Aplicaciones reales
+
+- **Crecimiento poblacional:** Modelos exponenciales
+- **Intereses financieros:** [Interés compuesto](/calculo1/derivadas/2.7)
+- **Sistemas físicos:** Comportamiento a largo plazo
         `
       },
       {
@@ -141,24 +170,31 @@ Ejemplo: lim(x→0⁺) 1/x = ∞
         titulo: 'Asíntotas verticales, horizontales y oblicuas',
         descripcion: 'Rectas a las que una función se aproxima cada vez más sin nunca tocarlas.',
         contenido: `
-## Concepto
+## Introducción
 
-Las asíntotas son rectas a las que una función se aproxima.
+Las [asíntotas](/calculo1/limites/1.4) son rectas a las que una [función](/saberes-previos#funciones) se aproxima cada vez más sin nunca tocarlas.
 
-### Verticales
-Ocurren cuando el denominador se hace cero.
+## Asíntotas verticales
 
-Ejemplo: f(x) = 1/(x - 1) → Asíntota: x = 1
+Ocurren cuando el denominador se hace cero y el [límite](/calculo1/limites/1.1) tiende a infinito.
 
-### Horizontales
-Se estudian con lim(x→∞) f(x)
+$$f(x) = \\frac{1}{x - 1} \\implies \\text{Asíntota: } x = 1$$
 
-Ejemplo: (2x + 1)/x = 2 → Asíntota: y = 2
+## Asíntotas horizontales
 
-### Oblicuas
-Cuando el grado del numerador es uno mayor.
+Se estudian con [límites](/calculo1/limites/1.4) al infinito:
 
-Ejemplo: (x² + 1)/x = x + 1/x → Asíntota: y = x
+$$\\lim_{x \\to \\infty} \\frac{2x + 1}{x} = 2 \\implies \\text{Asíntota: } y = 2$$
+
+## Asíntotas oblicuas
+
+Cuando el grado del [polinomio](/saberes-previos#polinomios) numerador es uno mayor que el denominador:
+
+$$f(x) = \\frac{x^2 + 1}{x} = x + \\frac{1}{x} \\implies \\text{Asíntota: } y = x$$
+
+## Aplicación
+
+Las [asíntotas](/calculo1/limites/1.4) son fundamentales en el [análisis completo de funciones](/calculo1/aplicaciones/3.11).
         `
       },
       {
@@ -166,63 +202,109 @@ Ejemplo: (x² + 1)/x = x + 1/x → Asíntota: y = x
         titulo: 'Límites trigonométricos',
         descripcion: 'Límites fundamentales para derivadas y análisis matemático.',
         contenido: `
-## Concepto
+## Introducción
 
-Son límites fundamentales para derivadas y análisis matemático.
+Son [límites](/calculo1/limites/1.1) fundamentales que aparecen en el cálculo de [derivadas](/calculo1/derivadas/2.1) de [funciones trigonométricas](/saberes-previos#trigonometria).
 
-### Principal
-lim(x→0) sen(x)/x = 1
+## Límite fundamental
 
-### Otros importantes
-- lim(x→0) tan(x)/x = 1
-- lim(x→0) (1 - cos(x))/x = 0
+$$\\lim_{x \\to 0} \\frac{\\sin(x)}{x} = 1$$
 
-## Aplicaciones
-- Ondas
-- Sonido
-- Electricidad
+## Otros límites importantes
+
+$$\\lim_{x \\to 0} \\frac{\\tan(x)}{x} = 1$$
+
+$$\\lim_{x \\to 0} \\frac{1 - \\cos(x)}{x} = 0$$
+
+## Aplicación en derivadas
+
+Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórmulas de derivación](/calculo1/derivadas/2.6):
+- $\\frac{d}{dx}\\sin(x) = \\cos(x)$
+- $\\frac{d}{dx}\\cos(x) = -\\sin(x)$
+
+## Aplicaciones reales
+- Ondas y sonido
+- Electricidad alternada
 - Ingeniería civil
         `
       },
       {
         id: '1.7',
-        titulo: 'Continuidad lateral',
-        descripcion: 'Una función tiene continuidad lateral si coincide con su límite lateral correspondiente.',
+        titulo: 'Continuidad',
+        descripcion: 'Condición de continuidad en un punto: límite igual al valor de la función.',
         contenido: `
-## Concepto
+## Introducción
 
-Una función tiene continuidad lateral si coincide con su límite lateral correspondiente.
+Una [función](/saberes-previos#funciones) es continua en un punto si no tiene interrupciones. Esto se relaciona directamente con el concepto de [límite](/calculo1/limites/1.1).
 
-### Por izquierda
-lim(x→a⁻) f(x) = f(a)
+## Definición formal
 
-### Por derecha
-lim(x→a⁺) f(x) = f(a)
+Una [función](/saberes-previos#funciones) $f$ es continua en $x = a$ si se cumplen tres condiciones:
+
+1. $f(a)$ está definida.
+2. $\\lim_{x \\to a} f(x)$ existe.
+3. $\\lim_{x \\to a} f(x) = f(a)$
+
+## Tipos de discontinuidad
+
+### Discontinuidad removible
+Existe el [límite](/calculo1/limites/1.1), pero $f(a)$ no coincide.
+
+### Discontinuidad por salto
+Los [límites laterales](/calculo1/limites/1.3) son diferentes.
+
+### Discontinuidad infinita
+La función tiende a $\\pm\\infty$.
 
 ## Ejemplo
-Horarios de atención, impuestos escalonados.
+
+$f(x) = x^2$ es continua en todo punto porque no tiene interrupciones.
+
+$$\\lim_{x \\to 2} x^2 = 4 = f(2)$$
         `
       },
       {
         id: '1.8',
-        titulo: 'Continuidad en intervalos abiertos, cerrados y semiabiertos',
-        descripcion: 'Análisis de la continuidad según el tipo de intervalo considerado.',
+        titulo: 'Límites de funciones exponenciales y logarítmicas',
+        descripcion: 'Comportamiento de límites cuando participan funciones exponenciales y logarítmicas.',
         contenido: `
-## Intervalo abierto (a, b)
+## Introducción
 
-Continua en cada punto interno.
+Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/saberes-previos#exponenciales) y [funciones logarítmicas](/saberes-previos#logaritmos).
 
-## Intervalo cerrado [a, b]
+## Funciones exponenciales
 
-Debe cumplir continuidad lateral en extremos.
+### Límite fundamental
+$$\\lim_{x \\to \\infty} e^x = \\infty$$
+$$\\lim_{x \\to -\\infty} e^x = 0$$
 
-## Semiabierto [a, b)
+### Con base general
+$$\\lim_{x \\to \\infty} a^x = \\infty \\quad (\\text{si } a > 1)$$
+$$\\lim_{x \\to \\infty} a^x = 0 \\quad (\\text{si } 0 < a < 1)$$
 
-Se adapta según el extremo incluido.
+## Funciones logarítmicas
 
-## Ejemplo
+### Límite fundamental
+$$\\lim_{x \\to \\infty} \\ln(x) = \\infty$$
+$$\\lim_{x \\to 0^+} \\ln(x) = -\\infty$$
 
-f(x) = x² es continua porque no tiene interrupciones.
+## Ejemplo práctico
+
+$$\\lim_{x \\to \\infty} \\frac{e^x}{x^2} \\to \\frac{\\infty}{\\infty}$$
+
+Aplicando [Regla de L'Hôpital](/calculo1/aplicaciones/3.9) dos veces:
+$$\\lim_{x \\to \\infty} \\frac{e^x}{2x} = \\lim_{x \\to \\infty} \\frac{e^x}{2} = \\infty$$
+
+## Ejemplo con logaritmo
+
+$$\\lim_{x \\to \\infty} \\frac{\\ln(x)}{x} = 0$$
+
+El [logaritmo](/saberes-previos#logaritmos) crece más lento que cualquier [polinomio](/saberes-previos#polinomios).
+
+## Aplicación
+- Crecimiento poblacional
+- [Interés compuesto](/calculo1/derivadas/2.7)
+- Decaimiento radiactivo
         `
       },
       {
@@ -265,23 +347,23 @@ Los límites estudian hacia dónde va una función; la continuidad analiza si ll
         titulo: 'Introducción – Definición de derivada',
         descripcion: 'La derivada indica qué tan rápido cambia una cantidad en un momento determinado.',
         contenido: `
-## Concepto
+## Introducción
 
-La derivada es uno de los conceptos más importantes del cálculo diferencial, ya que mide cómo cambia una función en un instante específico. Representa la razón de cambio instantánea.
+La [derivada](/calculo1/derivadas/2.1) es uno de los conceptos más importantes del cálculo diferencial, ya que mide cómo cambia una [función](/saberes-previos#funciones) en un instante específico. Representa la razón de cambio instantánea.
 
 ## Definición formal
 
-f'(x) = lim(h→0) [f(x+h) - f(x)] / h
+$$f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$
 
 Donde:
-- f(x+h) - f(x) representa el cambio en la función.
-- h representa un cambio muy pequeño en x.
+- $f(x+h) - f(x)$ representa el cambio en la [función](/saberes-previos#funciones).
+- $h$ representa un cambio muy pequeño en $x$.
 
 ## Interpretación práctica
 
-Si d(t) = t² (distancia), entonces d'(t) = 2t (velocidad).
+Si $d(t) = t^2$ (distancia), entonces $d'(t) = 2t$ (velocidad).
 
-En t = 3: v = 2(3) = 6 unidades/segundo.
+En $t = 3$: $v = 2(3) = 6$ unidades/segundo.
 
 ## Importancia
 - Ingeniería
@@ -298,29 +380,30 @@ En t = 3: v = 2(3) = 6 unidades/segundo.
         contenido: `
 ## Interpretación geométrica
 
-Geométricamente, la derivada representa la pendiente de la recta tangente a una curva en un punto.
+Geométricamente, la [derivada](/calculo1/derivadas/2.1) representa la pendiente de la [recta tangente](/saberes-previos#recta-tangente) a una curva en un punto.
 
-- Pendiente positiva → la función crece.
-- Pendiente negativa → la función decrece.
-- Pendiente cero → punto máximo o mínimo.
+- Pendiente positiva → la [función](/saberes-previos#funciones) crece.
+- Pendiente negativa → la [función](/saberes-previos#funciones) decrece.
+- Pendiente cero → punto [máximo o mínimo](/calculo1/aplicaciones/3.3).
 
-Ejemplo: f(x) = x² → f'(x) = 2x
+**Ejemplo:** $f(x) = x^2 \\implies f'(x) = 2x$
 
-En x = 2: f'(2) = 4. La pendiente de la tangente es 4.
+En $x = 2$: $f'(2) = 4$. La pendiente de la tangente es 4.
 
 ## Interpretación física
 
 ### Velocidad instantánea
-Si s(t) = t² + 3t, entonces v(t) = s'(t) = 2t + 3
+Si $s(t) = t^2 + 3t$, entonces:
+$$v(t) = s'(t) = 2t + 3$$
 
 ### Aceleración
-a(t) = v'(t)
+$$a(t) = v'(t)$$
 
 ## Aplicación real
 - Movimiento de vehículos
 - Caída libre
 - Electricidad
-- Costos marginales
+- [Costos marginales](/calculo1/aplicaciones/3.12)
         `
       },
       {
@@ -328,29 +411,32 @@ a(t) = v'(t)
         titulo: 'Reglas básicas de derivación',
         descripcion: 'Permiten derivar funciones sin usar siempre la definición por límite.',
         contenido: `
-## Concepto
+## Introducción
 
-Permiten derivar funciones sin usar siempre la definición límite.
+Permiten derivar [funciones](/saberes-previos#funciones) sin usar siempre la [definición por límite](/calculo1/derivadas/2.1).
+
+## Reglas fundamentales
 
 ### 1. Derivada de constante
-d/dx (c) = 0
+$$\\frac{d}{dx}(c) = 0$$
 
 ### 2. Regla de potencia
-d/dx (xⁿ) = n·xⁿ⁻¹
+$$\\frac{d}{dx}(x^n) = n \\cdot x^{n-1}$$
 
-Ejemplo: d/dx (x⁴) = 4x³
+**Ejemplo:** $\\frac{d}{dx}(x^4) = 4x^3$
 
 ### 3. Suma y resta
-(f ± g)' = f' ± g'
+$$(f \\pm g)' = f' \\pm g'$$
 
-### 4. Multiplicación
-(fg)' = f'g + fg'
+### 4. Multiplicación (regla del producto)
+$$(fg)' = f'g + fg'$$
 
-### 5. División
-(f/g)' = (f'g - fg') / g²
+### 5. División (regla del cociente)
+$$\\left(\\frac{f}{g}\\right)' = \\frac{f'g - fg'}{g^2}$$
 
 ## Ejemplo práctico
-f(x) = x² + 3x → f'(x) = 2x + 3
+
+$$f(x) = x^2 + 3x \\implies f'(x) = 2x + 3$$
         `
       },
       {
@@ -358,27 +444,29 @@ f(x) = x² + 3x → f'(x) = 2x + 3
         titulo: 'Regla de la cadena',
         descripcion: 'Se utiliza cuando una función está dentro de otra función (funciones compuestas).',
         contenido: `
-## Concepto
+## Introducción
 
-Se utiliza cuando una función está dentro de otra función.
+Se utiliza cuando una [función](/saberes-previos#funciones) está dentro de otra [función](/saberes-previos#funciones) (funciones compuestas).
 
-### Fórmula
+## Fórmula
 
-(d/dx)[f(g(x))] = f'(g(x)) · g'(x)
+$$\\frac{d}{dx}[f(g(x))] = f'(g(x)) \\cdot g'(x)$$
 
-## Ejemplo
+## Ejemplo paso a paso
 
-y = (3x + 2)⁴
+$$y = (3x + 2)^4$$
 
-Paso 1: Función externa → u⁴
-Paso 2: Interna → u = 3x + 2
+**Paso 1:** Función externa $\\to u^4$
 
-Derivada: y' = 4(3x + 2)³ · (3) = 12(3x + 2)³
+**Paso 2:** Interna $\\to u = 3x + 2$
+
+**Derivada:**
+$$y' = 4(3x + 2)^3 \\cdot (3) = 12(3x + 2)^3$$
 
 ## Aplicación real
 - Temperatura compuesta
 - Modelos biológicos
-- Optimización
+- [Optimización](/calculo1/aplicaciones/3.6)
         `
       },
       {
@@ -386,17 +474,23 @@ Derivada: y' = 4(3x + 2)³ · (3) = 12(3x + 2)³
         titulo: 'Derivadas de funciones algebraicas',
         descripcion: 'Incluye polinomiales, racionales y radicales.',
         contenido: `
+## Introducción
+
+Incluye [funciones polinomiales](/saberes-previos#polinomios), [racionales](/saberes-previos#racionales) y [radicales](/saberes-previos#radicales).
+
 ## Funciones polinomiales
 
-Ejemplo: f(x) = 4x³ - 2x + 7 → f'(x) = 12x² - 2
+$$f(x) = 4x^3 - 2x + 7 \\implies f'(x) = 12x^2 - 2$$
 
 ## Funciones racionales
 
-f(x) = (x + 1)/(x - 2) → Usamos regla del cociente.
+$$f(x) = \\frac{x + 1}{x - 2}$$
+
+Usamos la [regla del cociente](/calculo1/derivadas/2.3).
 
 ## Funciones radicales
 
-f(x) = √x = x^(1/2) → f'(x) = 1/(2√x)
+$$f(x) = \\sqrt{x} = x^{1/2} \\implies f'(x) = \\frac{1}{2\\sqrt{x}}$$
 
 ## Aplicación
 Diseño estructural, áreas, volúmenes.
@@ -407,19 +501,25 @@ Diseño estructural, áreas, volúmenes.
         titulo: 'Derivadas de funciones trigonométricas',
         descripcion: 'Derivadas de seno, coseno, tangente y sus funciones inversas.',
         contenido: `
+## Introducción
+
+[Derivadas](/calculo1/derivadas/2.1) de [funciones trigonométricas](/saberes-previos#trigonometria) básicas y sus inversas.
+
 ## Principales
 
-- d/dx (sen x) = cos x
-- d/dx (cos x) = -sen x
-- d/dx (tan x) = sec² x
+$$\\frac{d}{dx}(\\sin x) = \\cos x$$
+
+$$\\frac{d}{dx}(\\cos x) = -\\sin x$$
+
+$$\\frac{d}{dx}(\\tan x) = \\sec^2 x$$
 
 ## Trigonométricas inversas
 
-- d/dx (arcsen x) = 1/√(1 - x²)
+$$\\frac{d}{dx}(\\arcsin x) = \\frac{1}{\\sqrt{1 - x^2}}$$
 
 ## Ejemplo práctico
 
-f(x) = sen x + x² → f'(x) = cos x + 2x
+$$f(x) = \\sin x + x^2 \\implies f'(x) = \\cos x + 2x$$
 
 ## Aplicación
 - Ondas
@@ -433,24 +533,28 @@ f(x) = sen x + x² → f'(x) = cos x + 2x
         titulo: 'Derivadas de funciones exponenciales y logarítmicas',
         descripcion: 'Incluye la función especial e^x cuya derivada es ella misma.',
         contenido: `
+## Introducción
+
+Incluye la [función](/saberes-previos#funciones) especial $e^x$ cuya [derivada](/calculo1/derivadas/2.1) es ella misma.
+
 ## Exponencial natural
 
-d/dx (e^x) = e^x
+$$\\frac{d}{dx}(e^x) = e^x$$
 
 ## Exponencial general
 
-d/dx (a^x) = a^x · ln(a)
+$$\\frac{d}{dx}(a^x) = a^x \\cdot \\ln(a)$$
 
 ## Logaritmo natural
 
-d/dx (ln x) = 1/x
+$$\\frac{d}{dx}(\\ln x) = \\frac{1}{x}$$
 
 ## Ejemplo
 
-f(x) = e^x + ln x → f'(x) = e^x + 1/x
+$$f(x) = e^x + \\ln x \\implies f'(x) = e^x + \\frac{1}{x}$$
 
 ## Aplicación
-- Interés compuesto
+- [Interés compuesto](/calculo1/limites/1.8)
 - Crecimiento bacteriano
 - Decaimiento radiactivo
         `
@@ -460,17 +564,19 @@ f(x) = e^x + ln x → f'(x) = e^x + 1/x
         titulo: 'Derivación implícita',
         descripcion: 'Se usa cuando y no está despejada explícitamente en términos de x.',
         contenido: `
-## Concepto
+## Introducción
 
-Se usa cuando y no está despejada explícitamente.
+Se usa cuando $y$ no está despejada explícitamente en términos de $x$.
 
 ## Ejemplo
 
-x² + y² = 25
+$$x^2 + y^2 = 25$$
 
-Derivando: 2x + 2y · dy/dx = 0
+Derivando implícitamente:
+$$2x + 2y \\cdot \\frac{dy}{dx} = 0$$
 
-Despejando: dy/dx = -x/y
+Despejando:
+$$\\frac{dy}{dx} = -\\frac{x}{y}$$
 
 ## Aplicación
 Circunferencias, elipses, geometría analítica.
@@ -481,25 +587,32 @@ Circunferencias, elipses, geometría analítica.
         titulo: 'Derivadas de orden superior',
         descripcion: 'Son derivadas sucesivas: primera (velocidad), segunda (aceleración), tercera (jerk).',
         contenido: `
-## Concepto
+## Introducción
 
-Son derivadas sucesivas.
+Son [derivadas](/calculo1/derivadas/2.1) sucesivas que dan información sobre el comportamiento de la [función](/saberes-previos#funciones).
 
-### Primera: Velocidad
-### Segunda: Aceleración
-### Tercera: Cambio de aceleración
+## Jerarquía
+
+### Primera derivada: Velocidad
+$$f'(x)$$
+
+### Segunda derivada: Aceleración
+$$f''(x)$$
+
+### Tercera derivada: Cambio de aceleración
+$$f'''(x)$$
 
 ## Ejemplo
 
-f(x) = x⁴
-- f'(x) = 4x³
-- f''(x) = 12x²
-- f'''(x) = 24x
+$$f(x) = x^4$$
+$$f'(x) = 4x^3$$
+$$f''(x) = 12x^2$$
+$$f'''(x) = 24x$$
 
 ## Aplicación
 - Movimiento
-- Curvatura
-- Optimización
+- [Curvatura](/calculo1/aplicaciones/3.4)
+- [Optimización](/calculo1/aplicaciones/3.6)
         `
       },
       {
@@ -507,25 +620,25 @@ f(x) = x⁴
         titulo: 'Diferenciales',
         descripcion: 'Permiten aproximar pequeños cambios en una función usando su derivada.',
         contenido: `
-## Concepto
+## Introducción
 
-El diferencial permite aproximar pequeños cambios en una función.
+El diferencial permite aproximar pequeños cambios en una [función](/saberes-previos#funciones) usando su [derivada](/calculo1/derivadas/2.1).
 
-### Fórmula
+## Fórmula
 
-dy = f'(x) · dx
+$$dy = f'(x) \\cdot dx$$
 
 ## Ejemplo práctico
 
-y = x²
+$$y = x^2$$
 
-Si x = 4, dx = 0.1:
-dy = 2(4)(0.1) = 0.8
+Si $x = 4$, $dx = 0.1$:
+$$dy = 2(4)(0.1) = 0.8$$
 
-Aproximación: Cuando x pasa de 4 a 4.1, y aumenta aproximadamente 0.8.
+**Aproximación:** Cuando $x$ pasa de 4 a 4.1, $y$ aumenta aproximadamente 0.8.
 
 ## Aplicación real
-- Estimación de errores
+- [Estimación de errores](/calculo1/aplicaciones/3.10)
 - Ingeniería
 - Mediciones científicas
         `
@@ -544,22 +657,24 @@ Aproximación: Cuando x pasa de 4 a 4.1, y aumenta aproximadamente 0.8.
         titulo: 'Razones de cambio relacionadas',
         descripcion: 'Estudian situaciones donde dos o más variables cambian con respecto al tiempo y están conectadas.',
         contenido: `
-## Concepto
+## Introducción
 
-Las razones de cambio relacionadas estudian situaciones donde dos o más variables cambian con respecto al tiempo y están conectadas por una ecuación.
+Las razones de cambio relacionadas estudian situaciones donde dos o más [variables](/saberes-previos#variables) cambian con respecto al tiempo y están conectadas por una [ecuación](/saberes-previos#ecuaciones).
 
 ## Procedimiento general
 
-1. Identificar variables.
-2. Relacionarlas mediante una ecuación.
-3. Derivar implícitamente respecto al tiempo.
+1. Identificar [variables](/saberes-previos#variables).
+2. Relacionarlas mediante una [ecuación](/saberes-previos#ecuaciones).
+3. [Derivar](/calculo1/derivadas/2.1) implícitamente respecto al tiempo.
 4. Sustituir valores.
 
 ## Ejemplo práctico: Globo inflándose
 
-Volumen de una esfera: V = (4/3)πr³
+Volumen de una esfera:
+$$V = \\frac{4}{3}\\pi r^3$$
 
-Derivando: dV/dt = 4πr² · dr/dt
+[Derivando](/calculo1/derivadas/2.1):
+$$\\frac{dV}{dt} = 4\\pi r^2 \\cdot \\frac{dr}{dt}$$
 
 Si aumenta el volumen, también cambia el radio.
 
@@ -575,25 +690,25 @@ Si aumenta el volumen, también cambia el radio.
         titulo: 'Crecimiento y decrecimiento de funciones',
         descripcion: 'La primera derivada permite determinar si una función aumenta o disminuye.',
         contenido: `
-## Concepto
+## Introducción
 
-La primera derivada permite determinar si una función aumenta o disminuye.
+La primera [derivada](/calculo1/derivadas/2.1) permite determinar si una [función](/saberes-previos#funciones) aumenta o disminuye.
 
 ## Criterios
 
-- Si f'(x) > 0 → La función crece.
-- Si f'(x) < 0 → La función decrece.
+- Si $f'(x) > 0$ → La [función](/saberes-previos#funciones) **crece**.
+- Si $f'(x) < 0$ → La [función](/saberes-previos#funciones) **decrece**.
 
 ## Ejemplo
 
-f(x) = x² - 4x
-f'(x) = 2x - 4
+$$f(x) = x^2 - 4x$$
+$$f'(x) = 2x - 4$$
 
-Punto crítico: 2x - 4 = 0 → x = 2
+**Punto crítico:** $2x - 4 = 0 \\implies x = 2$
 
-Intervalos:
-- x < 2: decrece
-- x > 2: crece
+**Intervalos:**
+- $x < 2$: decrece
+- $x > 2$: crece
 
 ## Aplicación
 - Producción empresarial
@@ -606,24 +721,24 @@ Intervalos:
         titulo: 'Máximos y mínimos relativos',
         descripcion: 'Son puntos donde la función alcanza valores mayores o menores respecto a puntos cercanos.',
         contenido: `
-## Concepto
+## Introducción
 
-Son puntos donde la función alcanza valores mayores o menores respecto a puntos cercanos.
+Son puntos donde la [función](/saberes-previos#funciones) alcanza valores mayores o menores respecto a puntos cercanos.
 
-## Criterio de la primera derivada
+## Criterio de la primera [derivada](/calculo1/derivadas/2.1)
 
-1. Hallar f'(x) = 0
+1. Hallar $f'(x) = 0$
 2. Analizar cambio de signo.
 
-- + a - → máximo
-- - a + → mínimo
+- $+$ a $-$ → **máximo**
+- $-$ a $+$ → **mínimo**
 
 ## Ejemplo
 
-f(x) = x² - 6x + 5
-f'(x) = 2x - 6 → x = 3
+$$f(x) = x^2 - 6x + 5$$
+$$f'(x) = 2x - 6 \\implies x = 3$$
 
-Resultado: Mínimo relativo en x = 3.
+**Resultado:** Mínimo relativo en $x = 3$.
 
 ## Aplicación real
 - Ganancia máxima
@@ -636,27 +751,27 @@ Resultado: Mínimo relativo en x = 3.
         titulo: 'Concavidad y puntos de inflexión',
         descripcion: 'La segunda derivada indica cómo se curva la gráfica de una función.',
         contenido: `
-## Concepto
+## Introducción
 
-La segunda derivada indica cómo se curva la gráfica.
+La segunda [derivada](/calculo1/derivadas/2.1) indica cómo se curva la gráfica de una [función](/saberes-previos#funciones).
 
 ## Criterios
 
-- Si f''(x) > 0 → Cóncava hacia arriba.
-- Si f''(x) < 0 → Cóncava hacia abajo.
+- Si $f''(x) > 0$ → Cóncava hacia arriba.
+- Si $f''(x) < 0$ → Cóncava hacia abajo.
 
 ## Punto de inflexión
 
-Ocurre cuando cambia la concavidad.
+Ocurre cuando cambia la [concavidad](/calculo1/aplicaciones/3.4).
 
 ## Ejemplo
 
-f(x) = x³
-f''(x) = 6x
+$$f(x) = x^3$$
+$$f''(x) = 6x$$
 
-En x = 0 cambia de signo.
+En $x = 0$ cambia de signo.
 
-Resultado: Punto de inflexión en x = 0.
+**Resultado:** Punto de inflexión en $x = 0$.
 
 ## Aplicación
 Economía, trayectorias, estructuras.
@@ -667,22 +782,24 @@ Economía, trayectorias, estructuras.
         titulo: 'Criterio de la segunda derivada',
         descripcion: 'Permite clasificar puntos críticos más rápidamente que usando solo la primera derivada.',
         contenido: `
-## Concepto
+## Introducción
 
-Permite clasificar puntos críticos más rápido.
+Permite clasificar [puntos críticos](/calculo1/aplicaciones/3.3) más rápidamente que usando solo la primera [derivada](/calculo1/derivadas/2.1).
 
-Si f'(a) = 0:
+## Criterio
 
-- Si f''(a) > 0 → Mínimo
-- Si f''(a) < 0 → Máximo
+Si $f'(a) = 0$:
+
+- Si $f''(a) > 0$ → **Mínimo**
+- Si $f''(a) < 0$ → **Máximo**
 
 ## Ejemplo
 
-f(x) = x²
-f'(x) = 2x
-f''(x) = 2 > 0
+$$f(x) = x^2$$
+$$f'(x) = 2x$$
+$$f''(x) = 2 > 0$$
 
-Resultado: Mínimo en x = 0.
+**Resultado:** Mínimo en $x = 0$.
         `
       },
       {
@@ -690,7 +807,7 @@ Resultado: Mínimo en x = 0.
         titulo: 'Optimización',
         descripcion: 'Busca el mejor valor posible: máxima ganancia, mínimo costo, mayor área, menor material.',
         contenido: `
-## Concepto
+## Introducción
 
 Busca el mejor valor posible:
 - Máxima ganancia
@@ -700,21 +817,22 @@ Busca el mejor valor posible:
 
 ## Pasos
 
-1. Definir función objetivo.
-2. Derivar.
+1. Definir [función](/saberes-previos#funciones) objetivo.
+2. [Derivar](/calculo1/derivadas/2.1).
 3. Igualar a cero.
 4. Evaluar.
 
 ## Ejemplo práctico
 
-Perímetro: 2x + 2y = 100
-Área: A = xy
+**Perímetro:** $2x + 2y = 100$
 
-Despejar: y = 50 - x → A = x(50 - x)
+**Área:** $A = xy$
 
-Derivar: A' = 50 - 2x → x = 25
+Despejar: $y = 50 - x \\implies A = x(50 - x)$
 
-Resultado: Área máxima con cuadrado.
+[Derivar](/calculo1/derivadas/2.1): $A' = 50 - 2x \\implies x = 25$
+
+**Resultado:** Área máxima con cuadrado.
 
 ## Aplicación
 Arquitectura, economía, logística.
@@ -725,22 +843,26 @@ Arquitectura, economía, logística.
         titulo: 'Teorema de Rolle',
         descripcion: 'Si una función continua en [a,b] cumple f(a)=f(b), existe un punto con tangente horizontal.',
         contenido: `
-## Concepto
+## Introducción
 
-Si una función:
-1. Es continua en [a,b]
-2. Derivable en (a,b)
-3. f(a) = f(b)
+Si una [función](/saberes-previos#funciones) continua en $[a,b]$ cumple $f(a) = f(b)$, existe un punto con [tangente](/calculo1/derivadas/2.2) horizontal.
 
-Entonces existe un punto c tal que f'(c) = 0.
+## Condiciones
+
+Si una [función](/saberes-previos#funciones):
+1. Es continua en $[a,b]$
+2. Es [derivable](/calculo1/derivadas/2.1) en $(a,b)$
+3. $f(a) = f(b)$
+
+Entonces existe un punto $c$ tal que $f'(c) = 0$.
 
 ## Interpretación geométrica
 
-Hay al menos una tangente horizontal.
+Hay al menos una [tangente](/calculo1/derivadas/2.2) horizontal.
 
 ## Ejemplo
 
-f(x) = x² - 4x + 3 en [1, 3]
+$$f(x) = x^2 - 4x + 3 \\text{ en } [1, 3]$$
 
 ## Aplicación
 Control de trayectorias.
@@ -751,17 +873,17 @@ Control de trayectorias.
         titulo: 'Teorema del Valor Medio',
         descripcion: 'Existe un punto donde la pendiente instantánea iguala la pendiente promedio.',
         contenido: `
-## Concepto
+## Introducción
 
-Existe un punto donde la pendiente instantánea iguala la pendiente promedio.
+Existe un punto donde la [pendiente instantánea](/calculo1/derivadas/2.2) iguala la pendiente promedio.
 
-### Fórmula
+## Fórmula
 
-f'(c) = [f(b) - f(a)] / (b - a)
+$$f'(c) = \\frac{f(b) - f(a)}{b - a}$$
 
 ## Ejemplo físico
 
-Si recorres 100 km en 2 horas, en algún momento tu velocidad fue exactamente 50 km/h.
+Si recorres 100 km en 2 horas, en algún momento tu [velocidad](/calculo1/derivadas/2.2) fue exactamente 50 km/h.
 
 ## Aplicación
 - Tránsito
@@ -774,17 +896,17 @@ Si recorres 100 km en 2 horas, en algún momento tu velocidad fue exactamente 50
         titulo: "Regla de L'Hôpital",
         descripcion: 'Se usa para límites indeterminados del tipo 0/0 o ∞/∞.',
         contenido: `
-## Concepto
+## Introducción
 
-Se usa para límites indeterminados: 0/0, ∞/∞
+Se usa para [límites](/calculo1/limites/1.1) indeterminados del tipo $\\frac{0}{0}$ o $\\frac{\\infty}{\\infty}$.
 
-### Fórmula
+## Fórmula
 
-lim f(x)/g(x) = lim f'(x)/g'(x)
+$$\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\lim_{x \\to a} \\frac{f'(x)}{g'(x)}$$
 
 ## Ejemplo
 
-lim(x→0) sen(x)/x = lim(x→0) cos(x)/1 = 1
+$$\\lim_{x \\to 0} \\frac{\\sin(x)}{x} = \\lim_{x \\to 0} \\frac{\\cos(x)}{1} = 1$$
 
 ## Aplicación
 Modelos avanzados.
@@ -795,19 +917,19 @@ Modelos avanzados.
         titulo: 'Aproximación lineal y diferencial',
         descripcion: 'Permite aproximar valores cercanos usando la recta tangente.',
         contenido: `
-## Concepto
+## Introducción
 
-Permite aproximar valores cercanos usando la recta tangente.
+Permite aproximar valores cercanos usando la [recta tangente](/calculo1/derivadas/2.2).
 
-### Fórmula
+## Fórmula
 
-L(x) = f(a) + f'(a)(x - a)
+$$L(x) = f(a) + f'(a)(x - a)$$
 
 ## Ejemplo
 
-√4.1
+$$\\sqrt{4.1}$$
 
-Sea f(x) = √x, aproximando desde x = 4.
+Sea $f(x) = \\sqrt{x}$, aproximando desde $x = 4$.
 
 ## Aplicación
 Cálculos rápidos.
@@ -818,17 +940,17 @@ Cálculos rápidos.
         titulo: 'Análisis completo de funciones',
         descripcion: 'Estudio integral: dominio, intersecciones, límites, continuidad, asíntotas, crecimiento, extremos, concavidad y gráfica.',
         contenido: `
-## Concepto
+## Introducción
 
-Estudio integral de una función:
-- Dominio
+Estudio integral de una [función](/saberes-previos#funciones):
+- [Dominio](/saberes-previos#dominio)
 - Intersecciones
-- Límites
-- Continuidad
-- Asíntotas
-- Crecimiento
-- Extremos
-- Concavidad
+- [Límites](/calculo1/limites/1.1)
+- [Continuidad](/calculo1/limites/1.7)
+- [Asíntotas](/calculo1/limites/1.5)
+- [Crecimiento](/calculo1/aplicaciones/3.2)
+- [Extremos](/calculo1/aplicaciones/3.3)
+- [Concavidad](/calculo1/aplicaciones/3.4)
 - Gráfica
 
 ## Objetivo
@@ -846,16 +968,17 @@ Modelado matemático, ingeniería, economía.
         contenido: `
 ## Economía
 
-### Costo marginal
-C'(x) — Cambio del costo por unidad adicional.
+### [Costo marginal](/calculo1/aplicaciones/3.12)
+$$C'(x)$$
+Cambio del costo por unidad adicional.
 
 ## Física
 
-### Velocidad
-v(t) = s'(t)
+### [Velocidad](/calculo1/derivadas/2.2)
+$$v(t) = s'(t)$$
 
 ### Aceleración
-a(t) = v'(t)
+$$a(t) = v'(t)$$
 
 ## Ingeniería
 
@@ -866,7 +989,7 @@ a(t) = v'(t)
 
 ## Conclusión
 
-La derivada no solo calcula pendientes; permite tomar decisiones, optimizar recursos y comprender fenómenos reales.
+La [derivada](/calculo1/derivadas/2.1) no solo calcula pendientes; permite tomar decisiones, optimizar recursos y comprender fenómenos reales.
 
 Derivar es transformar matemáticas en soluciones para el mundo real.
         `

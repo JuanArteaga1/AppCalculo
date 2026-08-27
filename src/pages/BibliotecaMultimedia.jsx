@@ -1,4 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
+import { FiSearch } from 'react-icons/fi';
+import { FaPlay, FaCheck, FaTrash, FaYoutube } from 'react-icons/fa';
+import { IoClose } from 'react-icons/io5';
 import {
   videosBase,
   categorias,
@@ -141,7 +144,7 @@ export default function BibliotecaMultimedia() {
                 <p style={styles.playerMeta}>{videoActual.descripcion}</p>
               </div>
               <button style={styles.playerClose} onClick={() => setReproduciendo(null)} title="Cerrar reproductor">
-                ✕
+                <IoClose />
               </button>
             </div>
             <div style={styles.videoBox}>
@@ -155,11 +158,9 @@ export default function BibliotecaMultimedia() {
               />
             </div>
             <div style={styles.playerControls}>
-              <span style={styles.playerBadge}>
-                {videoActual.nivel === 'basico' ? '🟢 Básico' : videoActual.nivel === 'intermedio' ? '🟡 Intermedio' : '🔴 Avanzado'}
-              </span>
+              <span style={styles.playerBadge}>{videoActual.nivel === 'basico' ? '🟢 Básico' : videoActual.nivel === 'intermedio' ? '🟡 Intermedio' : '🔴 Avanzado'}</span>
               <span style={styles.playerBadge}>⏱ {videoActual.duracion}</span>
-              {vistos[videoActual.id] && <span style={styles.playerBadgeVisto}>✓ Visto</span>}
+              {vistos[videoActual.id] && <span style={styles.playerBadgeVisto}><FaCheck style={{ marginRight: 4 }} /> Visto</span>}
             </div>
           </div>
         )}
@@ -167,9 +168,7 @@ export default function BibliotecaMultimedia() {
         {/* Filtros */}
         <div style={styles.filters}>
           <div style={styles.searchWrap}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-            </svg>
+            <FiSearch style={{ color: 'rgba(255,255,255,0.4)', flexShrink: 0 }} />
             <input
               style={styles.searchInput}
               placeholder="Buscar videos por título o tema..."
@@ -224,7 +223,7 @@ export default function BibliotecaMultimedia() {
         {/* Formulario agregar video */}
         {mostrarForm && (
           <form onSubmit={handleAgregarVideo} style={styles.formPanel}>
-            <h3 style={styles.formTitle}>📹 Agregar video de YouTube</h3>
+            <h3 style={styles.formTitle}><FaYoutube style={{ verticalAlign: 'middle', marginRight: 6 }} /> Agregar video de YouTube</h3>
             <div style={styles.formGrid}>
               <div style={styles.formField}>
                 <label style={styles.formLabel}>Título del video *</label>
@@ -283,7 +282,7 @@ export default function BibliotecaMultimedia() {
             </div>
             {formError && <div style={styles.formError}>{formError}</div>}
             <div style={styles.formActions}>
-              <button type="submit" style={styles.formSubmit}>💾 Guardar video</button>
+              <button type="submit" style={styles.formSubmit}><FaCheck style={{ marginRight: 4 }} /> Guardar video</button>
             </div>
           </form>
         )}
@@ -302,10 +301,10 @@ export default function BibliotecaMultimedia() {
                     onError={(e) => { e.target.src = '/Estudiantes(1).jpeg'; }}
                   />
                   <div style={styles.thumbOverlay}>
-                    <div style={styles.playBtn}>▶</div>
+                    <div style={styles.playBtn}><FaPlay /></div>
                   </div>
                   <span style={styles.duracion}>{video.duracion}</span>
-                  {vistos[video.id] && <span style={styles.vistoBadge}>✓ Visto</span>}
+                  {vistos[video.id] && <span style={styles.vistoBadge}><FaCheck style={{ marginRight: 4 }} /> Visto</span>}
                 </div>
                 <div style={styles.cardBody}>
                   <h3 style={styles.cardTitle}>{video.titulo}</h3>
@@ -329,7 +328,7 @@ export default function BibliotecaMultimedia() {
                   </div>
                   <div style={styles.cardActions}>
                     <button style={styles.actionBtnPlay} onClick={() => setReproduciendo(video.id)}>
-                      ▶ Reproducir
+                      <FaPlay style={{ marginRight: 4 }} /> Reproducir
                     </button>
                     <button
                       style={{
@@ -338,7 +337,7 @@ export default function BibliotecaMultimedia() {
                       }}
                       onClick={() => toggleVisto(video.id)}
                     >
-                      {vistos[video.id] ? '✓ Visto' : 'Marcar visto'}
+                      {vistos[video.id] ? <><FaCheck style={{ marginRight: 4 }} /> Visto</> : 'Marcar visto'}
                     </button>
                     {isCustom && (
                       <button
@@ -346,7 +345,7 @@ export default function BibliotecaMultimedia() {
                         onClick={() => handleEliminarVideo(video.id)}
                         title="Eliminar video"
                       >
-                        🗑
+                        <FaTrash />
                       </button>
                     )}
                   </div>
@@ -358,7 +357,7 @@ export default function BibliotecaMultimedia() {
 
         {filtrados.length === 0 && (
           <div style={styles.empty}>
-            <div style={styles.emptyIcon}>🔍</div>
+            <div style={styles.emptyIcon}><FiSearch /></div>
             <h3 style={styles.emptyTitle}>No se encontraron videos</h3>
             <p style={styles.emptyText}>Intenta con otros términos de búsqueda, ajusta los filtros o agrega un video nuevo.</p>
           </div>
@@ -374,16 +373,16 @@ const styles = {
     textAlign: 'center', maxWidth: '720px', margin: '0 auto 32px',
   },
   tag: {
-    display: 'inline-block', padding: '6px 14px', background: 'rgba(0,71,204,0.08)',
-    color: '#0047CC', fontSize: '13px', fontWeight: 700, borderRadius: '999px',
+    display: 'inline-block', padding: '6px 14px', background: 'rgba(244,180,0,0.15)',
+    color: '#F4B400', fontSize: '13px', fontWeight: 700, borderRadius: '999px',
     marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px',
   },
   title: {
-    fontSize: '32px', fontWeight: 800, color: '#1E293B', margin: '0 0 10px',
+    fontSize: '32px', fontWeight: 800, color: '#fff', margin: '0 0 10px',
     fontFamily: "'Poppins', sans-serif",
   },
   desc: {
-    fontSize: '16px', color: '#64748B', margin: 0, lineHeight: 1.55,
+    fontSize: '16px', color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.55,
   },
 
   playerWrap: {
@@ -405,6 +404,7 @@ const styles = {
     background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff',
     width: '36px', height: '36px', borderRadius: '10px', cursor: 'pointer',
     fontSize: '16px', lineHeight: 1, flexShrink: 0,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   videoBox: {
     background: '#000', aspectRatio: '16/9',
@@ -421,10 +421,12 @@ const styles = {
   playerBadge: {
     fontSize: '12px', color: 'rgba(255,255,255,0.7)',
     padding: '6px 12px', background: 'rgba(255,255,255,0.06)', borderRadius: '8px',
+    display: 'inline-flex', alignItems: 'center',
   },
   playerBadgeVisto: {
     fontSize: '12px', color: '#fff',
     padding: '6px 12px', background: '#10B981', borderRadius: '8px', fontWeight: 700,
+    display: 'inline-flex', alignItems: 'center',
   },
 
   filters: {
@@ -432,29 +434,30 @@ const styles = {
   },
   searchWrap: {
     display: 'flex', alignItems: 'center', gap: '12px',
-    background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '0 16px',
+    background: 'rgba(15,26,53,0.8)', border: '1px solid rgba(244,180,0,0.1)',
+    borderRadius: '12px', padding: '0 16px',
   },
   searchInput: {
     flex: 1, padding: '14px 0', border: 'none', outline: 'none',
-    fontSize: '15px', fontFamily: "'Inter', sans-serif", color: '#1E293B',
+    fontSize: '15px', fontFamily: "'Inter', sans-serif", color: '#fff',
   },
   filterGroup: {
     display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
   },
   filterLabel: {
-    fontSize: '13px', fontWeight: 600, color: '#64748B',
+    fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.5)',
     textTransform: 'uppercase', letterSpacing: '0.5px',
   },
   filterButtons: {
     display: 'flex', gap: '8px', flexWrap: 'wrap',
   },
   filterBtn: {
-    padding: '8px 14px', borderRadius: '10px', border: '1px solid #E2E8F0',
-    background: '#fff', color: '#334155', fontSize: '13px', fontWeight: 600,
+    padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(244,180,0,0.1)',
+    background: 'rgba(244,180,0,0.06)', color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600,
     cursor: 'pointer', transition: 'all 0.2s ease',
   },
   filterBtnActive: {
-    background: '#0047CC', color: '#fff', borderColor: '#0047CC',
+    background: '#F4B400', color: '#0b1020', borderColor: '#F4B400',
   },
 
   addBar: {
@@ -462,21 +465,22 @@ const styles = {
     marginBottom: '20px', flexWrap: 'wrap', gap: '10px',
   },
   resultsCount: {
-    fontSize: '13px', color: '#64748B', fontWeight: 600,
+    fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontWeight: 600,
   },
   addBtn: {
-    padding: '10px 18px', borderRadius: '10px', border: '2px dashed #0047CC',
-    background: 'rgba(0,71,204,0.04)', color: '#0047CC', fontSize: '14px',
+    padding: '10px 18px', borderRadius: '10px', border: '2px dashed rgba(244,180,0,0.3)',
+    background: 'rgba(244,180,0,0.04)', color: '#F4B400', fontSize: '14px',
     fontWeight: 700, cursor: 'pointer',
   },
 
   formPanel: {
-    background: '#fff', borderRadius: '16px', border: '1px solid #E2E8F0',
+    background: 'rgba(15,26,53,0.9)', borderRadius: '16px', border: '1px solid rgba(244,180,0,0.1)',
     padding: '24px', marginBottom: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
   },
   formTitle: {
-    fontSize: '17px', fontWeight: 700, color: '#1E293B', margin: '0 0 16px',
+    fontSize: '17px', fontWeight: 700, color: '#fff', margin: '0 0 16px',
     fontFamily: "'Poppins', sans-serif",
+    display: 'flex', alignItems: 'center',
   },
   formGrid: {
     display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px',
@@ -485,32 +489,34 @@ const styles = {
     display: 'flex', flexDirection: 'column', gap: '6px',
   },
   formLabel: {
-    fontSize: '12px', fontWeight: 700, color: '#64748B',
+    fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.5)',
     textTransform: 'uppercase', letterSpacing: '0.5px',
   },
   formInput: {
-    padding: '10px 12px', borderRadius: '10px', border: '1px solid #E2E8F0',
+    padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(244,180,0,0.1)',
     fontSize: '14px', fontFamily: "'Inter', sans-serif", outline: 'none',
-    background: '#fff', color: '#1E293B',
+    background: 'rgba(255,255,255,0.04)', color: '#fff',
   },
   formError: {
-    marginTop: '12px', padding: '10px 14px', background: '#FEF2F2',
-    color: '#DC2626', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+    marginTop: '12px', padding: '10px 14px', background: 'rgba(239,68,68,0.1)',
+    color: '#EF4444', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
   },
   formActions: {
     marginTop: '16px', display: 'flex', justifyContent: 'flex-end',
   },
   formSubmit: {
     padding: '10px 24px', borderRadius: '10px', border: 'none',
-    background: '#0047CC', color: '#fff', fontSize: '14px', fontWeight: 700,
+    background: '#F4B400', color: '#0b1020', fontSize: '14px', fontWeight: 700,
     cursor: 'pointer',
+    display: 'inline-flex', alignItems: 'center',
   },
 
   grid: {
     display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px',
   },
   card: {
-    background: '#fff', borderRadius: '16px', border: '1px solid #E2E8F0',
+    background: 'linear-gradient(145deg, rgba(15,26,53,0.8), rgba(11,16,32,0.9))',
+    borderRadius: '16px', border: '1px solid rgba(244,180,0,0.08)',
     overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
     display: 'flex', flexDirection: 'column',
@@ -529,7 +535,7 @@ const styles = {
   },
   playBtn: {
     width: '56px', height: '56px', borderRadius: '50%',
-    background: 'rgba(255,255,255,0.95)', color: '#0047CC',
+    background: 'rgba(255,255,255,0.95)', color: '#0b1020',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: '20px', paddingLeft: '4px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
@@ -543,16 +549,17 @@ const styles = {
     position: 'absolute', top: '10px', left: '10px',
     background: '#10B981', color: '#fff', fontSize: '11px',
     fontWeight: 700, padding: '4px 10px', borderRadius: '6px',
+    display: 'inline-flex', alignItems: 'center',
   },
   cardBody: {
     padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1,
   },
   cardTitle: {
-    fontSize: '15px', fontWeight: 700, color: '#1E293B', margin: 0,
+    fontSize: '15px', fontWeight: 700, color: '#fff', margin: 0,
     fontFamily: "'Poppins', sans-serif", lineHeight: 1.3,
   },
   cardDesc: {
-    fontSize: '13px', color: '#64748B', lineHeight: 1.5, margin: 0, flex: 1,
+    fontSize: '13px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, margin: 0, flex: 1,
   },
   cardMeta: {
     display: 'flex', gap: '8px', flexWrap: 'wrap',
@@ -561,43 +568,46 @@ const styles = {
     fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px',
     textTransform: 'uppercase', letterSpacing: '0.5px',
   },
-  nivelBasico: { background: 'rgba(16,185,129,0.1)', color: '#059669' },
-  nivelIntermedio: { background: 'rgba(245,158,11,0.1)', color: '#D97706' },
-  nivelAvanzado: { background: 'rgba(239,68,68,0.1)', color: '#DC2626' },
+  nivelBasico: { background: 'rgba(16,185,129,0.1)', color: '#10B981' },
+  nivelIntermedio: { background: 'rgba(245,158,11,0.1)', color: '#F59E0B' },
+  nivelAvanzado: { background: 'rgba(239,68,68,0.1)', color: '#EF4444' },
   unidadBadge: {
     fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px',
     textTransform: 'uppercase', letterSpacing: '0.5px',
-    background: 'rgba(0,71,204,0.08)', color: '#0047CC',
+    background: 'rgba(244,180,0,0.1)', color: '#F4B400',
   },
   cardActions: {
     display: 'flex', gap: '8px', marginTop: '4px',
   },
   actionBtnPlay: {
     flex: 1, padding: '10px 0', borderRadius: '10px', border: 'none',
-    background: '#0047CC', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+    background: '#F4B400', color: '#0b1020', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
   },
   actionBtnCheck: {
-    padding: '10px 14px', borderRadius: '10px', border: '1px solid #E2E8F0',
-    background: '#fff', color: '#64748B', fontSize: '12px', fontWeight: 700,
+    padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(244,180,0,0.1)',
+    background: 'rgba(244,180,0,0.06)', color: 'rgba(255,255,255,0.7)', fontSize: '12px', fontWeight: 700,
     cursor: 'pointer', whiteSpace: 'nowrap',
+    display: 'inline-flex', alignItems: 'center',
   },
   actionBtnCheckActive: {
     background: '#10B981', color: '#fff', borderColor: '#10B981',
   },
   actionBtnDelete: {
-    padding: '10px 12px', borderRadius: '10px', border: '1px solid #FECACA',
-    background: '#FEF2F2', color: '#DC2626', fontSize: '14px', cursor: 'pointer',
+    padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.3)',
+    background: 'rgba(239,68,68,0.06)', color: '#EF4444', fontSize: '14px', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
 
   empty: {
     textAlign: 'center', padding: '64px 24px',
   },
-  emptyIcon: { fontSize: '48px', marginBottom: '16px' },
+  emptyIcon: { fontSize: '48px', marginBottom: '16px', color: 'rgba(255,255,255,0.3)' },
   emptyTitle: {
-    fontSize: '20px', fontWeight: 700, color: '#1E293B', margin: '0 0 6px',
+    fontSize: '20px', fontWeight: 700, color: '#fff', margin: '0 0 6px',
     fontFamily: "'Poppins', sans-serif",
   },
-  emptyText: { fontSize: '15px', color: '#64748B', margin: 0 },
+  emptyText: { fontSize: '15px', color: 'rgba(255,255,255,0.6)', margin: 0 },
 };
 
 if (typeof document !== 'undefined') {

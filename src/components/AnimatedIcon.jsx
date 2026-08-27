@@ -26,9 +26,9 @@ export default function AnimatedIcon({ type, size = 52 }) {
   }, []);
 
   const color =
-    normalizedType === 'limite' ? '#0047CC' :
-    normalizedType === 'derivada' ? '#2563EB' :
-    '#059669';
+    normalizedType === 'limite' ? '#F4B400' :
+    normalizedType === 'derivada' ? '#60A5FA' :
+    '#34D399';
 
   const bg = color + '12';
 

@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { MdAdd } from 'react-icons/md';
+import { FiTrendingUp, FiTriangle, FiMaximize2, FiGrid } from 'react-icons/fi';
+import { HiOutlineScale, HiBookOpen, HiOutlineLightBulb } from 'react-icons/hi';
 
 const saberes = [
   {
     id: 'sp-1',
     titulo: 'Aritmética y Álgebra Básica',
-    icono: '➕',
+    icono: <MdAdd />,
     temas: [
       'Operaciones con fracciones y números racionales',
       'Propiedades de las potencias y raíces',
@@ -16,7 +19,7 @@ const saberes = [
   {
     id: 'sp-2',
     titulo: 'Ecuaciones e Inecuaciones',
-    icono: '⚖️',
+    icono: <HiOutlineScale />,
     temas: [
       'Ecuaciones lineales de primer grado',
       'Ecuaciones cuadráticas y fórmula general',
@@ -28,7 +31,7 @@ const saberes = [
   {
     id: 'sp-3',
     titulo: 'Funciones y Gráficas',
-    icono: '📈',
+    icono: <FiTrendingUp />,
     temas: [
       'Concepto de función: dominio, rango y correspondencia',
       'Función lineal: forma pendiente-intercepto',
@@ -40,7 +43,7 @@ const saberes = [
   {
     id: 'sp-4',
     titulo: 'Trigonometría Esencial',
-    icono: '🔺',
+    icono: <FiTriangle />,
     temas: [
       'Razones trigonométricas: seno, coseno y tangente',
       'Identidades pitagóricas fundamentales',
@@ -52,7 +55,7 @@ const saberes = [
   {
     id: 'sp-5',
     titulo: 'Geometría Analítica',
-    icono: '📐',
+    icono: <FiMaximize2 />,
     temas: [
       'Plano cartesiano: puntos y distancias',
       'Ecuación de la recta: punto-pendiente y forma general',
@@ -64,7 +67,7 @@ const saberes = [
   {
     id: 'sp-6',
     titulo: 'Pensamiento Lógico-Matemático',
-    icono: '🧩',
+    icono: <FiGrid />,
     temas: [
       'Reconocimiento de patrones y secuencias',
       'Razonamiento proporcional y porcentajes',
@@ -126,7 +129,7 @@ export default function SaberesPrevios() {
                       ))}
                     </ul>
                     <div style={styles.cardFooter}>
-                      <span style={styles.note}>📚 Material de repaso disponible próximamente</span>
+                      <span style={styles.note}><HiBookOpen style={{ verticalAlign: 'middle', marginRight: 6 }} /> Material de repaso disponible próximamente</span>
                     </div>
                   </div>
                 )}
@@ -137,7 +140,7 @@ export default function SaberesPrevios() {
 
         {/* Callout */}
         <div style={styles.callout}>
-          <div style={styles.calloutEmoji}>💡</div>
+          <div style={styles.calloutEmoji}><HiOutlineLightBulb /></div>
           <div>
             <h3 style={styles.calloutTitle}>¿No recuerdas alguno de estos temas?</h3>
             <p style={styles.calloutText}>
@@ -164,8 +167,8 @@ const styles = {
   tag: {
     display: 'inline-block',
     padding: '6px 14px',
-    background: 'rgba(0,71,204,0.08)',
-    color: '#0047CC',
+    background: 'rgba(244,180,0,0.15)',
+    color: '#F4B400',
     fontSize: '13px',
     fontWeight: 700,
     borderRadius: '999px',
@@ -176,13 +179,13 @@ const styles = {
   title: {
     fontSize: '36px',
     fontWeight: 800,
-    color: '#1E293B',
+    color: '#fff',
     margin: '0 0 12px',
     fontFamily: "'Poppins', sans-serif",
   },
   desc: {
     fontSize: '17px',
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.6)',
     lineHeight: 1.6,
     margin: 0,
   },
@@ -194,16 +197,16 @@ const styles = {
     margin: '0 auto',
   },
   card: {
-    background: '#fff',
+    background: 'linear-gradient(145deg, rgba(15,26,53,0.8), rgba(11,16,32,0.9))',
     borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid rgba(244,180,0,0.08)',
     boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
     overflow: 'hidden',
     transition: 'box-shadow 0.2s ease',
   },
   cardOpen: {
     boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
-    borderColor: '#0047CC',
+    borderColor: 'rgba(244,180,0,0.3)',
   },
   cardHeader: {
     width: '100%',
@@ -228,18 +231,19 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#F5F7FA',
+    background: 'rgba(244,180,0,0.1)',
+    color: '#F4B400',
     borderRadius: '10px',
   },
   cardTitle: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#1E293B',
+    color: '#fff',
     fontFamily: "'Poppins', sans-serif",
   },
   cardArrow: {
     fontSize: '20px',
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.5)',
     fontWeight: 300,
     width: '28px',
     height: '28px',
@@ -263,14 +267,14 @@ const styles = {
     alignItems: 'flex-start',
     gap: '10px',
     fontSize: '14px',
-    color: '#334155',
+    color: 'rgba(255,255,255,0.8)',
     lineHeight: 1.5,
     padding: '8px 12px',
-    background: '#F8FAFC',
+    background: 'rgba(244,180,0,0.04)',
     borderRadius: '8px',
   },
   bullet: {
-    color: '#0047CC',
+    color: '#F4B400',
     fontWeight: 700,
     lineHeight: 1.5,
   },
@@ -282,7 +286,7 @@ const styles = {
   },
   note: {
     fontSize: '13px',
-    color: '#8a6d00',
+    color: '#F4B400',
     fontWeight: 500,
   },
   callout: {
@@ -292,24 +296,25 @@ const styles = {
     maxWidth: '720px',
     margin: '40px auto 0',
     padding: '24px',
-    background: '#EFF6FF',
+    background: 'rgba(244,180,0,0.06)',
     borderRadius: '16px',
-    border: '1px solid #BFDBFE',
+    border: '1px solid rgba(244,180,0,0.15)',
   },
   calloutEmoji: {
     fontSize: '28px',
     lineHeight: 1,
+    color: '#F4B400',
   },
   calloutTitle: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#1E40AF',
+    color: '#F4B400',
     margin: '0 0 6px',
     fontFamily: "'Poppins', sans-serif",
   },
   calloutText: {
     fontSize: '14px',
-    color: '#1E3A8A',
+    color: 'rgba(255,255,255,0.7)',
     lineHeight: 1.55,
     margin: 0,
   },
