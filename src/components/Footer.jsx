@@ -60,10 +60,11 @@ export default function Footer() {
 
 const styles = {
   footer: {
-    background: '#0A1628',
+    background: '#0b1020',
     color: '#94A3B8',
     padding: '64px 0 32px',
     marginTop: 'auto',
+    borderTop: '1px solid rgba(255,255,255,0.06)',
   },
   grid: {
     display: 'grid',

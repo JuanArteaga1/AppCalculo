@@ -71,8 +71,8 @@ export default function Calculo1() {
             <span style={styles.heroTag}>Curso principal</span>
             <h1 style={styles.heroTitle}>Cálculo I</h1>
             <p style={styles.heroDesc}>
-              Un viaje completo desde los fundamentos de los límites hasta las aplicaciones prácticas 
-              de las derivadas. Aprende con el curso y refuerza a tu ritmo con contenido interactivo y visualizaciones dinámicas.
+            Aprender cálculo también puede ser divertido.
+            Explora, prueba, equivócate y vuelve a intentarlo. Aprende a tu ritmo y gana confianza en tus habilidades matemáticas.
             </p>
             <div style={styles.heroStats}>
               <div style={styles.stat}>
@@ -98,19 +98,17 @@ export default function Calculo1() {
       <section style={styles.unitsSection}>
         <div className="container">
           <div style={styles.unitsHeader}>
-            <h2 style={styles.unitsTitle}>Estructura del curso</h2>
+            <h2 style={styles.unitsTitle}>Empecemos este viaje</h2>
             <p style={styles.unitsDesc}>
-              El curso está dividido en tres unidades que cubren todo el programa de Cálculo I 
-              de forma progresiva y conectada.
+            Tres unidades para aprender, practicar y ganar confianza en Cálculo I.
             </p>
           </div>
 
           <div className="calculo-units-grid" style={styles.unitsGrid}>
             {unidades.map((u) => (
               <Link key={u.id} to={`/calculo1/${u.id}`} style={styles.unitCard}>
-                <AnimatedIcon type={u.id} size={52} />
+                <AnimatedIcon type={u.id} size={72} />
                 <h3 style={styles.unitTitle}>{u.titulo}</h3>
-                <p style={styles.unitDesc}>{u.descripcion}</p>
                 <div style={styles.unitFooter}>
                   <span style={styles.unitCount}>{u.temas.length} temas</span>
                   <span style={{ ...styles.unitBtn, color: u.color }}>Explorar →</span>
@@ -127,6 +125,8 @@ export default function Calculo1() {
 const styles = {
   page: {
     padding: '40px 0 80px',
+    background: '#0b1020',
+    minHeight: '100vh',
   },
   breadcrumb: {
     display: 'flex',
@@ -136,26 +136,27 @@ const styles = {
     fontSize: '14px',
   },
   breadcrumbLink: {
-    color: '#0047CC',
+    color: '#F4B400',
     textDecoration: 'none',
     fontWeight: 600,
   },
   breadcrumbSep: {
-    color: '#94A3B8',
+    color: 'rgba(255,255,255,0.3)',
   },
   breadcrumbCurrent: {
-    color: '#1E293B',
+    color: '#fff',
     fontWeight: 700,
   },
   unidadHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '20px',
+    gap: '24px',
     marginBottom: '40px',
-    padding: '24px',
-    background: '#fff',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    padding: '28px',
+    background: 'linear-gradient(145deg, rgba(15,26,53,0.9) 0%, rgba(11,16,32,0.95) 100%)',
+    borderRadius: '20px',
+    border: '1px solid rgba(244,180,0,0.1)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(244,180,0,0.05)',
   },
   unidadIcon: {
     width: '64px',
@@ -170,13 +171,13 @@ const styles = {
   unidadTitle: {
     fontSize: '28px',
     fontWeight: 800,
-    color: '#1E293B',
+    color: '#fff',
     margin: '0 0 6px',
     fontFamily: "'Poppins', sans-serif",
   },
   unidadDesc: {
     fontSize: '15px',
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.6)',
     margin: 0,
     maxWidth: '640px',
   },
@@ -186,34 +187,34 @@ const styles = {
     gap: '20px',
   },
   temaCard: {
-    background: '#fff',
-    borderRadius: '16px',
-    padding: '24px',
-    border: '1px solid #E2E8F0',
+    background: 'linear-gradient(145deg, rgba(15,26,53,0.7) 0%, rgba(11,16,32,0.85) 100%)',
+    borderRadius: '18px',
+    padding: '28px',
+    border: '1px solid rgba(244,180,0,0.08)',
     textDecoration: 'none',
     color: 'inherit',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    transition: 'all 0.3s ease',
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
   },
   temaNumber: {
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: 800,
-    color: '#0047CC',
+    color: '#F4B400',
     letterSpacing: '1px',
   },
   temaTitle: {
-    fontSize: '17px',
+    fontSize: '18px',
     fontWeight: 700,
-    color: '#1E293B',
+    color: '#fff',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
   },
   temaDesc: {
     fontSize: '14px',
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.5)',
     lineHeight: 1.5,
     margin: 0,
     flex: 1,
@@ -229,19 +230,19 @@ const styles = {
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
-    color: '#64748B',
-    background: '#F1F5F9',
+    color: 'rgba(255,255,255,0.5)',
+    background: 'rgba(255,255,255,0.06)',
     padding: '4px 10px',
     borderRadius: '999px',
   },
   temaArrow: {
-    color: '#0047CC',
+    color: '#F4B400',
     fontWeight: 700,
     fontSize: '16px',
   },
 
   hero: {
-    background: 'linear-gradient(135deg, #0047CC 0%, #003399 50%, #0A1628 100%)',
+    background: 'linear-gradient(135deg, #0f1a35 0%, #0b1020 50%, #0b1020 100%)',
     color: '#fff',
     padding: '64px 0',
   },
@@ -278,7 +279,7 @@ const styles = {
   heroDesc: {
     fontSize: '17px',
     lineHeight: 1.6,
-    color: 'rgba(255,255,255,0.85)',
+    color: 'rgba(255,255,255,0.7)',
     margin: 0,
     maxWidth: '520px',
   },
@@ -300,12 +301,11 @@ const styles = {
   },
   statLabel: {
     fontSize: '13px',
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(255,255,255,0.5)',
   },
   heroRight: {
     borderRadius: '20px',
     overflow: 'hidden',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
   },
   heroImage: {
     width: '100%',
@@ -316,7 +316,7 @@ const styles = {
 
   unitsSection: {
     padding: '64px 0',
-    background: '#F5F7FA',
+    background: '#0b1020',
   },
   unitsHeader: {
     textAlign: 'center',
@@ -326,13 +326,13 @@ const styles = {
   unitsTitle: {
     fontSize: '28px',
     fontWeight: 800,
-    color: '#1E293B',
+    color: '#fff',
     margin: '0 0 10px',
     fontFamily: "'Poppins', sans-serif",
   },
   unitsDesc: {
     fontSize: '16px',
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.5)',
     margin: 0,
     lineHeight: 1.55,
   },
@@ -342,41 +342,41 @@ const styles = {
     gap: '24px',
   },
   unitCard: {
-    background: '#fff',
+    background: 'linear-gradient(145deg, rgba(15,26,53,0.8) 0%, rgba(11,16,32,0.9) 100%)',
     borderRadius: '20px',
-    padding: '28px',
-    border: '1px solid #E2E8F0',
+    padding: '32px 28px',
+    border: '1px solid rgba(244,180,0,0.08)',
     textDecoration: 'none',
     color: 'inherit',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    transition: 'all 0.3s ease',
     display: 'flex',
     flexDirection: 'column',
-    gap: '14px',
+    gap: '16px',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
   },
   unitIconWrap: {
-    width: '52px',
-    height: '52px',
-    borderRadius: '14px',
+    width: '72px',
+    height: '72px',
+    borderRadius: '18px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: '16px',
-    fontSize: '24px',
+    marginBottom: '8px',
+    fontSize: '32px',
   },
   unitIcon: {
     lineHeight: 1,
   },
   unitTitle: {
-    fontSize: '18px',
-    fontWeight: 700,
-    color: '#1E293B',
+    fontSize: '20px',
+    fontWeight: 800,
+    color: '#fff',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
   },
   unitDesc: {
     fontSize: '14px',
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.5)',
     lineHeight: 1.55,
     margin: '0 0 6px',
     flex: 1,
@@ -385,13 +385,13 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderTop: '1px solid #E2E8F0',
+    borderTop: '1px solid rgba(255,255,255,0.08)',
     paddingTop: '14px',
   },
   unitCount: {
     fontSize: '12px',
     fontWeight: 700,
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.4)',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
   },

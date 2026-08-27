@@ -1,10 +1,37 @@
 import { useParams, Link } from 'react-router-dom';
 import { getTemaById } from '../data/temas';
-import GraphZone from '../components/GraphZone';
-import ErrorBoundary from '../components/ErrorBoundary';
 import TemaVideo from '../components/TemaVideo';
 import SaberesRelacionados from '../components/SaberesRelacionados';
 import AnimatedIcon from '../components/AnimatedIcon';
+import { FiBookOpen, FiVideo, FiBarChart2, FiArrowRight } from 'react-icons/fi';
+// Feather no trae bombilla; se usa la de Heroicons, igual que en Saberes Previos.
+import { HiOutlineLightBulb } from 'react-icons/hi';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+function renderLatex(text) {
+  if (!text) return text;
+  
+  let result = text;
+  
+  result = result.replace(/\$\$([\s\S]*?)\$\$/g, (_, latex) => {
+    try {
+      return katex.renderToString(latex.trim(), { displayMode: true, throwOnError: false });
+    } catch {
+      return latex;
+    }
+  });
+  
+  result = result.replace(/\$([^$\n]+?)\$/g, (_, latex) => {
+    try {
+      return katex.renderToString(latex.trim(), { displayMode: false, throwOnError: false });
+    } catch {
+      return latex;
+    }
+  });
+  
+  return result;
+}
 
 export default function TemaPage() {
   const { unidadId, temaId } = useParams();
@@ -41,20 +68,23 @@ export default function TemaPage() {
     return { modo: 'limite', subtipo: '' };
   }
 
-  const { modo, subtipo } = getGraphMode(unidadId, temaId);
+  const { modo } = getGraphMode(unidadId, temaId);
 
   const renderContent = (text) => {
-    const lines = text.trim().split('\n');
+    const preprocessed = renderLatex(text);
+    const lines = preprocessed.split('\n');
     const elements = [];
     let listItems = [];
     let inList = false;
+    let tableLines = [];
+    let inTable = false;
 
     const flushList = () => {
       if (inList && listItems.length) {
         elements.push(
           <ul key={`list-${elements.length}`} style={styles.list}>
             {listItems.map((item, i) => (
-              <li key={i} style={styles.listItem}>{item}</li>
+              <li key={i} style={styles.listItem} dangerouslySetInnerHTML={{ __html: item }} />
             ))}
           </ul>
         );
@@ -63,19 +93,60 @@ export default function TemaPage() {
       }
     };
 
+    const flushTable = () => {
+      if (inTable && tableLines.length) {
+        const headerCells = tableLines[0].split('|').map(c => c.trim()).filter(Boolean);
+        const bodyRows = tableLines.slice(2).map(row =>
+          row.split('|').map(c => c.trim()).filter(Boolean)
+        );
+        elements.push(
+          <table key={`table-${elements.length}`} style={styles.table}>
+            <thead>
+              <tr>
+                {headerCells.map((cell, i) => (
+                  <th key={i} style={styles.th} dangerouslySetInnerHTML={{ __html: cell }} />
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bodyRows.map((row, rIdx) => (
+                <tr key={rIdx}>
+                  {row.map((cell, cIdx) => (
+                    <td key={cIdx} style={styles.td} dangerouslySetInnerHTML={{ __html: cell }} />
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+        tableLines = [];
+        inTable = false;
+      }
+    };
+
     lines.forEach((line, idx) => {
       const trimmed = line.trim();
       if (!trimmed) {
         flushList();
+        flushTable();
         return;
+      }
+
+      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        flushList();
+        inTable = true;
+        tableLines.push(trimmed);
+        return;
+      } else {
+        flushTable();
       }
 
       if (trimmed.startsWith('## ')) {
         flushList();
-        elements.push(<h2 key={idx} style={styles.h2}>{trimmed.replace('## ', '')}</h2>);
+        elements.push(<h2 key={idx} style={styles.h2} dangerouslySetInnerHTML={{ __html: trimmed.replace('## ', '') }} />);
       } else if (trimmed.startsWith('### ')) {
         flushList();
-        elements.push(<h3 key={idx} style={styles.h3}>{trimmed.replace('### ', '')}</h3>);
+        elements.push(<h3 key={idx} style={styles.h3} dangerouslySetInnerHTML={{ __html: trimmed.replace('### ', '') }} />);
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
         inList = true;
         listItems.push(trimmed.slice(2));
@@ -93,13 +164,14 @@ export default function TemaPage() {
           if (part.startsWith('**') && part.endsWith('**')) {
             return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
           }
-          return part;
+          return <span key={pIdx} dangerouslySetInnerHTML={{ __html: part }} />;
         });
         elements.push(<p key={idx} style={styles.paragraph}>{children}</p>);
       }
     });
 
     flushList();
+    flushTable();
     return elements;
   };
 
@@ -121,7 +193,7 @@ export default function TemaPage() {
             <div id="seccion-contenido" style={styles.card}>
               <div style={styles.cardHeader}>
                 <div style={styles.cardHeaderTop}>
-                  <AnimatedIcon type={unidadId} size={48} />
+                  <AnimatedIcon type={unidadId} size={72} />
                   <span style={styles.cardTag}>Leccion {tema.id}</span>
                 </div>
                 <h1 style={styles.cardTitle}>{tema.titulo}</h1>
@@ -137,13 +209,12 @@ export default function TemaPage() {
             </div>
 
             <div id="seccion-laboratorio" style={styles.graphWrap}>
-              <ErrorBoundary>
-                <GraphZone
-                  modo={modo}
-                  subtipo={subtipo}
-                  title={`Laboratorio: ${tema.titulo}`}
-                />
-              </ErrorBoundary>
+              <LanzadorLaboratorio
+                titulo={tema.titulo}
+                modo={modo}
+                unidadId={unidadId}
+                temaId={temaId}
+              />
             </div>
           </div>
 
@@ -151,10 +222,10 @@ export default function TemaPage() {
             <div style={styles.sidebarCard}>
               <h4 style={styles.sidebarTitle}>Recursos</h4>
               <nav style={styles.navList}>
-                <NavLink href="#seccion-contenido" icon="📘" label="Contenido del tema" />
-                <NavLink href="#seccion-videos" icon="🎥" label="Videos de apoyo" />
-                <NavLink href="#seccion-laboratorio" icon="📊" label="Laboratorio" />
-                <NavLink href="#seccion-saberes" icon="💡" label="Saberes previos" />
+                <NavLink href="#seccion-contenido" icon={<FiBookOpen />} label="Contenido del tema" />
+                <NavLink href="#seccion-videos" icon={<FiVideo />} label="Videos de apoyo" />
+                <NavLink href="#seccion-laboratorio" icon={<FiBarChart2 />} label="Laboratorio" />
+                <NavLink href="#seccion-saberes" icon={<HiOutlineLightBulb />} label="Saberes previos" />
               </nav>
             </div>
 
@@ -164,6 +235,63 @@ export default function TemaPage() {
           </aside>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Función y punto sugeridos para abrir el laboratorio desde cada unidad. */
+const SUGERENCIAS = {
+  limite: { fn: '(x^2 - 4)/(x - 2)', punto: '2' },
+  derivada: { fn: 'x^2', punto: '2' },
+  aplicacion: { fn: 'x^3 - 3x', punto: '1' },
+};
+
+/**
+ * Tarjeta que abre el laboratorio de graficación en su propia página,
+ * ya cargado con la función y el punto del tema.
+ */
+function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
+  const sugerencia = SUGERENCIAS[modo] || SUGERENCIAS.limite;
+  const herramienta = modo === 'limite' ? 'limite' : 'derivada';
+
+  const query = new URLSearchParams({
+    fn: sugerencia.fn,
+    modo: herramienta,
+    a: sugerencia.punto,
+    tema: titulo,
+    volver: `/calculo1/${unidadId}/${temaId}`,
+  });
+
+  return (
+    <div className="tema-lanzador" style={styles.lanzador}>
+      <div style={styles.lanzadorTexto}>
+        <span style={styles.lanzadorTag}>Laboratorio interactivo</span>
+        <h2 style={styles.lanzadorTitulo}>Grafica y analiza este tema</h2>
+        <p style={styles.lanzadorDesc}>
+          Abre el plano cartesiano a pantalla completa: escribe funciones con el teclado
+          matemático, grafícalas juntas y calcula {herramienta === 'limite' ? 'límites' : 'derivadas y rectas tangentes'} sobre la curva.
+        </p>
+        <Link to={`/laboratorio?${query.toString()}`} style={styles.lanzadorBtn}>
+          Abrir laboratorio
+          <FiArrowRight />
+        </Link>
+        <p style={styles.lanzadorPista}>
+          Se abrirá con <code style={styles.lanzadorCode}>f(x) = {sugerencia.fn}</code>
+        </p>
+      </div>
+
+      <svg viewBox="0 0 200 130" style={styles.lanzadorPreview} aria-hidden="true">
+        <rect x="0" y="0" width="200" height="130" rx="12" fill="#0F172A" />
+        <g stroke="rgba(255,255,255,0.08)" strokeWidth="1">
+          {[20, 50, 80, 110, 140, 170].map((x) => <line key={x} x1={x} y1="10" x2={x} y2="120" />)}
+          {[25, 50, 75, 100].map((y) => <line key={y} x1="10" y1={y} x2="190" y2={y} />)}
+        </g>
+        <line x1="10" y1="75" x2="190" y2="75" stroke="#475569" strokeWidth="1.5" />
+        <line x1="80" y1="10" x2="80" y2="120" stroke="#475569" strokeWidth="1.5" />
+        <path d="M 15 110 Q 60 15 105 70 T 190 25" fill="none" stroke="#F4B400" strokeWidth="3" strokeLinecap="round" />
+        <path d="M 15 95 Q 70 95 190 45" fill="none" stroke="#38BDF8" strokeWidth="2" strokeDasharray="6 4" />
+        <circle cx="105" cy="70" r="5" fill="#EF4444" stroke="#fff" strokeWidth="2" />
+      </svg>
     </div>
   );
 }
@@ -197,7 +325,7 @@ const styles = {
     fontSize: '14px',
   },
   breadcrumbLink: {
-    color: '#0047CC',
+    color: '#F4B400',
     textDecoration: 'none',
     fontWeight: 600,
   },
@@ -205,7 +333,7 @@ const styles = {
     color: '#94A3B8',
   },
   breadcrumbCurrent: {
-    color: '#1E293B',
+    color: '#fff',
     fontWeight: 700,
   },
   layout: {
@@ -220,16 +348,16 @@ const styles = {
     gap: '24px',
   },
   card: {
-    background: '#fff',
+    background: 'linear-gradient(145deg, rgba(15,26,53,0.85) 0%, rgba(11,16,32,0.95) 100%)',
     borderRadius: '20px',
-    border: '1px solid #E2E8F0',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+    border: '1px solid rgba(244,180,0,0.08)',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(244,180,0,0.05)',
     overflow: 'hidden',
   },
   cardHeader: {
     padding: '28px 32px',
-    borderBottom: '1px solid #E2E8F0',
-    background: '#F8FAFC',
+    borderBottom: '1px solid rgba(244,180,0,0.1)',
+    background: 'linear-gradient(180deg, rgba(244,180,0,0.03) 0%, transparent 100%)',
   },
   cardHeaderTop: {
     display: 'flex',
@@ -240,8 +368,8 @@ const styles = {
   cardTag: {
     display: 'inline-flex',
     padding: '4px 10px',
-    background: 'rgba(0,71,204,0.08)',
-    color: '#0047CC',
+    background: 'rgba(244,180,0,0.15)',
+    color: '#F4B400',
     fontSize: '11px',
     fontWeight: 700,
     borderRadius: '999px',
@@ -252,13 +380,13 @@ const styles = {
   cardTitle: {
     fontSize: '24px',
     fontWeight: 800,
-    color: '#1E293B',
+    color: '#fff',
     margin: '0 0 8px',
     fontFamily: "'Poppins', sans-serif",
   },
   cardDesc: {
     fontSize: '15px',
-    color: '#64748B',
+    color: 'rgba(255,255,255,0.6)',
     margin: 0,
     lineHeight: 1.5,
   },
@@ -271,20 +399,20 @@ const styles = {
   h2: {
     fontSize: '20px',
     fontWeight: 700,
-    color: '#1E293B',
+    color: '#fff',
     margin: '16px 0 6px',
     fontFamily: "'Poppins', sans-serif",
   },
   h3: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#1E293B',
+    color: '#fff',
     margin: '12px 0 4px',
     fontFamily: "'Poppins', sans-serif",
   },
   paragraph: {
     fontSize: '15px',
-    color: '#334155',
+    color: 'rgba(255,255,255,0.75)',
     lineHeight: 1.7,
     margin: 0,
   },
@@ -300,24 +428,90 @@ const styles = {
     position: 'relative',
     paddingLeft: '20px',
     fontSize: '15px',
-    color: '#334155',
+    color: 'rgba(255,255,255,0.75)',
     lineHeight: 1.6,
   },
   equation: {
-    background: '#0F172A',
+    background: 'linear-gradient(135deg, rgba(244,180,0,0.06) 0%, rgba(15,26,53,0.8) 100%)',
     borderRadius: '12px',
     padding: '16px 20px',
     margin: '8px 0',
     textAlign: 'center',
+    border: '1px solid rgba(244,180,0,0.1)',
   },
   equationCode: {
-    color: '#E2E8F0',
+    color: '#F4B400',
     fontFamily: "'Courier New', monospace",
     fontSize: '16px',
     letterSpacing: '0.5px',
   },
   graphWrap: {
     marginTop: '8px',
+  },
+  lanzador: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) 220px',
+    gap: '24px',
+    alignItems: 'center',
+    padding: '28px 32px',
+    borderRadius: '20px',
+    background: 'linear-gradient(135deg, rgba(244,180,0,0.08) 0%, rgba(15,26,53,0.9) 50%, rgba(11,16,32,0.95) 100%)',
+    border: '1px solid rgba(244,180,0,0.12)',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(244,180,0,0.08)',
+  },
+  lanzadorTexto: {
+    minWidth: 0,
+  },
+  lanzadorTag: {
+    display: 'inline-flex',
+    padding: '4px 10px',
+    borderRadius: '999px',
+    background: 'rgba(244,180,0,0.15)',
+    color: '#F4B400',
+    fontSize: '11px',
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  lanzadorTitulo: {
+    margin: '10px 0 8px',
+    fontSize: '22px',
+    fontWeight: 800,
+    color: '#fff',
+    fontFamily: "'Poppins', sans-serif",
+  },
+  lanzadorDesc: {
+    margin: '0 0 18px',
+    fontSize: '14.5px',
+    lineHeight: 1.6,
+    color: 'rgba(255,255,255,0.72)',
+  },
+  lanzadorBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '13px 24px',
+    borderRadius: '12px',
+    background: '#F4B400',
+    color: '#0b1020',
+    fontSize: '15px',
+    fontWeight: 800,
+    textDecoration: 'none',
+    boxShadow: '0 8px 20px rgba(244,180,0,0.25)',
+  },
+  lanzadorPista: {
+    margin: '14px 0 0',
+    fontSize: '12.5px',
+    color: 'rgba(255,255,255,0.5)',
+  },
+  lanzadorCode: {
+    fontFamily: "'Courier New', monospace",
+    color: '#7DD3FC',
+  },
+  lanzadorPreview: {
+    width: '100%',
+    height: 'auto',
+    borderRadius: '12px',
   },
   sidebar: {
     display: 'flex',
@@ -327,16 +521,16 @@ const styles = {
     top: '90px',
   },
   sidebarCard: {
-    background: '#fff',
+    background: 'linear-gradient(145deg, rgba(15,26,53,0.8) 0%, rgba(11,16,32,0.9) 100%)',
     borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid rgba(244,180,0,0.08)',
     padding: '20px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
   },
   sidebarTitle: {
     fontSize: '14px',
     fontWeight: 700,
-    color: '#1E293B',
+    color: '#fff',
     margin: '0 0 12px',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
@@ -354,21 +548,45 @@ const styles = {
     padding: '10px 12px',
     borderRadius: '10px',
     textDecoration: 'none',
-    color: '#334155',
+    color: 'rgba(255,255,255,0.7)',
     fontSize: '14px',
     fontWeight: 600,
-    background: '#F8FAFC',
+    background: 'rgba(244,180,0,0.04)',
     transition: 'all 0.2s ease',
     cursor: 'pointer',
-    border: '1px solid transparent',
+    border: '1px solid rgba(244,180,0,0.06)',
   },
   navIcon: {
     fontSize: '16px',
     lineHeight: 1,
+    color: '#F4B400',
   },
   navLabel: {
     fontSize: '14px',
     fontWeight: 600,
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    margin: '12px 0',
+    fontSize: '14px',
+    background: 'rgba(15,26,53,0.5)',
+    borderRadius: '12px',
+    overflow: 'hidden',
+  },
+  th: {
+    padding: '12px 16px',
+    textAlign: 'left',
+    borderBottom: '2px solid rgba(244,180,0,0.2)',
+    color: '#F4B400',
+    fontWeight: 700,
+    fontFamily: "'Poppins', sans-serif",
+    background: 'rgba(244,180,0,0.06)',
+  },
+  td: {
+    padding: '12px 16px',
+    borderBottom: '1px solid rgba(244,180,0,0.08)',
+    color: 'rgba(255,255,255,0.85)',
   },
 };
 
@@ -379,10 +597,18 @@ if (typeof document !== 'undefined') {
       .tema-layout { grid-template-columns: 1fr !important; }
       .tema-sidebar { position: static !important; }
     }
+    @media (max-width: 640px) {
+      .tema-lanzador {
+        grid-template-columns: 1fr !important;
+        padding: 22px 18px !important;
+      }
+      .tema-lanzador svg { max-width: 260px; margin: 0 auto; }
+    }
     .tema-sidebar a:hover {
-      background: rgba(0,71,204,0.06) !important;
-      border-color: #BFDBFE !important;
-      color: #0047CC !important;
+      background: rgba(244,180,0,0.1) !important;
+      border-color: rgba(244,180,0,0.25) !important;
+      color: #F4B400 !important;
+      box-shadow: 0 2px 12px rgba(244,180,0,0.1);
     }
     #seccion-contenido,
     #seccion-videos,

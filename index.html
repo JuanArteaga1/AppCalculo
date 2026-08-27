@@ -2,7 +2,8 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://img.youtube.com data:; frame-src https://www.youtube.com; connect-src 'self' https://api.openai.com;" />
+    <!-- font-src necesita data: porque en el build Vite incrusta las fuentes de KaTeX como data URI -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' https://img.youtube.com https://i.ytimg.com data: blob:; frame-src https://www.youtube.com https://www.youtube-nocookie.com; connect-src 'self' https://api.openai.com;" />
     <link rel="icon" type="image/png" href="/LogoUniversidad.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LimitsHub - Plataforma Educativa de Cálculo</title>
