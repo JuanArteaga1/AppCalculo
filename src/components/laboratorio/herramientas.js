@@ -42,8 +42,6 @@ function calcularLimite(funcion, a) {
     analisis,
     tabla,
     texPrincipal: `\\lim_{x \\to ${puntoA}} ${funcion.tex} = ${valorTex}`,
-    texIzquierda: `\\lim_{x \\to ${puntoA}^{-}} ${funcion.nombre}(x) \\approx ${formatearTex(analisis.izq)}`,
-    texDerecha: `\\lim_{x \\to ${puntoA}^{+}} ${funcion.nombre}(x) \\approx ${formatearTex(analisis.der)}`,
     texEnPunto: analisis.enPunto === null
       ? `${funcion.nombre}(${puntoA}) \\text{ no está definida}`
       : `${funcion.nombre}(${puntoA}) = ${formatearTex(analisis.enPunto)}`,

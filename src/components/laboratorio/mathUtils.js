@@ -260,11 +260,33 @@ export function tablaAproximacion(evaluar, punto, modo = 'limite') {
 
 /**
  * Diagnóstico numérico del límite en un punto: compara los dos laterales.
+ *
+ * Antes esto evaluaba la función a una distancia fija h = 1e-6 del punto y
+ * mostraba ese valor tal cual. Para funciones que sí tienen límite exacto
+ * (p. ej. x^2 - 4 cuando x -> 2, cuyo límite es 0), evaluar tan cerca del
+ * punto no da exactamente 0 sino un residuo minúsculo (algo como -4e-6), que
+ * el formateador terminaba mostrando en notación científica y confundía al
+ * verse como si el límite "no fuera" 0.
+ *
+ * Ahora se usa extrapolación de Richardson: se comparan dos pasos (h y h/2)
+ * para cancelar el término de error dominante, y cualquier resultado por
+ * debajo de un umbral insignificante se redondea a 0. Esto hace que el valor
+ * calculado converja mucho más rápido al límite matemático real.
  */
 export function analizarLimite(evaluar, punto) {
-  const h = 1e-6;
-  const izq = evaluar(punto - h);
-  const der = evaluar(punto + h);
+  const h = 1e-4;
+  const EPS = 1e-9;
+
+  const aproximar = (lado) => {
+    const cerca = evaluar(punto + lado * (h / 2));
+    const lejos = evaluar(punto + lado * h);
+    if (cerca === null || lejos === null) return null;
+    const valor = 2 * cerca - lejos;
+    return Math.abs(valor) < EPS ? 0 : valor;
+  };
+
+  const izq = aproximar(-1);
+  const der = aproximar(1);
   const enPunto = evaluar(punto);
 
   // Magnitud creciente hacia el punto => asíntota vertical.
