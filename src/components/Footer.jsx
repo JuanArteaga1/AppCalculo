@@ -16,37 +16,12 @@ export default function Footer() {
             <p style={styles.brandDesc}>
               Reduciendo la mortalidad académica en matemáticas universitarias mediante un ecosistema digital de aprendizaje interactivo.
             </p>
-      <div style={styles.container}>
-        
-        {/* Identidad de la Marca */}
-        <div style={styles.brandHeader}>
-          <img 
-            src="/LogoUniversidad.png" 
-            alt="Logo Universidad" 
-            style={styles.logoImg} 
-          />
-          <div style={styles.brandInfo}>
-            <h3 style={styles.brandTitle}>LimitsHub</h3>
-            <span style={styles.brandBadge}>Plataforma Educativa</span>
           </div>
         </div>
 
-        {/* Descripción Principal */}
-        <p style={styles.brandDesc}>
-          Reduciendo la mortalidad académica en matemáticas universitarias a través de un ecosistema digital de aprendizaje interactivo.
-        </p>
-
-        {/* Separador Sutil */}
-        <div style={styles.divider} />
-
-        {/* Derechos de Autor */}
-        <p style={styles.copy}>
-          © {currentYear} LimitsHub — Proyecto de la Universidad Autónoma. Todos los derechos reservados.
-        </p>
-
         <div style={styles.bottom}>
           <p style={styles.copy}>
-            © {new Date().getFullYear()} EDUCALC XE — Proyecto de la Universidad Autónoma. Todos los derechos reservados.
+            © {currentYear} EDUCALC XE — Proyecto de la Universidad Autónoma. Todos los derechos reservados.
           </p>
         </div>
       </div>
@@ -56,70 +31,57 @@ export default function Footer() {
 
 const styles = {
   footer: {
-    backgroundColor: '#090d16',
-    padding: '72px 24px 40px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: '#0b1020',
+    padding: '64px 0 32px',
     marginTop: 'auto',
+    borderTop: '1px solid rgba(255,255,255,0.06)',
   },
-  container: {
-    maxWidth: '680px',
-    margin: '0 auto',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    textAlign: 'center',
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr 1fr 1fr',
+    gap: '48px',
+    marginBottom: '48px',
   },
-  brandHeader: {
+  brandCol: {
+    maxWidth: '320px',
+  },
+  brand: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: '16px',
-    marginBottom: '20px',
+    gap: '12px',
+    marginBottom: '16px',
   },
   logoImg: {
-    height: '48px',
+    height: '40px',
     width: 'auto',
     objectFit: 'contain',
     filter: 'brightness(0) invert(1)',
   },
-  brandInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-  },
   brandTitle: {
     color: '#FFFFFF',
-    fontSize: '26px',
-    fontWeight: '700',
-    margin: 0,
-    lineHeight: '1.2',
-    letterSpacing: '-0.5px',
+    fontSize: '18px',
+    fontWeight: 700,
+    fontFamily: "'Poppins', sans-serif",
   },
-  brandBadge: {
-    color: '#38BDF8',
-    fontSize: '12px',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    marginTop: '2px',
+  brandTag: {
+    color: '#94A3B8',
+    fontSize: '13px',
+    margin: 0,
   },
   brandDesc: {
     color: '#94A3B8',
-    fontSize: '16px',
-    lineHeight: '1.6',
-    marginTop: 0,
-    marginBottom: '36px',
-    maxWidth: '560px',
+    fontSize: '14px',
+    lineHeight: 1.6,
+    margin: 0,
   },
-  divider: {
-    width: '100%',
-    height: '1px',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: '28px',
+  bottom: {
+    borderTop: '1px solid rgba(255,255,255,0.1)',
+    paddingTop: '24px',
+    textAlign: 'center',
   },
   copy: {
-    color: '#64748B',
     fontSize: '13px',
+    color: '#64748B',
     margin: 0,
   },
 };
