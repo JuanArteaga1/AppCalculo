@@ -37,7 +37,8 @@ export default function Calculo1() {
             </div>
           </div>
 
-          <div className="calculo-temas-grid" style={styles.temasGrid}>
+          <div className="calculo-unidad-layout" style={styles.unidadLayout}>
+            <div className="calculo-temas-grid" style={styles.temasGrid}>
             {unidad.temas.map((tema, idx) => (
               <Link
                 key={tema.id}
@@ -53,10 +54,13 @@ export default function Calculo1() {
                 </div>
               </Link>
             ))}
-          </div>
+            </div>
 
-          {/* Chatbot especializado al final de la unidad */}
-          <ChatSection tema={unidadId} unidadTitulo={unidad.titulo} />
+            {/* El chat acompana al alumno mientras baja por los subtemas */}
+            <aside className="calculo-chat-lateral" style={styles.chatLateral}>
+              <ChatSection tema={unidadId} unidadTitulo={unidad.titulo} lateral />
+            </aside>
+          </div>
         </div>
       </div>
     );
@@ -181,10 +185,23 @@ const styles = {
     margin: 0,
     maxWidth: '640px',
   },
+  unidadLayout: {
+    display: 'grid',
+    // minmax(0, ...) para que la columna pueda encogerse en vez de ensanchar la pagina
+    gridTemplateColumns: 'minmax(0, 1fr) 380px',
+    gap: '28px',
+    alignItems: 'start',
+  },
+  chatLateral: {
+    position: 'sticky',
+    top: '90px',
+    minWidth: 0,
+  },
   temasGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '20px',
+    minWidth: 0,
   },
   temaCard: {
     background: 'linear-gradient(145deg, rgba(15,26,53,0.7) 0%, rgba(11,16,32,0.85) 100%)',
@@ -407,6 +424,8 @@ if (typeof document !== 'undefined') {
     @media (max-width: 1024px) {
       .calculo-hero-container { grid-template-columns: 1fr !important; }
       .calculo-units-grid { grid-template-columns: 1fr !important; }
+      .calculo-unidad-layout { grid-template-columns: minmax(0, 1fr) !important; }
+      .calculo-chat-lateral { position: static !important; }
       .calculo-temas-grid { grid-template-columns: 1fr !important; }
     }
   `;

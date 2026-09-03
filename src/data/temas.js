@@ -14,55 +14,98 @@ export const unidades = [
       {
         id: '1.1',
         titulo: 'Introducción – Definición de límite',
-        descripcion: 'El concepto de límite se explica mediante un ejemplo paso a paso: analizar qué valor toma una función cuando la variable se aproxima a un punto donde no está definida.',
+        descripcion: 'Explora el concepto de límite a través de un ejemplo paso a paso y descubre qué sucede con una función cuando la variable se acerca cada vez más a un punto, incluso cuando la función no está definida allí.',
         contenido: `
 ## Introducción
 
-Considere la función:
+Considere la [función](https://es.wikipedia.org/wiki/Funci%C3%B3n_matem%C3%A1tica):
 
 $$f(x) = \\frac{16 - x^2}{4 - x}$$
 
-Su dominio es todos los números reales excepto $x = 4$. Al intentar evaluar $f(4)$ obtenemos $\\frac{0}{0}$, una indeterminación. Pero, ¿qué pasa cuando $x$ está *muy cerca* de 4?
+Su dominio son todos los números reales excepto $x = 4$, porque en ese punto el denominador se anula. La pregunta que responde el [límite](https://es.wikipedia.org/wiki/L%C3%ADmite_de_una_funci%C3%B3n) no es cuánto vale la función en 4, sino **a qué valor se acerca** cuando $x$ se aproxima a 4.
 
-## Tabla de valores por la izquierda
+## Paso 1: intentar la sustitución directa
 
-| $x$ | $f(x)$ |
-|-----|--------|
-| 3.9 | 7.9 |
-| 3.99 | 7.99 |
-| 3.999 | 7.999 |
-| 3.9999 | 7.9999 |
+Lo primero que se prueba siempre es reemplazar el valor en la función:
 
-## Tabla de valores por la derecha
+$$f(4) = \\frac{16 - 4^2}{4 - 4} = \\frac{16 - 16}{0} = \\frac{0}{0}$$
 
-| $x$ | $f(x)$ |
-|-----|--------|
-| 4.1 | 8.1 |
-| 4.01 | 8.01 |
-| 4.001 | 8.001 |
-| 4.0001 | 8.0001 |
+El resultado es una **[indeterminación](https://es.wikipedia.org/wiki/Forma_indeterminada)**. No significa que el límite no exista: significa que la sustitución directa no alcanza para responder y hay que analizar el comportamiento alrededor del punto.
 
-## Observación
+## Paso 2: acercarse al punto por ambos lados
 
-Cuando $x$ tiende a 4 por la izquierda o por la derecha, los valores de $f(x)$ tienden a **8**.
+Si no podemos evaluar en 4, evaluamos *cerca* de 4: primero con valores un poco menores (por la izquierda) y luego con valores un poco mayores (por la derecha). Cada fila se acerca diez veces más que la anterior.
 
-## Simplificación algebraica
+[[tabla-limite expr=(16-x^2)/(4-x) punto=4]]
 
-Podemos simplificar la función factorizando el numerador:
+Los dos lados se acercan al mismo número, y ese número es **8**. Ninguna fila llega a $x = 4$: nos acercamos tanto como queramos sin tocar el punto.
 
-$$f(x) = \\frac{16 - x^2}{4 - x} = \\frac{(4 - x)(4 + x)}{4 - x} = 4 + x$$
+## Paso 3: comprobarlo con álgebra
 
-Para todo $x \\neq 4$, la función se reduce a $f(x) = 4 + x$.
+La tabla sugiere el resultado; el álgebra lo demuestra. El numerador es una diferencia de cuadrados, así que se puede factorizar:
 
-## Conclusión
+$$f(x) = \\frac{16 - x^2}{4 - x} = \\frac{\\cancel{(4 - x)}(4 + x)}{\\cancel{4 - x}} = 4 + x$$
+
+El factor $(4 - x)$ se cancela arriba y abajo. Esa cancelación es válida para todo $x \\neq 4$, que es justamente donde estamos trabajando: alrededor del punto, nunca en él.
+
+## Paso 4: conclusión
+
+Con la función ya simplificada, la sustitución directa sí funciona:
 
 $$\\lim_{x \\to 4} \\frac{16 - x^2}{4 - x} = \\lim_{x \\to 4} (4 + x) = 8$$
 
-El límite existe y vale **8**, aunque $f(4)$ no esté definida.
+El límite existe y vale **8**, aunque $f(4)$ no esté definida: el límite y la [continuidad](https://es.wikipedia.org/wiki/Funci%C3%B3n_continua) son cosas distintas. Gráficamente, la curva es la recta $y = 4 + x$ con un agujero en el punto $(4, 8)$.
         `
       },
       {
         id: '1.2',
+        titulo: 'Límites laterales',
+        descripcion: 'Estudian el comportamiento de la función desde un solo lado: por la izquierda o por la derecha.',
+        contenido: `
+## Introducción
+
+Hasta ahora nos acercamos al punto por los dos lados a la vez. Pero, ¿qué pasa si la función
+hace una cosa por la izquierda y otra distinta por la derecha? Para eso existen los
+**límites laterales**: miran cada lado por separado.
+
+Considere esta función definida por partes:
+
+$$f(x) = \\begin{cases} 3, & \\text{si } x < 2 \\\\ 7, & \\text{si } x > 2 \\end{cases}$$
+
+## Paso 1: mirar cada lado por separado
+
+Por la izquierda la función vale siempre 3, por cerca que estemos de 2. Por la derecha vale
+siempre 7. Los dos lados son constantes, pero **constantes distintas**.
+
+$$\\lim_{x \\to 2^{-}} f(x) = 3 \\qquad \\lim_{x \\to 2^{+}} f(x) = 7$$
+
+## Paso 2: comprobarlo con la tabla
+
+La columna de diferencia es la clave: si el límite existiera, esa diferencia tendría que
+acercarse a cero conforme nos pegamos al punto. Aquí se queda clavada en 4.
+
+[[tabla-limite expr=x < 2 ? 3 : 7 punto=2 modo=laterales]]
+
+## Paso 3: qué significa el salto
+
+En la gráfica hay una rama azul a la altura 3 y otra roja a la altura 7, con un salto en
+$x = 2$. Los dos extremos se dibujan como círculos huecos porque la función no llega a tomar
+esos valores viniendo del otro lado.
+
+## Paso 4: conclusión
+
+Para que exista el límite hacen falta dos cosas: que exista cada lateral **y** que ambos
+valgan lo mismo.
+
+$$\\lim_{x \\to 2^{-}} f(x) \\neq \\lim_{x \\to 2^{+}} f(x) \\implies \\lim_{x \\to 2} f(x) \\text{ no existe}$$
+
+Esta ruptura se llama **discontinuidad de salto**, y es distinta de la removible del
+[tema anterior](/calculo1/limites/1.1): allí el límite sí existía y solo faltaba el valor
+en el punto.
+        `
+      },
+      {
+        id: '1.3',
         titulo: 'Propiedades de los límites de funciones',
         descripcion: 'Las propiedades permiten simplificar cálculos complejos sin resolver toda la función desde cero.',
         contenido: `
@@ -95,44 +138,6 @@ Calcular: $\\lim_{x \\to 2} (x^3 + 4x - 1)$
 
 Usando la propiedad de suma:
 $$\\lim_{x \\to 2} x^3 + \\lim_{x \\to 2} 4x - \\lim_{x \\to 2} 1 = 8 + 8 - 1 = 15$$
-        `
-      },
-      {
-        id: '1.3',
-        titulo: 'Límites laterales',
-        descripcion: 'Estudian el comportamiento de la función desde un solo lado: por la izquierda o por la derecha.',
-        contenido: `
-## Introducción
-
-Los [límites](/calculo1/limites/1.1) laterales estudian el comportamiento de una [función](/saberes-previos#funciones) desde un solo lado: por la izquierda o por la derecha.
-
-## Definición
-
-### Límite por la izquierda
-$$\\lim_{x \\to a^-} f(x)$$
-Valores menores que $a$.
-
-### Límite por la derecha
-$$\\lim_{x \\to a^+} f(x)$$
-Valores mayores que $a$.
-
-## Condición de existencia
-
-El [límite](/calculo1/limites/1.1) general existe si y solo si:
-$$\\lim_{x \\to a^-} f(x) = \\lim_{x \\to a^+} f(x) = L$$
-
-## Ejemplo práctico
-
-Consideremos la [función](/saberes-previos#funciones) por partes:
-$$f(x) = \\begin{cases} 3 & \\text{si } x < 2 \\\\ 7 & \\text{si } x > 2 \\end{cases}$$
-
-**Límite por la izquierda:**
-$$\\lim_{x \\to 2^-} f(x) = 3$$
-
-**Límite por la derecha:**
-$$\\lim_{x \\to 2^+} f(x) = 7$$
-
-**Conclusión:** Como $3 \\neq 7$, el [límite](/calculo1/limites/1.1) general no existe.
         `
       },
       {

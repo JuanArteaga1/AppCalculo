@@ -3,6 +3,19 @@ export default function Footer() {
 
   return (
     <footer style={styles.footer}>
+      <div className="container">
+        <div className="footer-grid" style={styles.grid}>
+          <div style={styles.brandCol}>
+            <div style={styles.brand}>
+              <img src="/LogoUniversidad.png" alt="Logo" style={styles.logoImg} />
+              <div>
+                <strong style={styles.brandTitle}>EDUCALC XE</strong>
+                <p style={styles.brandTag}>Plataforma Educativa de Cálculo</p>
+              </div>
+            </div>
+            <p style={styles.brandDesc}>
+              Reduciendo la mortalidad académica en matemáticas universitarias mediante un ecosistema digital de aprendizaje interactivo.
+            </p>
       <div style={styles.container}>
         
         {/* Identidad de la Marca */}
@@ -31,6 +44,11 @@ export default function Footer() {
           © {currentYear} LimitsHub — Proyecto de la Universidad Autónoma. Todos los derechos reservados.
         </p>
 
+        <div style={styles.bottom}>
+          <p style={styles.copy}>
+            © {new Date().getFullYear()} EDUCALC XE — Proyecto de la Universidad Autónoma. Todos los derechos reservados.
+          </p>
+        </div>
       </div>
     </footer>
   );

@@ -8,13 +8,19 @@
  * educativo/demo.
  */
 
-const DEV = import.meta.env.DEV;
+import { parse } from 'mathjs';
+
+// Encadenamiento opcional: fuera de Vite (Node, un test) import.meta.env no existe.
+const DEV = import.meta.env?.DEV ?? false;
+
+/** Lo unico que puede aparecer como variable en una expresion del alumno. */
+const SIMBOLOS_PERMITIDOS = ['x', 'e', 'pi', 'i', 'tau', 'phi', 'Infinity'];
 
 /**
  * Obtiene la API key de OpenAI.
  */
 function getApiKey() {
-  return import.meta.env.VITE_OPENAI_API_KEY || null;
+  return import.meta.env?.VITE_OPENAI_API_KEY || null;
 }
 
 /**
@@ -22,7 +28,7 @@ function getApiKey() {
  * y no un intento de jailbreak o prompt injection.
  * Retorna true si el input es válido.
  */
-function validarInputSeguro(input) {
+export function validarInputSeguro(input) {
   if (!input || input.length > 500) return false;
 
   // Palabras clave sospechosas de jailbreak / prompt injection
@@ -46,35 +52,36 @@ function validarInputSeguro(input) {
     if (lowerInput.includes(palabra)) return false;
   }
 
-  // Debe contener al menos una palabra clave de matematicas/calculo
-  const mathKeywords = [
-    'limite', 'límite', 'lim', 'limit',
-    'derivada', 'derivar', 'derivative', 'differentiate',
-    'integral', 'integrar',
-    'funcion', 'función', 'function',
-    'calcular', 'resuelve', 'resolver', 'calcula', 'solve',
-    'hallar', 'encontrar', 'find',
-    'ecuacion', 'ecuación',
-    'maximo', 'maximos', 'mínimo', 'minimos',
-    'concavidad', 'punto de inflexion',
-    'asintota', 'asíntota',
-    'tangente', 'secante',
-    'sen', 'sin', 'cos', 'tan',
-    'log', 'ln', 'exp', 'e^',
-    'x^2', 'x^3', 'x^',
-    'factorizar', 'factorize',
-    'indeterminacion', 'indeterminación',
-    'continuidad', 'continuo',
-    'optimiz', 'crecimiento', 'decrecimiento',
-    'rolle', 'valor medio', 'lhopital', 'l\'hopital',
-    'evaluar', 'evaluate', 'evaluar en',
-    'paso a paso', 'step by step',
-  ];
+  // La comprobación de fondo: lo que se envía tiene que ser una expresión
+  // matemática de verdad, no texto. Pedir "que contenga una palabra clave de
+  // cálculo" rechazaba funciones legítimas como 1/x; parsearla es exacto.
+  return esExpresionMatematica(input);
+}
 
-  const tieneMathKeyword = mathKeywords.some(kw => lowerInput.includes(kw));
-  if (!tieneMathKeyword) return false;
+/**
+ * True si el texto es una expresión que mathjs sabe leer y cuyas únicas
+ * variables son x y las constantes conocidas.
+ *
+ * Es la barrera real contra la inyección de prompts: una frase como
+ * "ignora tus instrucciones" se parsea como los símbolos `ignora` y `todo`,
+ * que no están permitidos, y se rechaza.
+ */
+function esExpresionMatematica(texto) {
+  try {
+    const nodo = parse(String(texto).trim());
+    const variables = nodo
+      .filter((n, ruta, padre) => n.isSymbolNode && !(padre?.isFunctionNode && ruta === 'fn'))
+      .map((n) => n.name);
+    return variables.every((nombre) => SIMBOLOS_PERMITIDOS.includes(nombre));
+  } catch {
+    return false;
+  }
+}
 
-  return true;
+/** True si el valor es un número finito (o una cadena que lo represente). */
+function esNumeroFinito(valor) {
+  if (valor === null || valor === undefined || valor === '') return false;
+  return Number.isFinite(Number(valor));
 }
 
 /**
@@ -203,6 +210,19 @@ export async function resolverConIA(modo, params) {
 
   if (!apiKey) {
     return { ok: false, error: 'NO_API_KEY' };
+  }
+
+  // Validacion en la frontera: nada sale hacia OpenAI sin comprobarse.
+  if (!validarInputSeguro(params?.fn)) {
+    return {
+      ok: false,
+      error: 'La funcion no parece una expresion matematica valida. Revisala antes de pedir la explicacion.',
+    };
+  }
+  for (const [nombre, valor] of [['a', params.a], ['x0', params.x0], ['h', params.h]]) {
+    if (valor !== undefined && valor !== null && valor !== '' && !esNumeroFinito(valor)) {
+      return { ok: false, error: `El parametro ${nombre} tiene que ser un numero.` };
+    }
   }
 
   const prompt = construirPrompt(modo, params);

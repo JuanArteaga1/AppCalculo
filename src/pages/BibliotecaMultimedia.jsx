@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { FaPlay, FaCheck, FaTrash, FaYoutube } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
@@ -52,15 +52,9 @@ export default function BibliotecaMultimedia() {
 
   const allVideos = useMemo(() => [...videosBase, ...customVideos], [customVideos]);
 
-  useEffect(() => {
-    const initial = {};
-    allVideos.forEach((v) => {
-      if (!(v.id in vistos)) initial[v.id] = v.visto || false;
-    });
-    if (Object.keys(initial).length > 0) {
-      setVistos((prev) => ({ ...prev, ...initial }));
-    }
-  }, [allVideos]);
+  // Un video que aun no esta en el mapa conserva su valor por defecto: así no hace
+  // falta sembrar el estado desde un efecto cada vez que se agrega uno nuevo.
+  const estaVisto = (video) => vistos[video.id] ?? video.visto ?? false;
 
   const filtrados = useMemo(() => {
     return allVideos.filter((v) => {
@@ -160,7 +154,7 @@ export default function BibliotecaMultimedia() {
             <div style={styles.playerControls}>
               <span style={styles.playerBadge}>{videoActual.nivel === 'basico' ? '🟢 Básico' : videoActual.nivel === 'intermedio' ? '🟡 Intermedio' : '🔴 Avanzado'}</span>
               <span style={styles.playerBadge}>⏱ {videoActual.duracion}</span>
-              {vistos[videoActual.id] && <span style={styles.playerBadgeVisto}><FaCheck style={{ marginRight: 4 }} /> Visto</span>}
+              {estaVisto(videoActual) && <span style={styles.playerBadgeVisto}><FaCheck style={{ marginRight: 4 }} /> Visto</span>}
             </div>
           </div>
         )}
@@ -213,7 +207,7 @@ export default function BibliotecaMultimedia() {
           <div style={styles.resultsCount}>
             {filtrados.length} video{filtrados.length !== 1 ? 's' : ''} encontrado{filtrados.length !== 1 ? 's' : ''}
             {' · '}
-            {Object.values(vistos).filter(Boolean).length}/{allVideos.length} vistos
+            {allVideos.filter(estaVisto).length}/{allVideos.length} vistos
           </div>
           <button style={styles.addBtn} onClick={() => setMostrarForm(!mostrarForm)}>
             {mostrarForm ? '− Cancelar' : '+ Agregar video de YouTube'}
@@ -295,7 +289,9 @@ export default function BibliotecaMultimedia() {
               <div key={video.id} style={styles.card}>
                 <div style={styles.thumbWrap} onClick={() => setReproduciendo(video.id)}>
                   <img
-                    src={youtubeThumb(video.youtubeId)}
+                    // El campo guarda la URL completa de YouTube, no el ID:
+                    // hay que extraerlo o la miniatura sale 404.
+                    src={youtubeThumb(extraerYoutubeId(video.youtubeId))}
                     alt={video.titulo}
                     style={styles.thumb}
                     onError={(e) => { e.target.src = '/Estudiantes(1).jpeg'; }}
@@ -304,7 +300,7 @@ export default function BibliotecaMultimedia() {
                     <div style={styles.playBtn}><FaPlay /></div>
                   </div>
                   <span style={styles.duracion}>{video.duracion}</span>
-                  {vistos[video.id] && <span style={styles.vistoBadge}><FaCheck style={{ marginRight: 4 }} /> Visto</span>}
+                  {estaVisto(video) && <span style={styles.vistoBadge}><FaCheck style={{ marginRight: 4 }} /> Visto</span>}
                 </div>
                 <div style={styles.cardBody}>
                   <h3 style={styles.cardTitle}>{video.titulo}</h3>
@@ -333,11 +329,11 @@ export default function BibliotecaMultimedia() {
                     <button
                       style={{
                         ...styles.actionBtnCheck,
-                        ...(vistos[video.id] ? styles.actionBtnCheckActive : {}),
+                        ...(estaVisto(video) ? styles.actionBtnCheckActive : {}),
                       }}
                       onClick={() => toggleVisto(video.id)}
                     >
-                      {vistos[video.id] ? <><FaCheck style={{ marginRight: 4 }} /> Visto</> : 'Marcar visto'}
+                      {estaVisto(video) ? <><FaCheck style={{ marginRight: 4 }} /> Visto</> : 'Marcar visto'}
                     </button>
                     {isCustom && (
                       <button
