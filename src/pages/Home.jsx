@@ -132,21 +132,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ICONOS ANIMADOS DE CÁLCULO */}
+      {/* ICONOS ANIMADOS DE CÁLCULO VINCULADOS A SUS RUTAS */}
       <section className="calculus-section">
         <div className="container">
           <div className="calculus-grid">
             <CalculusIcon
               title="Límites"
               animation="limit"
+              to="/calculo1/limites"
             />
             <CalculusIcon
               title="Derivadas"
               animation="derivative"
+              to="/calculo1/derivadas"
             />
             <CalculusIcon
               title="Aplicación de la Derivada"
               animation="application"
+              to="/calculo1/aplicaciones"
             />
           </div>
         </div>
@@ -369,7 +372,7 @@ export default function Home() {
   );
 }
 
-function CalculusIcon({ title, animation }) {
+function CalculusIcon({ title, animation, to }) {
   const renderAnimation = () => {
     switch (animation) {
       case 'limit':
@@ -418,12 +421,14 @@ function CalculusIcon({ title, animation }) {
   };
 
   return (
-    <div className="calculus-icon-card" style={styles.calculusCard}>
-      <div style={styles.iconContainer}>
-        {renderAnimation()}
+    <Link to={to} style={{ textDecoration: 'none' }}>
+      <div className="calculus-icon-card" style={styles.calculusCard}>
+        <div style={styles.iconContainer}>
+          {renderAnimation()}
+        </div>
+        <h3 style={styles.iconTitle}>{title}</h3>
       </div>
-      <h3 style={styles.iconTitle}>{title}</h3>
-    </div>
+    </Link>
   );
 }
 
@@ -494,7 +499,7 @@ const styles = {
     textAlign: 'center',
     border: '1px solid rgba(255,255,255,0.08)',
     transition: 'all 0.3s ease',
-    cursor: 'default',
+    cursor: 'pointer',
   },
   iconContainer: {
     display: 'flex',

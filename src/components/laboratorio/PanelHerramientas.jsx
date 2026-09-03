@@ -104,14 +104,12 @@ export default function PanelHerramientas({
             <Tex tex={resultado.texPrincipal} display />
           </div>
           <div className="lab-resultado-filas">
-            <div className="lab-fila-lado lado-izq"><Tex tex={resultado.texIzquierda} /></div>
-            <div className="lab-fila-lado lado-der"><Tex tex={resultado.texDerecha} /></div>
             <div className="lab-fila-lado"><Tex tex={resultado.texEnPunto} /></div>
           </div>
           <p className={`lab-conclusion tipo-${resultado.analisis.tipo}`}>
             {resultado.analisis.mensaje}
           </p>
-          <TablaLab datos={resultado.tabla} modo="limite" />
+          <TablaLab datos={resultado.tabla} modo="limite" punto={punto} />
         </div>
       )}
 
@@ -160,14 +158,54 @@ export default function PanelHerramientas({
   );
 }
 
-/** Tabla compacta de aproximación por ambos lados. */
-function TablaLab({ datos, modo }) {
+/**
+ * Tabla compacta de aproximación por ambos lados.
+ *
+ * Para límites: en vez de mostrar el incremento abstracto "h", muestra el
+ * valor real de x que se acerca al punto por cada lado (más intuitivo para
+ * ver cómo x -> a por izquierda y por derecha).
+ *
+ * Para derivadas: se mantiene "h", porque ahí sí corresponde a la notación
+ * estándar del cociente incremental (f(x0+h) - f(x0)) / h.
+ */
+function TablaLab({ datos, modo, punto }) {
   if (!datos?.length) return null;
+
+  if (modo === 'limite') {
+    const puntoNum = Number.parseFloat(punto);
+    return (
+      <div className="lab-tabla-wrap">
+        <div className="lab-tabla-titulo">Aproximación por ambos lados</div>
+        <table className="lab-tabla">
+          <thead>
+            <tr>
+              <th>x (izquierda)</th>
+              <th>f(x)</th>
+              <th>x (derecha)</th>
+              <th>f(x)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {datos.map((fila, i) => (
+              <tr key={i} className={i === datos.length - 1 ? 'destacada' : ''}>
+                <td>{formatearValor(puntoNum - fila.h, 5)}</td>
+                <td>{formatearValor(fila.izq, 5)}</td>
+                <td>{formatearValor(puntoNum + fila.h, 5)}</td>
+                <td>{formatearValor(fila.der, 5)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="lab-tabla-nota">
+          Cada fila acerca x al punto por ambos lados; observa cómo f(x) converge al mismo valor.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="lab-tabla-wrap">
-      <div className="lab-tabla-titulo">
-        {modo === 'limite' ? 'Aproximación por ambos lados' : 'Cociente incremental'}
-      </div>
+      <div className="lab-tabla-titulo">Cociente incremental</div>
       <table className="lab-tabla">
         <thead>
           <tr>
@@ -189,3 +227,4 @@ function TablaLab({ datos, modo }) {
     </div>
   );
 }
+  
