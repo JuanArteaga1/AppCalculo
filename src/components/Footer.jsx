@@ -9,7 +9,7 @@ export default function Footer() {
             <div style={styles.brand}>
               <img src="/LogoUniversidad.png" alt="Logo" style={styles.logoImg} />
               <div>
-                <strong style={styles.brandTitle}>LimitsHub</strong>
+                <strong style={styles.brandTitle}>EDUCALC XE</strong>
                 <p style={styles.brandTag}>Plataforma Educativa de Cálculo</p>
               </div>
             </div>
@@ -50,7 +50,7 @@ export default function Footer() {
 
         <div style={styles.bottom}>
           <p style={styles.copy}>
-            © {new Date().getFullYear()} LimitsHub — Proyecto de la Universidad Autónoma. Todos los derechos reservados.
+            © {new Date().getFullYear()} EDUCALC XE — Proyecto de la Universidad Autónoma. Todos los derechos reservados.
           </p>
         </div>
       </div>

@@ -26,7 +26,7 @@ export default function Navbar() {
             alt="Logo Universidad"
           />
           <div style={styles.brand}>
-            <span className="navbar-brand-title">LimitsHub</span>
+            <span className="navbar-brand-title">EDUCALC XE</span>
             <span className="navbar-brand-subtitle">Plataforma Educativa</span>
           </div>
         </Link>

@@ -1,4 +1,4 @@
-# Especificacion del Sistema de Graficacion Interactiva - LimitsHub
+# Especificacion del Sistema de Graficacion Interactiva - EDUCALC XE
 
 ## 1. Stack tecnologico recomendado
 

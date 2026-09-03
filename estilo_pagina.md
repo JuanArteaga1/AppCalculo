@@ -13,7 +13,7 @@ El enfoque visual recuerda plataformas como Coursera, Platzi o Khan Academy, per
 A. Navbar (Barra superior)
 Características:
 Fondo blanco limpio
-Logo a la izquierda (ícono matemático + nombre “LimitsHub”)
+Logo a la izquierda (ícono matemático + nombre “EDUCALC XE”)
 Menú horizontal a la derecha
 Opción “Inicio” resaltada como botón activo
 Diseño:

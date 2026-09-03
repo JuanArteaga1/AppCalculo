@@ -3,7 +3,7 @@ import { chatbotMensaje } from '../services/chatbotService';
 import renderMathInElement from 'katex/dist/contrib/auto-render';
 import 'katex/dist/katex.min.css';
 
-export default function ChatSection({ tema = 'limites', unidadTitulo = '' }) {
+export default function ChatSection({ tema = 'limites', unidadTitulo = '', lateral = false }) {
   const [messages, setMessages] = useState(() => [
     {
       from: 'bot',
@@ -12,12 +12,21 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '' }) {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
   const mathRef = useRef(null);
+  const primeraVez = useRef(true);
 
-  // Auto-scroll al último mensaje
+  // Auto-scroll al ultimo mensaje, DENTRO de la caja de mensajes.
+  // Antes se usaba scrollIntoView sobre un ancla, y como el efecto tambien corre
+  // al montar (el saludo ya esta en el estado), al entrar en la unidad la pagina
+  // saltaba sola hasta el chat.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (primeraVez.current) {
+      primeraVez.current = false;
+      return;
+    }
+    const caja = mathRef.current;
+    if (!caja) return;
+    caja.scrollTo({ top: caja.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
 
   // Renderizar LaTeX en mensajes
@@ -80,7 +89,7 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '' }) {
   };
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, ...(lateral ? styles.containerLateral : {}) }}>
       <div style={styles.headerSection}>
         <div style={styles.headerIcon}>🎓</div>
         <div>
@@ -92,7 +101,7 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '' }) {
       </div>
 
       <div style={styles.chatWrap}>
-        <div ref={mathRef} style={styles.messages}>
+        <div ref={mathRef} style={{ ...styles.messages, ...(lateral ? styles.messagesLateral : {}) }}>
           {messages.map((m, i) => (
             <div
               key={i}
@@ -132,7 +141,6 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '' }) {
             </div>
           )}
 
-          <div ref={messagesEndRef} />
         </div>
 
         <form onSubmit={handleSend} style={styles.form}>
@@ -206,6 +214,16 @@ const styles = {
     flexDirection: 'column',
     background: '#F8FAFC',
     borderBottom: '1px solid #E2E8F0',
+  },
+  containerLateral: {
+    marginTop: 0,
+    maxHeight: 'calc(100vh - 110px)',
+  },
+  messagesLateral: {
+    // En el lateral la caja se estira con la tarjeta en vez de un alto fijo.
+    flex: 1,
+    minHeight: '160px',
+    maxHeight: 'none',
   },
   messages: {
     padding: '24px 28px',

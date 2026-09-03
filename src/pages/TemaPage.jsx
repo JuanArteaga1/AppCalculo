@@ -1,8 +1,10 @@
 import { useParams, Link } from 'react-router-dom';
 import { getTemaById } from '../data/temas';
+import { enlazarTerminos, referenciasPara } from '../data/glosario';
 import TemaVideo from '../components/TemaVideo';
 import SaberesRelacionados from '../components/SaberesRelacionados';
 import AnimatedIcon from '../components/AnimatedIcon';
+import TablaLimiteInteractiva from '../components/TablaLimiteInteractiva';
 import { FiBookOpen, FiVideo, FiBarChart2, FiArrowRight } from 'react-icons/fi';
 // Feather no trae bombilla; se usa la de Heroicons, igual que en Saberes Previos.
 import { HiOutlineLightBulb } from 'react-icons/hi';
@@ -31,6 +33,19 @@ function renderLatex(text) {
   });
   
   return result;
+}
+
+/**
+ * Convierte los enlaces markdown [texto](https://...) en anclas externas.
+ * Solo admite http/https: el contenido vive en el repositorio, pero limitar el
+ * esquema evita que un `javascript:` se cuele si alguien pega un enlace raro.
+ */
+function renderEnlaces(html) {
+  if (!html) return html;
+  return html.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a class="tema-enlace" href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
 }
 
 export default function TemaPage() {
@@ -71,7 +86,9 @@ export default function TemaPage() {
   const { modo } = getGraphMode(unidadId, temaId);
 
   const renderContent = (text) => {
-    const preprocessed = renderLatex(text);
+    // Orden: primero se enlazan los terminos del glosario (respetando formulas y
+    // enlaces existentes), luego KaTeX, y al final los enlaces pasan a <a>.
+    const preprocessed = renderEnlaces(renderLatex(enlazarTerminos(text)));
     const lines = preprocessed.split('\n');
     const elements = [];
     let listItems = [];
@@ -132,6 +149,22 @@ export default function TemaPage() {
         return;
       }
 
+      // Marcador de contenido: [[tabla-limite expr=<expresion> punto=<numero>]]
+      const marcadorTabla = trimmed.match(/^\[\[tabla-limite\s+expr=(.+?)\s+punto=([-\d.]+)(?:\s+modo=(\w+))?\]\]$/);
+      if (marcadorTabla) {
+        flushList();
+        flushTable();
+        elements.push(
+          <TablaLimiteInteractiva
+            key={idx}
+            expr={marcadorTabla[1]}
+            punto={Number(marcadorTabla[2])}
+            modo={marcadorTabla[3] || undefined}
+          />
+        );
+        return;
+      }
+
       if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
         flushList();
         inTable = true;
@@ -162,7 +195,11 @@ export default function TemaPage() {
         const parts = trimmed.split(/(\*\*.*?\*\*)/g);
         const children = parts.map((part, pIdx) => {
           if (part.startsWith('**') && part.endsWith('**')) {
-            return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+            // El texto en negrita puede contener fórmulas o enlaces ya convertidos
+            // a HTML, así que se inserta igual que el resto del párrafo.
+            return (
+              <strong key={pIdx} dangerouslySetInnerHTML={{ __html: part.slice(2, -2) }} />
+            );
           }
           return <span key={pIdx} dangerouslySetInnerHTML={{ __html: part }} />;
         });
@@ -201,6 +238,7 @@ export default function TemaPage() {
               </div>
               <div style={styles.cardBody}>
                 {renderContent(tema.contenido)}
+                <Referencias tema={tema} />
               </div>
             </div>
 
@@ -296,6 +334,37 @@ function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
   );
 }
 
+/**
+ * Enlaces de lectura del tema. Salen del glosario segun los conceptos que
+ * aparecen en el propio tema, asi que ningun tema se queda sin referencias.
+ */
+function Referencias({ tema }) {
+  const enlaces = referenciasPara(tema);
+  if (!enlaces.length) return null;
+
+  return (
+    <div style={styles.referencias}>
+      <h3 style={styles.referenciasTitulo}>Para profundizar</h3>
+      <ul style={styles.referenciasLista}>
+        {enlaces.map(({ clave, url }) => (
+          <li key={url}>
+            <a
+              className="tema-enlace"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.referenciaEnlace}
+            >
+              {clave}
+              <span style={styles.referenciaExterna} aria-hidden="true"> ↗</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function NavLink({ href, icon, label }) {
   const handleClick = (e) => {
     e.preventDefault();
@@ -338,7 +407,10 @@ const styles = {
   },
   layout: {
     display: 'grid',
-    gridTemplateColumns: '1fr 320px',
+    // minmax(0, 1fr) en vez de 1fr: con `1fr` el minimo automatico de la pista es
+    // su contenido, asi que cualquier hijo ancho (una grafica, una tabla) ensancha
+    // la rejilla en lugar de recortarse, y la pagina se desborda sin freno.
+    gridTemplateColumns: 'minmax(0, 1fr) 320px',
     gap: '32px',
     alignItems: 'start',
   },
@@ -346,6 +418,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
+    minWidth: 0,
   },
   card: {
     background: 'linear-gradient(145deg, rgba(15,26,53,0.85) 0%, rgba(11,16,32,0.95) 100%)',
@@ -444,6 +517,35 @@ const styles = {
     fontFamily: "'Courier New', monospace",
     fontSize: '16px',
     letterSpacing: '0.5px',
+  },
+  referencias: {
+    marginTop: '20px',
+    paddingTop: '18px',
+    borderTop: '1px solid rgba(244,180,0,0.12)',
+  },
+  referenciasTitulo: {
+    margin: '0 0 10px',
+    fontSize: '12px',
+    fontWeight: 800,
+    letterSpacing: '0.6px',
+    textTransform: 'uppercase',
+    color: 'rgba(244,180,0,0.75)',
+    fontFamily: "'Poppins', sans-serif",
+  },
+  referenciasLista: {
+    listStyle: 'none',
+    margin: 0,
+    padding: 0,
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px 18px',
+  },
+  referenciaEnlace: {
+    fontSize: '14px',
+  },
+  referenciaExterna: {
+    fontSize: '11px',
+    opacity: 0.7,
   },
   graphWrap: {
     marginTop: '8px',
@@ -594,15 +696,25 @@ if (typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.textContent = `
     @media (max-width: 1024px) {
-      .tema-layout { grid-template-columns: 1fr !important; }
+      .tema-layout { grid-template-columns: minmax(0, 1fr) !important; }
       .tema-sidebar { position: static !important; }
     }
     @media (max-width: 640px) {
       .tema-lanzador {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: minmax(0, 1fr) !important;
         padding: 22px 18px !important;
       }
       .tema-lanzador svg { max-width: 260px; margin: 0 auto; }
+    }
+    .tema-enlace {
+      color: #F4B400;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(244,180,0,0.4);
+      transition: text-decoration-color 0.2s ease;
+    }
+    .tema-enlace:hover {
+      text-decoration-color: #F4B400;
     }
     .tema-sidebar a:hover {
       background: rgba(244,180,0,0.1) !important;
