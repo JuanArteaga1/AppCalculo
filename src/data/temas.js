@@ -1,8 +1,4 @@
-// Estructura completa de temas de Cálculo 1
-// Unidad 1: Límites y Continuidad
-// Unidad 2: Derivadas
-// Unidad 3: Aplicaciones de la Derivada
-
+// Estructura completa de temas de Cálculo 1 (Corregida y optimizada)
 export const unidades = [
   {
     id: 'limites',
@@ -151,67 +147,133 @@ allí el límite sí existía y solo faltaba el valor en el punto.
       {
         id: '1.3',
         titulo: 'Propiedades de los límites de funciones',
-        descripcion: 'Las propiedades permiten simplificar cálculos complejos sin resolver toda la función desde cero.',
+        descripcion: 'Las leyes de los límites permiten calcular el límite de sumas, restas, productos, cocientes, potencias y raíces sin analizar la función desde cero, siempre que los límites de las partes existan.',
         contenido: `
 ## Introducción
 
-Si conocemos los límites de dos [funciones](/saberes-previos#funciones), podemos calcular límites más complejos usando propiedades algebraicas.
+Si conocemos los límites de dos [funciones](/saberes-previos#funciones) en un punto, podemos calcular el límite de combinaciones de esas funciones (sumas, restas, productos, cocientes, potencias, raíces) sin volver a analizar el comportamiento cerca del punto desde cero. A este conjunto de reglas se le llama las leyes de los límites.
 
-## Propiedades
+Estas leyes solo son válidas cuando los límites individuales de $f$ y $g$ existen. Si alguno no existe, la ley correspondiente no se puede aplicar directamente y hay que recurrir a otras herramientas (factorización, racionalización, límites laterales).
 
-Sean $\\lim_{x \\to a} f(x) = L$ y $\\lim_{x \\to a} g(x) = M$:
+## Leyes de los límites
 
-### 1. Suma
+Sean $\\lim_{x \\to a} f(x) = L$, $\\lim_{x \\to a} g(x) = M$ (ambos existen), $c$ una constante y $n$ un entero positivo.
+
+### 1. Límite de una constante
+$$\\lim_{x \\to a} c = c$$
+
+### 2. Límite de la función identidad
+$$\\lim_{x \\to a} x = a$$
+
+### 3. Múltiplo constante
+$$\\lim_{x \\to a} [c \\cdot f(x)] = c \\cdot L$$
+
+### 4. Suma
 $$\\lim_{x \\to a} [f(x) + g(x)] = L + M$$
 
-### 2. Resta
+### 5. Resta
 $$\\lim_{x \\to a} [f(x) - g(x)] = L - M$$
 
-### 3. Multiplicación
+### 6. Producto
 $$\\lim_{x \\to a} [f(x) \\cdot g(x)] = L \\cdot M$$
 
-### 4. Cociente
-$$\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\frac{L}{M}, \\quad M \\neq 0$$
+### 7. Cociente
+$$\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\frac{L}{M}, \\quad \\text{si } M \\neq 0$$
 
-### 5. Potencias
+### 8. Potencia
 $$\\lim_{x \\to a} [f(x)]^n = L^n$$
 
-## Ejemplo práctico
+### 9. Raíz (potencia fraccionaria)
+$$\\lim_{x \\to a} [f(x)]^{1/n} = L^{1/n}$$
 
-Calcular: $\\lim_{x \\to 2} (x^3 + 4x - 1)$
+Si $n$ es par, esta ley exige además que $L \\geq 0$, porque la raíz par de un número negativo no es un número real.
 
-Usando la propiedad de suma:
-$$\\lim_{x \\to 2} x^3 + \\lim_{x \\to 2} 4x - \\lim_{x \\to 2} 1 = 8 + 8 - 1 = 15$$
+---
+
+## Ejemplos resueltos
+
+### Ejemplo 1: suma, resta, múltiplo constante y potencia
+
+Calcular $\\lim_{x \\to 2} (x^3 + 4x - 1)$.
+
+Separando la suma y la resta (leyes 4 y 5):
+$$\\lim_{x \\to 2} x^3 + \\lim_{x \\to 2} 4x - \\lim_{x \\to 2} 1$$
+
+Cada término se calcula por separado:
+- $\\lim_{x \\to 2} x^3 = 2^3 = 8$, por la ley de la potencia.
+- $\\lim_{x \\to 2} 4x = 4 \\cdot 2 = 8$, por el múltiplo constante.
+- $\\lim_{x \\to 2} 1 = 1$, por el límite de una constante.
+
+Sumando los tres resultados:
+$$8 + 8 - 1 = 15$$
+
+### Ejemplo 2: potencia y coeficientes
+
+Calcular $\\lim_{x \\to 3} (2x^2 - 5x + 1)$.
+
+$$\\lim_{x \\to 3} 2x^2 - \\lim_{x \\to 3} 5x + \\lim_{x \\to 3} 1 = 2(3^2) - 5(3) + 1 = 18 - 15 + 1 = 4$$
+
+### Ejemplo 3: cociente
+
+Calcular $\\lim_{x \\to 1} \\frac{x^2 + 3}{x - 4}$.
+
+Antes de dividir hay que confirmar que el límite del denominador no sea cero:
+$$\\lim_{x \\to 1} (x - 4) = 1 - 4 = -3 \\neq 0$$
+
+Como el denominador no tiende a cero, la ley del cociente aplica directamente:
+$$\\lim_{x \\to 1} \\frac{x^2 + 3}{x - 4} = \\frac{1^2 + 3}{1 - 4} = \\frac{4}{-3} = -\\frac{4}{3}$$
+
+### Ejemplo 4: producto
+
+Calcular $\\lim_{x \\to 2} (x + 1)(x^2 - 3)$.
+
+Se calcula el límite de cada factor por separado:
+$$\\lim_{x \\to 2} (x + 1) = 3 \\qquad \\lim_{x \\to 2} (x^2 - 3) = 1$$
+
+Y se multiplican los resultados:
+$$3 \\cdot 1 = 3$$
+
+### Ejemplo 5: raíz (potencia fraccionaria)
+
+Calcular $\\lim_{x \\to 9} (x + 7)^{1/2}$.
+
+Primero se resuelve el interior:
+$$\\lim_{x \\to 9} (x + 7) = 16$$
+
+Como $16 \\geq 0$, la ley de la raíz aplica:
+$$16^{1/2} = 4$$
+
+## Cuándo no se pueden aplicar directamente
+
+Las leyes de los límites solo garantizan un resultado cuando cada límite involucrado existe y, en el cociente, el límite del denominador no es cero. Cuando la sustitución directa produce una forma como $\\frac{0}{0}$, la ley del cociente todavía no se puede usar: primero hay que simplificar la expresión, factorizando o racionalizando, como se hizo en [Introducción a los límites](/calculo1/limites/1.1), y solo después aplicar las propiedades sobre la expresión ya simplificada.
         `
       },
       {
         id: '1.4',
         titulo: 'Límites al infinito y en infinito',
-        descripcion: 'Analizan el comportamiento extremo de una función cuando x crece o decrece sin límite.',
+        descripcion: 'Analizan el comportamiento extremo de una función cuando x crece o decrece sin límite, incluyendo ejercicios y definición formal.',
         contenido: `
-## Introducción
+## Definición Formal
 
-Analizan el comportamiento extremo de una [función](/saberes-previos#funciones) cuando la [variable independiente](/saberes-previos#variables) crece o decrece sin límite.
+El límite $\\lim_{x \\to \\infty} f(x) = L$ significa que para todo $\\varepsilon > 0$, existe un número positivo $N$ tal que $|f(x) - L| < \\varepsilon$ siempre que $x > N$. De forma análoga cuando $x \\to -\\infty$.
 
-## Límite al infinito
+## Ejercicios Explicados
 
-Cuando $x$ crece o decrece sin límite:
+### 1. Calcular $\\lim_{x \\to -\\infty} \\frac{2x^2 - 5}{3x^2 + x + 2}$
+- **Método:** Se divide cada término del numerador y del denominador entre la mayor potencia de $x$ del denominador ($x^2$).
+- **Desarrollo:**
+  $$\\lim_{x \\to -\\infty} \\frac{\\frac{2x^2}{x^2} - \\frac{5}{x^2}}{\\frac{3x^2}{x^2} + \\frac{x}{x^2} + \\frac{2}{x^2}} = \\lim_{x \\to -\\infty} \\frac{2 - \\frac{5}{x^2}}{3 + \\frac{1}{x} + \\frac{2}{x^2}}$$
+- **Evaluación:** Al tender $x$ a $-\\infty$, los términos con fracciones sobre $x$ se anulan ($0$):
+  $$\\frac{2 - 0}{3 + 0 + 0} = \\frac{2}{3}$$
 
-$$\\lim_{x \\to \\infty} \\frac{1}{x} = 0$$
+### 2. Calcular $\\lim_{x \\to \\infty} \\frac{4x}{x^2 + 9}$
+- **Desarrollo:** Dividiendo cada término entre $x^2$:
+  $$\\lim_{x \\to \\infty} \\frac{\\frac{4x}{x^2}}{\\frac{x^2}{x^2} + \\frac{9}{x^2}} = \\lim_{x \\to \\infty} \\frac{\\frac{4}{x}}{1 + \\frac{9}{x^2}} = \\frac{0}{1} = 0$$
 
-## Límite en infinito
-
-Cuando una [función](/saberes-previos#funciones) crece indefinidamente cerca de un punto:
-
-$$\\lim_{x \\to 0^+} \\frac{1}{x} = +\\infty$$
-
-$$\\lim_{x \\to 0^-} \\frac{1}{x} = -\\infty$$
-
-## Aplicaciones reales
-
-- **Crecimiento poblacional:** Modelos exponenciales
-- **Intereses financieros:** [Interés compuesto](/calculo1/derivadas/2.7)
-- **Sistemas físicos:** Comportamiento a largo plazo
+## Cómo hacer la gráfica
+- Dibuja un plano cartesiano con los ejes $X$ e $Y$.
+- Traza una línea punteada horizontal en $y = L$ (asíntota horizontal).
+- Dibuja una curva suave que, al extenderse hacia los extremos del eje $X$ ($+\\infty$ o $-\\infty$), se aproxime cada vez más a esa línea punteada sin llegar a cruzarla o tocarla necesariamente.
         `
       },
       {
@@ -286,67 +348,73 @@ lado del eje.
       {
         id: '1.6',
         titulo: 'Límites trigonométricos',
-        descripcion: 'Límites fundamentales para derivadas y análisis matemático.',
+        descripcion: 'Límites fundamentales y ejemplos prácticos explicados paso a paso para evitar indeterminaciones.',
         contenido: `
-## Introducción
+## Teorema: Límites Fundamentales
 
-Son [límites](/calculo1/limites/1.1) fundamentales que aparecen en el cálculo de [derivadas](/calculo1/derivadas/2.1) de [funciones trigonométricas](/saberes-previos#trigonometria).
+Los límites trigonométricos se resuelven utilizando identidades y un grupo de teoremas clave que sirven como herramientas para evitar indeterminaciones del tipo $\\frac{0}{0}$.
 
-## Límite fundamental
+1. $\\lim_{x \\to 0} \\operatorname{sen}(x) = 0$
+2. $\\lim_{x \\to 0} \\cos(x) = 1$
+3. $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(x)}{x} = 1$
+4. $\\lim_{x \\to 0} \\frac{1 - \\cos(x)}{x} = 0$
 
-$$\\lim_{x \\to 0} \\frac{\\sin(x)}{x} = 1$$
+---
 
-## Otros límites importantes
+## Ejemplos Prácticos a Calcular
 
-$$\\lim_{x \\to 0} \\frac{\\tan(x)}{x} = 1$$
+### Ejemplo 1: Calcular $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{2x}$
 
-$$\\lim_{x \\to 0} \\frac{1 - \\cos(x)}{x} = 0$$
+1. **Identifica el problema:** Si evalúas directo, obtienes una indeterminación $\\frac{0}{0}$.
+2. **Iguala el argumento:** Para usar el límite especial ($\\frac{\\operatorname{sen}(\\theta)}{\\theta} = 1$ cuando $\\theta \\to 0$), el ángulo del seno y el denominador deben ser iguales. Aquí tienes $5x$ arriba y $2x$ abajo.
+3. **Ajusta las constantes:** Saca el número que sobra del denominador y multiplica y divide por $5$:
+   $$\\frac{1}{2} \\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{x} = \\frac{5}{2} \\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{5x}$$
+4. **Resultado:** Como $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{5x} = 1$, te queda:
+   $$\\frac{5}{2} \\cdot 1 = \\frac{5}{2}$$
+
+---
+
+### Ejemplo 2: Calcular $\\lim_{t \\to 0} \\frac{\\tan(t)}{2t}$
+
+1. **Usa identidades:** La tangente se puede expresar como $\\tan(t) = \\frac{\\operatorname{sen}(t)}{\\cos(t)}$. Sustitúyela en el límite:
+   $$\\lim_{t \\to 0} \\frac{\\frac{\\operatorname{sen}(t)}{\\cos(t)}}{2t} = \\lim_{t \\to 0} \\frac{\\operatorname{sen}(t)}{2t \\cos(t)}$$
+2. **Separa los términos:** Agrupa la parte del límite especial y deja el coseno por separado:
+   $$\\frac{1}{2} \\lim_{t \\to 0} \\left( \\frac{\\operatorname{sen}(t)}{t} \\cdot \\frac{1}{\\cos(t)} \\right)$$
+3. **Evalúa cada parte:**
+   - $\\lim_{t \\to 0} \\frac{\\operatorname{sen}(t)}{t} = 1$
+   - $\\lim_{t \\to 0} \\frac{1}{\\cos(t)} = \\frac{1}{\\cos(0)} = \\frac{1}{1} = 1$
+4. **Resultado:**
+   $$\\frac{1}{2} \\cdot 1 \\cdot 1 = \\frac{1}{2}$$
 
 ## Aplicación en derivadas
-
 Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórmulas de derivación](/calculo1/derivadas/2.6):
 - $\\frac{d}{dx}\\sin(x) = \\cos(x)$
 - $\\frac{d}{dx}\\cos(x) = -\\sin(x)$
-
-## Aplicaciones reales
-- Ondas y sonido
-- Electricidad alternada
-- Ingeniería civil
         `
       },
       {
         id: '1.7',
         titulo: 'Continuidad',
-        descripcion: 'Condición de continuidad en un punto: límite igual al valor de la función.',
+        descripcion: 'Condición de continuidad en un punto: el límite debe coincidir con el valor de la función.',
         contenido: `
 ## Introducción
 
-Una [función](/saberes-previos#funciones) es continua en un punto si no tiene interrupciones. Esto se relaciona directamente con el concepto de [límite](/calculo1/limites/1.1).
+Una [función](/saberes-previos#funciones) es continua en un número $a$ si no tiene interrupciones, saltos o agujeros. 
 
 ## Definición formal
 
-Una [función](/saberes-previos#funciones) $f$ es continua en $x = a$ si se cumplen tres condiciones:
+Una función $f$ es continua en $x = a$ si se satisfacen tres condiciones obligatorias:
+1. $f(a)$ está definida (el punto existe en el intervalo).
+2. El límite $\\lim_{x \\to a} f(x)$ existe.
+3. El límite coincide con la función: $\\lim_{x \\to a} f(x) = f(a)$.
 
-1. $f(a)$ está definida.
-2. $\\lim_{x \\to a} f(x)$ existe.
-3. $\\lim_{x \\to a} f(x) = f(a)$
+## Ejemplo de la gráfica: $f(x) = \\frac{1}{x - 2}$
+- Su dominio es $\\mathbb{R} - \\{2\\}$ porque en $x = 2$ el denominador se anula.
+- En $x = 2$ la función **no está definida** ($f(2)$ no existe), por lo que no es continua en ese punto.
 
-## Tipos de discontinuidad
-
-### Discontinuidad removible
-Existe el [límite](/calculo1/limites/1.1), pero $f(a)$ no coincide.
-
-### Discontinuidad por salto
-Los [límites laterales](/calculo1/limites/1.3) son diferentes.
-
-### Discontinuidad infinita
-La función tiende a $\\pm\\infty$.
-
-## Ejemplo
-
-$f(x) = x^2$ es continua en todo punto porque no tiene interrupciones.
-
-$$\\lim_{x \\to 2} x^2 = 4 = f(2)$$
+## Cómo hacer la gráfica
+- Dibuja una línea punteada vertical en $x = 2$ para representar la asíntota vertical.
+- Traza las dos ramas de la curva que se disparan hacia los infinitos a ambos lados de la asíntota.
         `
       },
       {
@@ -395,28 +463,85 @@ El [logaritmo](/saberes-previos#logaritmos) crece más lento que cualquier [poli
       },
       {
         id: '1.9',
-        titulo: 'Discontinuidad removible y discontinuidad esencial',
-        descripcion: 'Clasificación de los tipos de discontinuidad que puede presentar una función.',
+        titulo: 'Discontinuidad esencial y discontinuidad evitable (removible)',
+        descripcion: 'No todas las discontinuidades son iguales: unas se pueden "reparar" rellenando un punto y otras no. Clasificación completa con ejercicios resueltos de tus notas de clase.',
         contenido: `
-## Discontinuidad removible
+## Introducción
 
-Existe límite, pero el punto está mal definido.
+En [Continuidad](/calculo1/limites/1.7) vimos que $f$ es continua en $a$ si se cumplen a la vez tres condiciones: $f(a)$ existe, el [límite](/calculo1/limites/1.1) existe, y ambos coinciden. Si al menos una de esas tres falla, la función es discontinua en $a$.
 
-Ejemplo: (x² - 9)/(x - 3) → Se simplifica a x + 3. Hueco en x = 3.
+Pero no todas las discontinuidades se comportan igual. La pregunta que las separa en dos grandes familias es siempre la misma:
 
-## Discontinuidad esencial
+> **¿Existe el límite en ese punto o no existe?**
 
-No existe límite único o tiende a infinito.
+## Familia 1: Discontinuidad esencial (no removible)
 
-### Ejemplo salto
-f(x) = { 1 si x < 0; 4 si x > 0 }
+Aquí el límite $\\lim_{x \\to a} f(x)$ **no existe**. Como la función no se acerca a un único valor, no hay ningún número que le podamos asignar a $f(a)$ para "arreglar" la gráfica. Por eso a esta familia se le llama **esencial** (o **no removible**): el problema no tiene solución posible.
 
-### Ejemplo infinita
-f(x) = 1/x
+Existen dos formas de que el límite no exista, y corresponden a sus dos subtipos:
 
-## Conclusión
+### a) Discontinuidad de salto
+Los dos [límites laterales](/calculo1/limites/1.2) existen (son números finitos), pero son **distintos** entre sí:
 
-Los límites estudian hacia dónde va una función; la continuidad analiza si llega sin interrupciones.
+$$\\lim_{x \\to a^{-}} f(x) \\neq \\lim_{x \\to a^{+}} f(x)$$
+
+**Cómo se ve en la gráfica:** una rama de la curva llega hasta cierta altura y se detiene en un círculo hueco; la otra rama arranca desde una altura distinta, también con un círculo hueco. Entre ambas queda un "escalón" vertical justo en $x = a$. Ya trabajamos un ejemplo completo de este caso en [Límites laterales](/calculo1/limites/1.2).
+
+[[grafica tipo=salto]]
+
+### b) Discontinuidad infinita
+Al menos uno de los límites laterales se dispara a $+\\infty$ o a $-\\infty$:
+
+$$\\lim_{x \\to a^{-}} f(x) = \\pm\\infty \\quad \\text{o bien} \\quad \\lim_{x \\to a^{+}} f(x) = \\pm\\infty$$
+
+**Cómo se ve en la gráfica:** aparece una línea punteada vertical en $x = a$ (la [asíntota vertical](/calculo1/limites/1.5)), y las dos ramas de la curva se acercan cada vez más a esa línea sin tocarla jamás, disparándose hacia arriba o hacia abajo.
+
+[[grafica tipo=infinita]]
+
+**Ejemplo:** $f(x) = \\dfrac{1}{x - 1}$ tiene una discontinuidad infinita en $x = 1$, porque $\\lim_{x \\to 1^{-}} f(x) = -\\infty$ y $\\lim_{x \\to 1^{+}} f(x) = +\\infty$.
+
+## Familia 2: Discontinuidad evitable (removible)
+
+Aquí el límite $\\lim_{x \\to a} f(x)$ **sí existe**, pero pasa una de estas dos cosas:
+
+- $f(a)$ no está definida, **o**
+- $f(a)$ sí está definida, pero **no coincide** con el límite: $f(a) \\neq \\lim_{x \\to a} f(x)$
+
+**Cómo se ve en la gráfica:** la curva se comporta perfectamente bien alrededor de $a$, acercándose a una sola altura por ambos lados. Justo en esa altura hay un "hueco" (un círculo vacío), porque ahí la función no está definida; o, en su lugar, hay un punto suelto dibujado en otra altura, que muestra que $f(a)$ existe pero está "mal puesto".
+
+[[grafica tipo=evitable]]
+
+¿Por qué se llama **evitable**? Porque basta con definir (o redefinir) $f(a)$ igual al valor del límite para que la función se vuelva continua en ese punto. De las tres discontinuidades, esta es la única que se repara con un solo retoque.
+
+## Resumen: ¿cómo distinguirlas?
+
+| Tipo | ¿Existe el límite? | ¿Se puede reparar? |
+|---|---|---|
+| De salto | No — los laterales existen pero son distintos | No |
+| Infinita | No — algún lateral es $\\pm\\infty$ | No |
+| Evitable (removible) | Sí | Sí, redefiniendo $f(a) = \\lim_{x \\to a} f(x)$ |
+
+Las dos primeras son subtipos de la **discontinuidad esencial**; la tercera es la **discontinuidad evitable**.
+
+---
+
+## Ejercicios Resueltos
+
+### Ejercicio 1: Estudiar la continuidad de $f(x) = \\begin{cases} 2x + 3 & \\text{si } x \\neq 1 \\\\ 2 & \\text{si } x = 1 \\end{cases}$ en $x = 1$
+1. **Evaluar en el punto:** $f(1) = 2$.
+2. **Calcular el límite:** 
+   $$\\lim_{x \\to 1} (2x + 3) = 2(1) + 3 = 5$$
+3. **Comparar:** Como $\\lim_{x \\to 1} f(x) \\neq f(1)$ ($5 \\neq 2$), la función **no es continua** en $x = 1$.
+4. **Clasificar:** El límite sí existe ($5$), así que es una **discontinuidad evitable (removible)**. Se repara redefiniendo:
+   $$f(x) = \\begin{cases} 2x + 3 & \\text{si } x \\neq 1 \\\\ 5 & \\text{si } x = 1 \\end{cases}$$
+
+### Ejercicio 2: Estudiar la continuidad de $f(x) = \\frac{x^{1/2} - 2}{x - 4}$ en $x = 4$
+1. **Evaluar en el punto:** $f(4)$ no existe (el denominador se anula y $x = 4$ queda fuera del dominio).
+2. **Calcular el límite (racionalizando):**
+   $$\\lim_{x \\to 4} \\frac{(x^{1/2} - 2)(x^{1/2} + 2)}{(x - 4)(x^{1/2} + 2)} = \\lim_{x \\to 4} \\frac{x - 4}{(x - 4)(x^{1/2} + 2)}$$
+3. **Simplificar y evaluar:**
+   $$\\lim_{x \\to 4} \\frac{1}{x^{1/2} + 2} = \\frac{1}{4^{1/2} + 2} = \\frac{1}{4}$$
+4. **Clasificar:** El límite existe y vale $\\frac{1}{4}$, pero $f(4)$ no está definida $\\implies$ **discontinuidad evitable** en $x = 4$.
         `
       }
     ]
