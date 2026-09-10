@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -16,6 +18,35 @@ export default function Footer() {
             <p style={styles.brandDesc}>
               Reduciendo la mortalidad académica en matemáticas universitarias mediante un ecosistema digital de aprendizaje interactivo.
             </p>
+          </div>
+
+          <div>
+            <h4 style={styles.heading}>Contenido</h4>
+            <ul style={styles.list}>
+              <li><Link to="/saberes-previos" style={styles.link}>Saberes Previos</Link></li>
+              <li><Link to="/calculo1/limites" style={styles.link}>Límites y Continuidad</Link></li>
+              <li><Link to="/calculo1/derivadas" style={styles.link}>Derivadas</Link></li>
+              <li><Link to="/calculo1/aplicaciones" style={styles.link}>Aplicaciones</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style={styles.heading}>Plataforma</h4>
+            <ul style={styles.list}>
+              <li><Link to="/" style={styles.link}>Inicio</Link></li>
+              <li><Link to="/calculo1" style={styles.link}>Cálculo I</Link></li>
+              <li><Link to="/laboratorio" style={styles.link}>Laboratorio</Link></li>
+              <li><Link to="/biblioteca" style={styles.link}>Biblioteca Multimedia</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style={styles.heading}>Contacto</h4>
+            <ul style={styles.list}>
+              <li><span style={styles.link}>soporte@educalcxe.edu</span></li>
+              <li><span style={styles.link}>+57 (1) 234 5678</span></li>
+              <li><span style={styles.link}>Bogotá, Colombia</span></li>
+            </ul>
           </div>
         </div>
 
