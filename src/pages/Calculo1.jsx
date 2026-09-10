@@ -29,7 +29,7 @@ export default function Calculo1() {
             <span style={styles.breadcrumbCurrent}>{unidad.titulo}</span>
           </div>
 
-          <div style={styles.unidadHeader}>
+          <div className="calculo-unidad-header" style={styles.unidadHeader}>
             <AnimatedIcon type={unidad.id} size={64} />
             <div>
               <h1 style={styles.unidadTitle}>{unidad.titulo}</h1>
@@ -39,21 +39,22 @@ export default function Calculo1() {
 
           <div className="calculo-unidad-layout" style={styles.unidadLayout}>
             <div className="calculo-temas-grid" style={styles.temasGrid}>
-            {unidad.temas.map((tema, idx) => (
-              <Link
-                key={tema.id}
-                to={`/calculo1/${unidad.id}/${tema.id}`}
-                style={styles.temaCard}
-              >
-                <div style={styles.temaNumber}>{String(idx + 1).padStart(2, '0')}</div>
-                <h3 style={styles.temaTitle}>{tema.titulo}</h3>
-                <p style={styles.temaDesc}>{tema.descripcion}</p>
-                <div style={styles.temaMeta}>
-                  <span style={styles.temaTag}>Lección</span>
-                  <span style={styles.temaArrow}>→</span>
-                </div>
-              </Link>
-            ))}
+              {unidad.temas.map((tema, idx) => (
+                <Link
+                  key={tema.id}
+                  to={`/calculo1/${unidad.id}/${tema.id}`}
+                  style={styles.temaCard}
+                  className="calculo-tema-card"
+                >
+                  <div style={styles.temaNumber}>{String(idx + 1).padStart(2, '0')}</div>
+                  <h3 style={styles.temaTitle}>{tema.titulo}</h3>
+                  <p style={styles.temaDesc}>{tema.descripcion}</p>
+                  <div style={styles.temaMeta}>
+                    <span style={styles.temaTag}>Lección</span>
+                    <span style={styles.temaArrow}>→</span>
+                  </div>
+                </Link>
+              ))}
             </div>
 
             {/* El chat acompana al alumno mientras baja por los subtemas */}
@@ -75,8 +76,8 @@ export default function Calculo1() {
             <span style={styles.heroTag}>Curso principal</span>
             <h1 style={styles.heroTitle}>Cálculo I</h1>
             <p style={styles.heroDesc}>
-            Aprender cálculo también puede ser divertido.
-            Explora, prueba, equivócate y vuelve a intentarlo. Aprende a tu ritmo y gana confianza en tus habilidades matemáticas.
+              Aprender cálculo también puede ser divertido.
+              Explora, prueba, equivócate y vuelve a intentarlo. Aprende a tu ritmo y gana confianza en tus habilidades matemáticas.
             </p>
             <div style={styles.heroStats}>
               <div style={styles.stat}>
@@ -104,13 +105,13 @@ export default function Calculo1() {
           <div style={styles.unitsHeader}>
             <h2 style={styles.unitsTitle}>Empecemos este viaje</h2>
             <p style={styles.unitsDesc}>
-            Tres unidades para aprender, practicar y ganar confianza en Cálculo I.
+              Tres unidades para aprender, practicar y ganar confianza en Cálculo I.
             </p>
           </div>
 
           <div className="calculo-units-grid" style={styles.unitsGrid}>
             {unidades.map((u) => (
-              <Link key={u.id} to={`/calculo1/${u.id}`} style={styles.unitCard}>
+              <Link key={u.id} to={`/calculo1/${u.id}`} style={styles.unitCard} className="calculo-unit-card">
                 <AnimatedIcon type={u.id} size={72} />
                 <h3 style={styles.unitTitle}>{u.titulo}</h3>
                 <div style={styles.unitFooter}>
@@ -136,7 +137,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    marginBottom: '24px',
+    marginBottom: '28px',
     fontSize: '14px',
   },
   breadcrumbLink: {
@@ -155,7 +156,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '24px',
-    marginBottom: '40px',
+    marginBottom: '32px',
     padding: '28px',
     background: 'linear-gradient(145deg, rgba(15,26,53,0.9) 0%, rgba(11,16,32,0.95) 100%)',
     borderRadius: '20px',
@@ -187,8 +188,7 @@ const styles = {
   },
   unidadLayout: {
     display: 'grid',
-    // minmax(0, ...) para que la columna pueda encogerse en vez de ensanchar la pagina
-    gridTemplateColumns: 'minmax(0, 1fr) 380px',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(320px, 380px)',
     gap: '28px',
     alignItems: 'start',
   },
@@ -199,18 +199,18 @@ const styles = {
   },
   temasGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '20px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+    gap: '16px',
     minWidth: 0,
   },
   temaCard: {
     background: 'linear-gradient(145deg, rgba(15,26,53,0.7) 0%, rgba(11,16,32,0.85) 100%)',
     borderRadius: '18px',
-    padding: '28px',
+    padding: '22px',
     border: '1px solid rgba(244,180,0,0.08)',
     textDecoration: 'none',
     color: 'inherit',
-    transition: 'all 0.3s ease',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
@@ -223,14 +223,14 @@ const styles = {
     letterSpacing: '1px',
   },
   temaTitle: {
-    fontSize: '18px',
+    fontSize: '17px',
     fontWeight: 700,
     color: '#fff',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
   },
   temaDesc: {
-    fontSize: '14px',
+    fontSize: '13.5px',
     color: 'rgba(255,255,255,0.5)',
     lineHeight: 1.5,
     margin: 0,
@@ -256,23 +256,24 @@ const styles = {
     color: '#F4B400',
     fontWeight: 700,
     fontSize: '16px',
+    transition: 'transform 0.2s ease',
   },
 
   hero: {
     background: 'linear-gradient(135deg, #0f1a35 0%, #0b1020 50%, #0b1020 100%)',
     color: '#fff',
-    padding: '64px 0',
+    padding: '56px 0',
   },
   heroContainer: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    gridTemplateColumns: 'minmax(0,1fr) minmax(280px, 420px)',
     alignItems: 'center',
-    gap: '56px',
+    gap: '48px',
   },
   heroLeft: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '14px',
   },
   heroTag: {
     display: 'inline-flex',
@@ -302,8 +303,9 @@ const styles = {
   },
   heroStats: {
     display: 'flex',
-    gap: '24px',
-    marginTop: '8px',
+    gap: '28px',
+    marginTop: '12px',
+    flexWrap: 'wrap',
   },
   stat: {
     display: 'flex',
@@ -324,21 +326,14 @@ const styles = {
     borderRadius: '20px',
     overflow: 'hidden',
   },
-  heroImage: {
-    width: '100%',
-    height: '300px',
-    objectFit: 'cover',
-    display: 'block',
-  },
-
   unitsSection: {
-    padding: '64px 0',
+    padding: '56px 0',
     background: '#0b1020',
   },
   unitsHeader: {
     textAlign: 'center',
     maxWidth: '640px',
-    margin: '0 auto 40px',
+    margin: '0 auto 36px',
   },
   unitsTitle: {
     fontSize: '28px',
@@ -351,38 +346,25 @@ const styles = {
     fontSize: '16px',
     color: 'rgba(255,255,255,0.5)',
     margin: 0,
-    lineHeight: 1.55,
+    lineHeight: '1.55',
   },
   unitsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '24px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    gap: '22px',
   },
   unitCard: {
     background: 'linear-gradient(145deg, rgba(15,26,53,0.8) 0%, rgba(11,16,32,0.9) 100%)',
     borderRadius: '20px',
-    padding: '32px 28px',
+    padding: '28px 24px',
     border: '1px solid rgba(244,180,0,0.08)',
     textDecoration: 'none',
     color: 'inherit',
-    transition: 'all 0.3s ease',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
     boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
-  },
-  unitIconWrap: {
-    width: '72px',
-    height: '72px',
-    borderRadius: '18px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: '8px',
-    fontSize: '32px',
-  },
-  unitIcon: {
-    lineHeight: 1,
   },
   unitTitle: {
     fontSize: '20px',
@@ -390,13 +372,6 @@ const styles = {
     color: '#fff',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
-  },
-  unitDesc: {
-    fontSize: '14px',
-    color: 'rgba(255,255,255,0.5)',
-    lineHeight: 1.55,
-    margin: '0 0 6px',
-    flex: 1,
   },
   unitFooter: {
     display: 'flex',
@@ -418,15 +393,68 @@ const styles = {
   },
 };
 
-if (typeof document !== 'undefined') {
+if (typeof document !== 'undefined' && !document.getElementById('calculo1-styles')) {
   const style = document.createElement('style');
+  style.id = 'calculo1-styles';
   style.textContent = `
+    /* Hover states */
+    .calculo-tema-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+      border-color: rgba(244,180,0,0.3) !important;
+    }
+    .calculo-tema-card:hover span:last-child {
+      transform: translateX(3px);
+    }
+    .calculo-unit-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+      border-color: rgba(244,180,0,0.3) !important;
+    }
+
+    /* Tablet: layout de unidad pasa a 1 columna, chat debajo */
     @media (max-width: 1024px) {
-      .calculo-hero-container { grid-template-columns: 1fr !important; }
-      .calculo-units-grid { grid-template-columns: 1fr !important; }
-      .calculo-unidad-layout { grid-template-columns: minmax(0, 1fr) !important; }
-      .calculo-chat-lateral { position: static !important; }
-      .calculo-temas-grid { grid-template-columns: 1fr !important; }
+      .calculo-unidad-layout {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+      .calculo-chat-lateral {
+        position: static !important;
+        max-width: 640px;
+        margin: 0 auto;
+        width: 100%;
+      }
+    }
+
+    /* Tablet: hero y grillas de temas/unidades a 2 columnas */
+    @media (max-width: 900px) {
+      .calculo-hero-container {
+        grid-template-columns: 1fr !important;
+        gap: 32px !important;
+        text-align: center;
+      }
+      .calculo-hero-container > div:first-child {
+        align-items: center !important;
+      }
+    }
+
+    /* Mobile: todo a 1 columna, header de unidad apilado */
+    @media (max-width: 640px) {
+      .calculo-temas-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .calculo-units-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .calculo-unidad-header {
+        flex-direction: column !important;
+        text-align: center;
+        gap: 16px !important;
+      }
+      .calculo-unidad-header > div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
     }
   `;
   document.head.appendChild(style);
