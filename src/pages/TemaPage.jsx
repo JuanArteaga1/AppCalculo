@@ -3,9 +3,10 @@ import { getTemaById } from '../data/temas';
 import { enlazarTerminos, referenciasPara } from '../data/glosario';
 import TemaVideo from '../components/TemaVideo';
 import SaberesRelacionados from '../components/SaberesRelacionados';
+import ChatSection from '../components/ChatSection';
 import AnimatedIcon from '../components/AnimatedIcon';
 import TablaLimiteInteractiva from '../components/TablaLimiteInteractiva';
-import { FiBookOpen, FiVideo, FiBarChart2, FiArrowRight } from 'react-icons/fi';
+import { FiBookOpen, FiVideo, FiBarChart2, FiArrowRight, FiMessageCircle } from 'react-icons/fi';
 import { HiOutlineLightBulb } from 'react-icons/hi';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -34,11 +35,6 @@ function renderLatex(text) {
   return result;
 }
 
-/**
- * Convierte los enlaces markdown [texto](https://...) en anclas externas.
- * Solo admite http/https: el contenido vive en el repositorio, pero limitar el
- * esquema evita que un `javascript:` se cuele si alguien pega un enlace raro.
- */
 function renderEnlaces(html) {
   if (!html) return html;
   return html.replace(
@@ -88,8 +84,6 @@ export default function TemaPage() {
   const { modo } = getGraphMode(unidadId, temaId);
 
   const renderContent = (text) => {
-    // Orden: primero se enlazan los terminos del glosario (respetando formulas y
-    // enlaces existentes), luego KaTeX, y al final los enlaces pasan a <a>.
     const preprocessed = renderEnlaces(renderLatex(enlazarTerminos(text)));
     const lines = preprocessed.split('\n');
     const elements = [];
@@ -243,7 +237,6 @@ export default function TemaPage() {
         return;
       }
 
-      // Marcador de contenido: [[tabla-limite expr=<expresion> punto=<numero>]]
       const marcadorTabla = trimmed.match(/^\[\[tabla-limite\s+expr=(.+?)\s+punto=([-\d.]+)(?:\s+modo=(\w+))?\]\]$/);
       if (marcadorTabla) {
         flushList();
@@ -312,8 +305,6 @@ export default function TemaPage() {
 
         const children = parts.map((part, pIdx) => {
           if (part.startsWith('**') && part.endsWith('**')) {
-            // El texto en negrita puede contener fórmulas o enlaces ya convertidos
-            // a HTML, así que se inserta igual que el resto del párrafo.
             return (
               <strong key={pIdx} dangerouslySetInnerHTML={{ __html: part.slice(2, -2) }} />
             );
@@ -404,6 +395,17 @@ export default function TemaPage() {
                 temaId={temaId}
               />
             </div>
+
+            <div id="seccion-chat" style={styles.chatSection}>
+              <div style={styles.chatSectionHeader}>
+                <span style={styles.chatSectionTag}>Ayuda en vivo</span>
+                <h2 style={styles.chatSectionTitle}>¿Se te atoró algo? Pregúntale al asistente</h2>
+                <p style={styles.chatSectionDesc}>
+                  Resuelve dudas de este tema al instante, paso a paso y con la notación matemática bien escrita.
+                </p>
+              </div>
+              <ChatSection tema={unidadId} unidadTitulo={tema.titulo} />
+            </div>
           </div>
 
           <aside className="tema-sidebar" style={styles.sidebar}>
@@ -425,6 +427,11 @@ export default function TemaPage() {
                   href="#seccion-laboratorio"
                   icon={<FiBarChart2 />}
                   label="Laboratorio"
+                />
+                <NavLink
+                  href="#seccion-chat"
+                  icon={<FiMessageCircle />}
+                  label="Asistente IA"
                 />
                 <NavLink
                   href="#seccion-saberes"
@@ -560,10 +567,6 @@ function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
   );
 }
 
-/**
- * Enlaces de lectura del tema. Salen del glosario segun los conceptos que
- * aparecen en el propio tema, asi que ningun tema se queda sin referencias.
- */
 function Referencias({ tema }) {
   const enlaces = referenciasPara(tema);
   if (!enlaces.length) return null;
@@ -642,9 +645,6 @@ const styles = {
 
   layout: {
     display: 'grid',
-    // minmax(0, 1fr) en vez de 1fr: con `1fr` el minimo automatico de la pista es
-    // su contenido, asi que cualquier hijo ancho (una grafica, una tabla) ensancha
-    // la rejilla en lugar de recortarse, y la pagina se desborda sin freno.
     gridTemplateColumns: 'minmax(0, 1fr) 320px',
     gap: '32px',
     alignItems: 'start'
@@ -881,6 +881,41 @@ const styles = {
     borderRadius: '12px'
   },
 
+  chatSection: {
+    borderRadius: '22px',
+  },
+
+  chatSectionHeader: {
+    padding: '4px 8px 14px',
+  },
+
+  chatSectionTag: {
+    display: 'inline-flex',
+    padding: '4px 10px',
+    borderRadius: '999px',
+    background: 'rgba(52,211,153,0.15)',
+    color: '#34D399',
+    fontSize: '11px',
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+
+  chatSectionTitle: {
+    margin: '10px 0 6px',
+    fontSize: '22px',
+    fontWeight: 800,
+    color: '#fff',
+    fontFamily: "'Poppins', sans-serif"
+  },
+
+  chatSectionDesc: {
+    margin: 0,
+    fontSize: '14.5px',
+    lineHeight: 1.6,
+    color: 'rgba(255,255,255,0.6)'
+  },
+
   sidebar: {
     display: 'flex',
     flexDirection: 'column',
@@ -1038,6 +1073,7 @@ if (typeof document !== 'undefined') {
     #seccion-contenido,
     #seccion-videos,
     #seccion-laboratorio,
+    #seccion-chat,
     #seccion-saberes {
       scroll-margin-top: 96px;
     }
