@@ -1,11 +1,12 @@
 import { useParams, Link } from 'react-router-dom';
 import { getTemaById } from '../data/temas';
-import { enlazarTerminos, referenciasPara } from '../data/glosario';
+import { enlazarTerminos } from '../data/glosario';
 import TemaVideo from '../components/TemaVideo';
 import SaberesRelacionados from '../components/SaberesRelacionados';
 import ChatSection from '../components/ChatSection';
 import AnimatedIcon from '../components/AnimatedIcon';
 import TablaLimiteInteractiva from '../components/TablaLimiteInteractiva';
+import AsintotasInteractivas from '../components/AsintotasInteractivas';
 import { FiBookOpen, FiVideo, FiBarChart2, FiArrowRight, FiMessageCircle } from 'react-icons/fi';
 import { HiOutlineLightBulb } from 'react-icons/hi';
 import katex from 'katex';
@@ -14,7 +15,9 @@ import 'katex/dist/katex.min.css';
 function renderLatex(text) {
   if (!text) return text;
   let result = text;
-  result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1');
+  // Solo elimina corchetes de enlaces internos del curso (/calculo1/...),
+  // NO de enlaces externos del glosario (https://...) que se renderizarán luego.
+  result = result.replace(/\[([^\]]+)\]\((\/[^)]+)\)/g, '$1');
 
   result = result.replace(/\$\$([\s\S]*?)\$\$/g, (_, latex) => {
     try {
@@ -37,7 +40,14 @@ function renderLatex(text) {
 
 function renderEnlaces(html) {
   if (!html) return html;
-  return html.replace(
+  // Enlaces del glosario con definición: [texto](url){data-definicion="..."}
+  // Se convierten en <a> con clase glosario-enlace y atributo data-definicion
+  let conDefinicion = html.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)\{data-definicion="([^"]+)"\}/g,
+    '<a class="tema-enlace glosario-enlace" href="$2" target="_blank" rel="noopener noreferrer" data-definicion="$3">$1</a>'
+  );
+  // Enlaces normales sin definición
+  return conDefinicion.replace(
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
     '<a class="tema-enlace" href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
   );
@@ -237,7 +247,10 @@ export default function TemaPage() {
         return;
       }
 
-      const marcadorTabla = trimmed.match(/^\[\[tabla-limite\s+expr=(.+?)\s+punto=([-\d.]+)(?:\s+modo=(\w+))?\]\]$/);
+// Marcador de contenido: [[tabla-limite expr=<expresion> punto=<numero> modo=<modo> visual=<visual>]]
+const marcadorTabla = trimmed.match(
+  /^\[\[tabla-limite\s+expr=(.+?)\s+punto=([-\d.]+)(?:\s+modo=(\w+))?(?:\s+visual=(\w+))?\]\]$/
+);
       if (marcadorTabla) {
         flushList();
         flushTable();
@@ -247,7 +260,19 @@ export default function TemaPage() {
             expr={marcadorTabla[1]}
             punto={Number(marcadorTabla[2])}
             modo={marcadorTabla[3] || undefined}
+            visual={marcadorTabla[4] || undefined}
           />
+        );
+        return;
+      }
+
+      // Marcador de contenido: [[asintotas expr=<expresion>]]
+      const marcadorAsintotas = trimmed.match(/^\[\[asintotas\s+expr=(.+?)\]\]$/);
+      if (marcadorAsintotas) {
+        flushList();
+        flushTable();
+        elements.push(
+          <AsintotasInteractivas key={idx} expr={marcadorAsintotas[1].trim()} />
         );
         return;
       }
@@ -261,7 +286,8 @@ export default function TemaPage() {
         flushTable();
       }
 
-      let generatedElement = null;
+      // Sin inicializar: todas las ramas del if/else de abajo le asignan valor.
+      let generatedElement;
 
       if (trimmed.startsWith('## ')) {
         flushList();
@@ -379,7 +405,6 @@ export default function TemaPage() {
 
               <div style={styles.cardBody}>
                 {renderContent(tema.contenido)}
-                <Referencias tema={tema} />
               </div>
             </div>
 
@@ -563,33 +588,6 @@ function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
           strokeWidth="2"
         />
       </svg>
-    </div>
-  );
-}
-
-function Referencias({ tema }) {
-  const enlaces = referenciasPara(tema);
-  if (!enlaces.length) return null;
-
-  return (
-    <div style={styles.referencias}>
-      <h3 style={styles.referenciasTitulo}>Para profundizar</h3>
-      <ul style={styles.referenciasLista}>
-        {enlaces.map(({ clave, url }) => (
-          <li key={url}>
-            <a
-              className="tema-enlace"
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={styles.referenciaEnlace}
-            >
-              {clave}
-              <span style={styles.referenciaExterna} aria-hidden="true"> ↗</span>
-            </a>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -1058,10 +1056,70 @@ if (typeof document !== 'undefined') {
       text-decoration: underline;
       text-underline-offset: 3px;
       text-decoration-color: rgba(244,180,0,0.4);
-      transition: text-decoration-color 0.2s ease;
+      transition: all 0.2s ease;
     }
     .tema-enlace:hover {
       text-decoration-color: #F4B400;
+    }
+    .glosario-enlace {
+      position: relative;
+      display: inline-block;
+      background: rgba(244,180,0,0.08);
+      padding: 1px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(244,180,0,0.15);
+      font-weight: 600;
+      text-decoration: none !important;
+    }
+    .glosario-enlace:hover {
+      background: rgba(244,180,0,0.18);
+      border-color: rgba(244,180,0,0.4);
+      box-shadow: 0 2px 8px rgba(244,180,0,0.15);
+    }
+    .glosario-enlace::after {
+      content: attr(data-definicion);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) scale(0.95);
+      width: max-content;
+      max-width: 280px;
+      padding: 10px 14px;
+      background: #0A1628;
+      color: #E2E8F0;
+      font-size: 12.5px;
+      font-weight: 500;
+      line-height: 1.5;
+      border-radius: 10px;
+      border: 1px solid rgba(244,180,0,0.2);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      pointer-events: none;
+      z-index: 100;
+      text-align: center;
+    }
+    .glosario-enlace::before {
+      content: '';
+      position: absolute;
+      bottom: calc(100% + 2px);
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(244,180,0,0.2) transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .glosario-enlace:hover::after,
+    .glosario-enlace:hover::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) scale(1);
     }
     .tema-sidebar a:hover {
       background: rgba(244,180,0,0.1) !important;

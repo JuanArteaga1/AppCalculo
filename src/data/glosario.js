@@ -18,146 +18,175 @@ export const GLOSARIO = [
     clave: 'teorema del valor medio',
     variantes: ['teorema del valor medio', 'valor medio'],
     url: W + 'Teorema_del_valor_medio',
+    definicion: 'Si una función es continua en [a,b] y derivable en (a,b), existe un punto c donde la derivada es igual a la pendiente promedio.',
   },
   {
     clave: 'regla de la cadena',
     variantes: ['regla de la cadena'],
     url: W + 'Regla_de_la_cadena',
+    definicion: 'Método para derivar funciones compuestas: la derivada de f(g(x)) es f\'(g(x)) · g\'(x).',
   },
   {
-    clave: 'regla de L’Hôpital',
+    clave: 'regla de L\'Hôpital',
     variantes: ["regla de l'hôpital", "l'hôpital", 'lhopital', 'hôpital'],
     url: W + 'Regla_de_l%27H%C3%B4pital',
+    definicion: 'Para límites indeterminados 0/0 o ∞/∞: deriva numerador y denominador por separado.',
   },
   {
     clave: 'teorema de Rolle',
     variantes: ['teorema de rolle', 'rolle'],
     url: W + 'Teorema_de_Rolle',
+    definicion: 'Si f(a)=f(b) y la función es continua y derivable, existe al menos un punto con derivada cero entre a y b.',
   },
   {
     clave: 'derivación implícita',
     variantes: ['derivación implícita', 'derivada implícita', 'implícita'],
     url: W + 'Funci%C3%B3n_impl%C3%ADcita',
+    definicion: 'Técnica para derivar cuando y no está despejada explícitamente en términos de x.',
   },
   {
     clave: 'punto de inflexión',
     variantes: ['punto de inflexión', 'puntos de inflexión', 'inflexión'],
     url: W + 'Punto_de_inflexi%C3%B3n',
+    definicion: 'Punto donde la función cambia de cóncava hacia arriba a cóncava hacia abajo (o viceversa).',
   },
   {
     clave: 'máximos y mínimos',
-    variantes: ['máximos y mínimos', 'máximos', 'mínimos', 'máximo', 'mínimo', 'máxima', 'mínima', 'extremos', 'extremo'],
+    variantes: ['máximos y mínimos', 'extremos', 'extremo'],
     url: W + 'Extremos_de_una_funci%C3%B3n',
+    definicion: 'Puntos donde una función alcanza su valor más alto o más bajo local.',
   },
   {
     clave: 'razón de cambio',
     variantes: ['razones de cambio', 'razón de cambio', 'razones', 'razón'],
     url: W + 'Tasa_de_cambio',
+    definicion: 'Velocidad a la que cambia una cantidad respecto a otra; la derivada mide la razón de cambio instantánea.',
   },
   {
     clave: 'aproximación lineal',
     variantes: ['aproximación lineal'],
     url: W + 'Aproximaci%C3%B3n_lineal',
+    definicion: 'Usar la recta tangente para estimar valores cercanos de una función sin calcularla directamente.',
   },
   {
     clave: 'función exponencial',
     variantes: ['función exponencial', 'funciones exponenciales', 'exponenciales', 'exponencial'],
     url: W + 'Funci%C3%B3n_exponencial',
+    definicion: 'Función de la forma f(x)=a^x donde la base es constante y el exponente variable.',
   },
   {
     clave: 'función trigonométrica',
     variantes: ['funciones trigonométricas', 'función trigonométrica', 'trigonométricas', 'trigonométricos', 'trigonométrica'],
     url: W + 'Funci%C3%B3n_trigonom%C3%A9trica',
+    definicion: 'Funciones periódicas basadas en el círculo unitario: seno, coseno, tangente y sus inversas.',
   },
   {
     clave: 'límites laterales',
     variantes: ['límites laterales', 'límite lateral'],
     url: W + 'L%C3%ADmite_de_una_funci%C3%B3n',
+    definicion: 'Valor al que se acerca una función cuando x se aproxima a un punto solo por la izquierda o solo por la derecha.',
   },
   {
     clave: 'discontinuidad',
     variantes: ['discontinuidades', 'discontinuidad', 'discontinua'],
     url: W + 'Clasificaci%C3%B3n_de_discontinuidades',
+    definicion: 'Punto donde la función se "rompe": puede ser removible (hueco), de salto o infinita.',
   },
   {
     clave: 'indeterminación',
     variantes: ['forma indeterminada', 'indeterminaciones', 'indeterminación', 'indeterminados', 'indeterminado'],
     url: W + 'Forma_indeterminada',
+    definicion: 'Expresión como 0/0 o ∞/∞ cuyo valor no se puede determinar sin análisis adicional.',
   },
   {
     clave: 'recta tangente',
     variantes: ['recta tangente', 'rectas tangentes', 'tangentes', 'tangente'],
     url: W + 'Recta_tangente',
+    definicion: 'Recta que toca una curva en un punto y tiene la misma pendiente que la curva en ese punto.',
   },
   {
     clave: 'recta secante',
     variantes: ['recta secante', 'secante'],
     url: W + 'Recta_secante',
+    definicion: 'Recta que corta una curva en dos puntos; su pendiente aproxima la derivada cuando los puntos se acercan.',
   },
   {
     clave: 'optimización',
     variantes: ['optimización', 'optimizar'],
     url: W + 'Optimizaci%C3%B3n_(matem%C3%A1tica)',
+    definicion: 'Proceso de encontrar el valor máximo o mínimo de una función bajo ciertas restricciones.',
   },
   {
     clave: 'continuidad',
     variantes: ['continuidad', 'continuas', 'continua', 'continuo'],
     url: W + 'Funci%C3%B3n_continua',
+    definicion: 'Una función es continua en un punto si se puede dibujar sin levantar el lápiz: no hay saltos ni huecos.',
   },
   {
     clave: 'concavidad',
     variantes: ['concavidad', 'cóncava', 'convexa'],
     url: W + 'Funci%C3%B3n_convexa',
+    definicion: 'Describe la curvatura de una gráfica: cóncava hacia arriba (∪) o hacia abajo (∩).',
   },
   {
     clave: 'diferencial',
     variantes: ['diferenciales', 'diferencial'],
     url: W + 'Diferencial_de_una_funci%C3%B3n',
+    definicion: 'Cambio infinitesimal en una variable; se usa para aproximar pequeñas variaciones de una función.',
   },
   {
     clave: 'derivada',
     variantes: ['derivadas', 'derivada', 'derivación', 'derivable', 'derivando', 'derivar'],
     url: W + 'Derivada',
+    definicion: 'Razón de cambio instantánea de una función; geométricamente es la pendiente de la recta tangente.',
   },
   {
     clave: 'logaritmo',
     variantes: ['logarítmicas', 'logarítmica', 'logaritmos', 'logaritmo'],
     url: W + 'Logaritmo',
+    definicion: 'Operación inversa de la potenciación: log_b(x) es el exponente al que hay que elevar b para obtener x.',
   },
   {
     clave: 'asíntota',
     variantes: ['asíntotas', 'asíntota'],
     url: W + 'As%C3%ADntota',
+    definicion: 'Recta que una curva se acerca indefinidamente sin nunca tocarla: vertical, horizontal u oblicua.',
   },
   {
     clave: 'pendiente',
     variantes: ['pendientes', 'pendiente'],
     url: W + 'Pendiente_(matem%C3%A1ticas)',
+    definicion: 'Inclinación de una recta: cambio en y dividido por cambio en x entre dos puntos.',
   },
   {
     clave: 'velocidad',
     variantes: ['velocidad'],
     url: W + 'Velocidad',
+    definicion: 'En cálculo, la derivada de la posición respecto al tiempo: rapidez de cambio de ubicación.',
   },
   {
     clave: 'dominio',
     variantes: ['dominio'],
     url: W + 'Dominio_de_definici%C3%B3n',
+    definicion: 'Conjunto de todos los valores de x para los cuales una función está definida.',
   },
   {
     clave: 'infinito',
     variantes: ['infinito'],
     url: W + 'Infinito',
+    definicion: 'Concepto de cantidad sin límite; en límites indica que una función crece o decrece sin cota.',
   },
   {
     clave: 'límite',
     variantes: ['límites', 'límite'],
     url: W + 'L%C3%ADmite_de_una_funci%C3%B3n',
+    definicion: 'Valor al que se acerca una función cuando la variable independiente se aproxima a un punto específico.',
   },
   {
     clave: 'función',
     variantes: ['funciones', 'función'],
     url: W + 'Funci%C3%B3n_matem%C3%A1tica',
+    definicion: 'Regla que asigna a cada elemento de un conjunto (dominio) exactamente un elemento de otro conjunto.',
   },
 ];
 
@@ -218,7 +247,7 @@ export function enlazarTerminos(texto, maximo = MAXIMO_EN_TEXTO) {
     // Trozos libres en los índices pares; los impares son fórmulas o enlaces.
     const trozos = lineas[i].split(INTOCABLE);
 
-    for (const { clave, variantes, url } of GLOSARIO) {
+    for (const { clave, variantes, url, definicion } of GLOSARIO) {
       if (insertados >= maximo) break;
       if (usados.has(clave) || destinos.has(url)) continue;
 
@@ -228,7 +257,8 @@ export function enlazarTerminos(texto, maximo = MAXIMO_EN_TEXTO) {
         const patron = patronDe(variante);
         for (let j = 0; j < trozos.length; j += 2) {
           if (!patron.test(trozos[j])) continue;
-          trozos[j] = trozos[j].replace(patron, (_, antes, palabra) => `${antes}[${palabra}](${url})`);
+          const defAttr = definicion ? ` data-definicion="${definicion}"` : '';
+          trozos[j] = trozos[j].replace(patron, (_, antes, palabra) => `${antes}[${palabra}](${url}){${defAttr}}`);
           colocado = true;
           break;
         }

@@ -12,9 +12,10 @@ const PASOS = [0.1, 0.01, 0.001, 0.0001];
  * Muestra los dos lados del punto en una sola tabla compacta y, al pulsar
  * "Resolver", va rellenando una fila por segundo hasta llegar a la conclusión.
  */
-export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', pasos = PASOS }) {
+export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', pasos = PASOS, visual = 'interactivo' }) {
+  const esEstatico = visual === 'estatico';
   const porLados = modo === 'laterales';
-  const [reveladas, setReveladas] = useState(0);
+  const [reveladas, setReveladas] = useState(esEstatico ? pasos.length : 0);
   const [corriendo, setCorriendo] = useState(false);
   const temporizador = useRef(null);
 
@@ -98,16 +99,22 @@ export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', p
     <div style={estilos.contenedor}>
       <div style={estilos.cabecera}>
         <span style={estilos.titulo}>
-          Aproximación a <Tex tex={`x = ${punto}`} />
+          {esEstatico ? (
+            <>Gráfica y tabla de aproximación en <Tex tex={`x = ${punto}`} /></>
+          ) : (
+            <>Aproximación a <Tex tex={`x = ${punto}`} /></>
+          )}
         </span>
-        {terminada ? (
-          <button type="button" style={estilos.btnSecundario} onClick={reiniciar}>
-            ↺ Repetir
-          </button>
-        ) : (
-          <button type="button" style={estilos.btn} onClick={resolver} disabled={corriendo}>
-            {corriendo ? 'Resolviendo…' : '▶ Resolver'}
-          </button>
+        {!esEstatico && (
+          terminada ? (
+            <button type="button" style={estilos.btnSecundario} onClick={reiniciar}>
+              ↺ Repetir
+            </button>
+          ) : (
+            <button type="button" style={estilos.btn} onClick={resolver} disabled={corriendo}>
+              {corriendo ? 'Resolviendo…' : '▶ Resolver'}
+            </button>
+          )
         )}
       </div>
 
@@ -116,8 +123,8 @@ export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', p
         punto={punto}
         limite={limite}
         puntos={puntosGrafica}
-        puntosVisibles={reveladas * 2}
-        estado={terminada ? 'completa' : corriendo ? 'animando' : 'oculta'}
+        puntosVisibles={esEstatico ? puntosGrafica.length : reveladas * 2}
+        estado={esEstatico || terminada ? 'completa' : corriendo ? 'animando' : 'oculta'}
         porLados={porLados}
         limiteIzq={laterales.izq}
         limiteDer={laterales.der}
@@ -136,8 +143,8 @@ export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', p
           </thead>
           <tbody>
             {filas.map((fila, i) => {
-              const visible = i < reveladas;
-              const recienRevelada = i === reveladas - 1 && !terminada;
+              const visible = esEstatico || i < reveladas;
+              const recienRevelada = !esEstatico && i === reveladas - 1 && !terminada;
               return (
                 <tr
                   key={fila.h}
@@ -166,7 +173,7 @@ export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', p
       </div>
 
       <div style={estilos.pie} aria-live="polite">
-        {terminada ? (
+        {esEstatico || terminada ? (
           porLados && !coinciden ? (
             <span style={estilos.conclusionAviso}>
               <Tex tex={`\\lim_{x \\to ${punto}^{-}} f(x) = ${formatearValor(laterales.izq, 4)}`} />

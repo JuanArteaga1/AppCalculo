@@ -64,40 +64,84 @@ Hasta ahora nos acercamos al punto por los dos lados a la vez. Pero, ¿qué pasa
 hace una cosa por la izquierda y otra distinta por la derecha? Para eso existen los
 **límites laterales**: miran cada lado por separado.
 
-Considere esta función definida por partes:
+## Definición formal
 
-$$f(x) = \\begin{cases} 3, & \\text{si } x < 2 \\\\ 7, & \\text{si } x > 2 \\end{cases}$$
+El **límite por la izquierda** de f(x) cuando x se acerca a a se escribe:
 
-## Paso 1: mirar cada lado por separado
+$$\\lim_{x \\to a^{-}} f(x) = L$$
 
-Por la izquierda la función vale siempre 3, por cerca que estemos de 2. Por la derecha vale
-siempre 7. Los dos lados son constantes, pero **constantes distintas**.
+y significa que f(x) se acerca a L cuando x se aproxima a a por valores **menores** que a.
 
-$$\\lim_{x \\to 2^{-}} f(x) = 3 \\qquad \\lim_{x \\to 2^{+}} f(x) = 7$$
+El **límite por la derecha** se escribe:
 
-## Paso 2: comprobarlo con la tabla
+$$\\lim_{x \\to a^{+}} f(x) = M$$
 
-La columna de diferencia es la clave: si el límite existiera, esa diferencia tendría que
-acercarse a cero conforme nos pegamos al punto. Aquí se queda clavada en 4.
+y significa que f(x) se acerca a M cuando x se aproxima a a por valores **mayores** que a.
 
-[[tabla-limite expr=x < 2 ? 3 : 7 punto=2 modo=laterales]]
+Para que exista el límite general, ambos laterales deben existir y ser iguales:
 
-## Paso 3: qué significa el salto
+$$\\lim_{x \\to a} f(x) \\text{ existe } \\iff \\lim_{x \\to a^{-}} f(x) = \\lim_{x \\to a^{+}} f(x)$$
 
-En la gráfica hay una rama azul a la altura 3 y otra roja a la altura 7, con un salto en
-$x = 2$. Los dos extremos se dibujan como círculos huecos porque la función no llega a tomar
-esos valores viniendo del otro lado.
+---
 
-## Paso 4: conclusión
+## Ejercicio 1: Explicación paso a paso
 
-Para que exista el límite hacen falta dos cosas: que exista cada lateral **y** que ambos
-valgan lo mismo.
+Considere la función definida por partes:
 
-$$\\lim_{x \\to 2^{-}} f(x) \\neq \\lim_{x \\to 2^{+}} f(x) \\implies \\lim_{x \\to 2} f(x) \\text{ no existe}$$
+$$f(x) = \\begin{cases} x + 1, & \\text{si } x < 2 \\\\ 2x + 3, & \\text{si } x > 2 \\end{cases}$$
 
-Esta ruptura se llama **discontinuidad de salto**, y es distinta de la removible del
-[tema anterior](/calculo1/limites/1.1): allí el límite sí existía y solo faltaba el valor
-en el punto.
+**Paso 1:** Calculamos el límite por la izquierda. La función sigue la recta $y = x + 1$.
+
+$$\\lim_{x \\to 2^{-}} f(x) = \\lim_{x \\to 2^{-}} (x + 1) = 2 + 1 = 3$$
+
+**Paso 2:** Calculamos el límite por la derecha. La función sigue la recta $y = 2x + 3$.
+
+$$\\lim_{x \\to 2^{+}} f(x) = \\lim_{x \\to 2^{+}} (2x + 3) = 2(2) + 3 = 7$$
+
+**Paso 3:** Observamos la gráfica y la tabla de aproximación. La rama izquierda (azul)
+llega a 3, la rama derecha (roja) arranca en 7, y la diferencia se mantiene en 4 por
+muy cerca que nos acerquemos.
+
+[[tabla-limite expr=x < 2 ? x + 1 : 2*x + 3 punto=2 modo=laterales visual=estatico]]
+
+**Paso 4:** Como los laterales son distintos, el límite general no existe.
+
+$$\\lim_{x \\to 2^{-}} f(x) = 3 \\qquad \\lim_{x \\to 2^{+}} f(x) = 7 \\qquad \\implies \\qquad \\lim_{x \\to 2} f(x) \\text{ no existe}$$
+
+Esta ruptura se llama **discontinuidad de salto**. Los círculos huecos en la gráfica
+indican que la función no toma esos valores viniendo del otro lado.
+
+---
+
+## Ejercicio 2: Ahora tú practicas
+
+Aplica el mismo procedimiento a esta función:
+
+$$g(x) = \\begin{cases} x^2 - 1, & \\text{si } x < 1 \\\\ 2x + 1, & \\text{si } x > 1 \\end{cases}$$
+
+Antes de ver la solución, intenta calcular:
+- ¿Cuánto vale $\\lim_{x \\to 1^{-}} g(x)$?
+- ¿Cuánto vale $\\lim_{x \\to 1^{+}} g(x)$?
+- ¿Existe el límite general?
+
+Cuando estés listo, pulsa **Resolver** para verificar tu respuesta paso a paso:
+
+[[tabla-limite expr=x < 1 ? x^2 - 1 : 2*x + 1 punto=1 modo=laterales]]
+
+---
+
+## Resumen
+
+Para que exista el límite en un punto hacen falta **dos condiciones**:
+1. Que exista el límite por la izquierda.
+2. Que exista el límite por la derecha.
+3. **Y** que ambos valgan **exactamente lo mismo**.
+
+Si los laterales difieren, el límite general **no existe** y la función presenta una
+discontinuidad de salto en ese punto.
+
+Es distinta de la discontinuidad removible del [tema anterior](/calculo1/limites/1.1):
+allí el límite sí existía y solo faltaba el valor en el punto.
         `
       },
       {
@@ -237,31 +281,68 @@ El límite $\\lim_{x \\to \\infty} f(x) = L$ significa que para todo $\\varepsil
         titulo: 'Asíntotas verticales, horizontales y oblicuas',
         descripcion: 'Rectas a las que una función se aproxima cada vez más sin nunca tocarlas.',
         contenido: `
-## Introducción
+## Definición
 
-Las [asíntotas](/calculo1/limites/1.4) son rectas a las que una [función](/saberes-previos#funciones) se aproxima cada vez más sin nunca tocarlas.
+Sea $f$ una función. Se dice que $f$ tiene **asíntotas** si se cumple alguna de estas tres
+situaciones. Una asíntota es una recta a la que la curva se acerca tanto como queramos sin
+llegar a tocarla.
 
-## Asíntotas verticales
+## 1. Asíntota horizontal
 
-Ocurren cuando el denominador se hace cero y el [límite](/calculo1/limites/1.1) tiende a infinito.
+Si el límite en el infinito es un número:
 
-$$f(x) = \\frac{1}{x - 1} \\implies \\text{Asíntota: } x = 1$$
+$$\\lim_{x \\to \\infty} f(x) = k \\qquad o \\qquad \\lim_{x \\to -\\infty} f(x) = k$$
 
-## Asíntotas horizontales
+entonces la recta $y = k$ es una asíntota horizontal de $f$.
 
-Se estudian con [límites](/calculo1/limites/1.4) al infinito:
+## 2. Asíntota vertical
 
-$$\\lim_{x \\to \\infty} \\frac{2x + 1}{x} = 2 \\implies \\text{Asíntota: } y = 2$$
+Si al acercarse a un punto la función se dispara:
 
-## Asíntotas oblicuas
+$$\\lim_{x \\to a} f(x) = \\pm\\infty$$
 
-Cuando el grado del [polinomio](/saberes-previos#polinomios) numerador es uno mayor que el denominador:
+entonces la recta $x = a$ es una asíntota vertical. En las funciones racionales, esos puntos
+$a$ son justamente los que **no** pertenecen al dominio: los que anulan el denominador.
 
-$$f(x) = \\frac{x^2 + 1}{x} = x + \\frac{1}{x} \\implies \\text{Asíntota: } y = x$$
+## 3. Asíntota oblicua
 
-## Aplicación
+La recta $y = mx + b$, con $m \\neq 0$, es una asíntota oblicua si
 
-Las [asíntotas](/calculo1/limites/1.4) son fundamentales en el [análisis completo de funciones](/calculo1/aplicaciones/3.11).
+$$\\lim_{x \\to \\pm\\infty} \\left[ f(x) - (mx + b) \\right] = 0$$
+
+donde los dos coeficientes se calculan con estos límites:
+
+$$m = \\lim_{x \\to \\pm\\infty} \\frac{f(x)}{x} \\qquad b = \\lim_{x \\to \\pm\\infty} \\left[ f(x) - mx \\right]$$
+
+**Cuándo buscarla:** solo hay asíntota oblicua si el grado del numerador es exactamente uno
+mayor que el del denominador. Y se busca únicamente si **no** hay asíntota horizontal: las dos
+son excluyentes.
+
+## Ejemplo 1: hay oblicua, no horizontal
+
+El numerador es de grado 2 y el denominador de grado 1, así que esperamos oblicua.
+
+[[asintotas expr=(x^2+2)/(x-2)]]
+
+## Ejemplo 2: hay horizontal, no oblicua
+
+Aquí numerador y denominador son del mismo grado. El límite en el infinito es el cociente de
+los coeficientes principales, y al haber horizontal ya no puede haber oblicua.
+
+[[asintotas expr=(2x^2+3)/(x^2-1)]]
+
+## Ejemplo 3: dos verticales y una horizontal
+
+El denominador se anula en dos puntos, así que aparecen dos asíntotas verticales, una a cada
+lado del eje.
+
+[[asintotas expr=2x^2/(9-x^2)]]
+
+## Resumen
+
+- **Horizontal:** se mira el límite cuando $x \\to \\pm\\infty$. Si da un número, esa es la altura.
+- **Vertical:** se miran los puntos fuera del dominio. Si el límite ahí se dispara, hay asíntota.
+- **Oblicua:** solo si no hay horizontal y el numerador supera al denominador en exactamente un grado.
         `
       },
       {
