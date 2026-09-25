@@ -52,22 +52,22 @@ function calcularLimite(funcion, a) {
   [0.6, 0.3, 0.12].forEach((offset, i) => {
     const yIzq = funcion.evaluar(a - offset);
     const yDer = funcion.evaluar(a + offset);
-    if (yIzq !== null) puntos.push({ x: a - offset, y: yIzq, color: '#10B981', r: 5 - i });
-    if (yDer !== null) puntos.push({ x: a + offset, y: yDer, color: '#EF4444', r: 5 - i });
+    if (yIzq !== null) puntos.push({ x: a - offset, y: yIzq, color: '#059669', r: 5 - i });
+    if (yDer !== null) puntos.push({ x: a + offset, y: yDer, color: '#DC2626', r: 5 - i });
   });
 
   const yEnA = funcion.evaluar(a);
   if (yEnA !== null) {
-    puntos.push({ x: a, y: yEnA, color: '#F4B400', r: 6 });
+    puntos.push({ x: a, y: yEnA, color: '#B45309', r: 6 });
   } else if (analisis.valor !== undefined && analisis.valor !== null) {
     // Discontinuidad removible: círculo hueco sobre el valor del límite.
-    puntos.push({ x: a, y: analisis.valor, color: '#F4B400', r: 6, hueco: true });
+    puntos.push({ x: a, y: analisis.valor, color: '#B45309', r: 6, hueco: true });
   }
 
   return {
     resultado,
     marcadores: {
-      verticales: [{ x: a, color: '#F4B400', etiqueta: `x = ${puntoA}` }],
+      verticales: [{ x: a, color: '#B45309', etiqueta: `x = ${puntoA}` }],
       puntos,
     },
   };
@@ -98,14 +98,14 @@ function calcularDerivada(funcion, x0, h) {
   }
 
   const tabla = tablaAproximacion(funcion.evaluar, x0, 'derivada');
-  const marcadores = { puntos: [], rectas: [], verticales: [{ x: x0, color: '#94A3B8', etiqueta: `x = ${punto0}` }] };
+  const marcadores = { puntos: [], rectas: [], verticales: [{ x: x0, color: '#64628A', etiqueta: `x = ${punto0}` }] };
 
-  if (fx0 !== null) marcadores.puntos.push({ x: x0, y: fx0, color: '#EF4444', r: 6 });
+  if (fx0 !== null) marcadores.puntos.push({ x: x0, y: fx0, color: '#DC2626', r: 6 });
 
   let texTangente = null;
   if (fx0 !== null && pendiente !== null && Number.isFinite(pendiente)) {
     const b = fx0 - pendiente * x0;
-    marcadores.rectas.push({ m: pendiente, b, color: '#EF4444' });
+    marcadores.rectas.push({ m: pendiente, b, color: '#DC2626' });
     const signo = b >= 0 ? '+' : '-';
     texTangente = `y = ${formatearTex(pendiente)}\\,x ${signo} ${formatearTex(Math.abs(b))}`;
   }
@@ -117,8 +117,8 @@ function calcularDerivada(funcion, x0, h) {
     const fxh = funcion.evaluar(x0 + hNum);
     if (fxh !== null) {
       const mSec = (fxh - fx0) / hNum;
-      marcadores.rectas.push({ m: mSec, b: fx0 - mSec * x0, color: '#0EA5E9', punteada: true });
-      marcadores.puntos.push({ x: x0 + hNum, y: fxh, color: '#0EA5E9', r: 5 });
+      marcadores.rectas.push({ m: mSec, b: fx0 - mSec * x0, color: '#4F46E5', punteada: true });
+      marcadores.puntos.push({ x: x0 + hNum, y: fxh, color: '#4F46E5', r: 5 });
       texSecante = `m_{sec} = \\frac{f(${punto0}+${formatearTex(hNum)}) - f(${punto0})}{${formatearTex(hNum)}} = ${formatearTex(mSec)}`;
     }
   }

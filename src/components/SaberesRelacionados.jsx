@@ -46,8 +46,8 @@ export default function SaberesRelacionados({ unidadId }) {
           </div>
         ))}
       </div>
-      <Link to="/saberes-previos" style={styles.link} className="saberes-link">
-        Repasar saberes previos <span style={styles.linkArrow}>→</span>
+      <Link to="/conceptos-previos" style={styles.link} className="saberes-link">
+        Repasar conceptos previos <span style={styles.linkArrow}>→</span>
       </Link>
     </div>
   );

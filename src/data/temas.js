@@ -5,7 +5,7 @@ export const unidades = [
     titulo: 'Límites y Continuidad',
     descripcion: '¿Qué sucede cuando nos acercamos cada vez más a un punto? Los límites te permiten descubrir y comprender qué ocurre cerca de un valor determinado, incluso cuando no llegamos exactamente a él. Aquí comienza el camino hacia el cálculo diferencial.',
     icono: '∞',
-    color: '#0047CC',
+    color: '#4F46E5',
     temas: [
       {
         id: '1.1',
@@ -151,7 +151,7 @@ allí el límite sí existía y solo faltaba el valor en el punto.
         contenido: `
 ## Introducción
 
-Si conocemos los límites de dos [funciones](/saberes-previos#funciones) en un punto, podemos calcular el límite de combinaciones de esas funciones (sumas, restas, productos, cocientes, potencias, raíces) sin volver a analizar el comportamiento cerca del punto desde cero. A este conjunto de reglas se le llama las leyes de los límites.
+Si conocemos los límites de dos [funciones](/conceptos-previos#funciones) en un punto, podemos calcular el límite de combinaciones de esas funciones (sumas, restas, productos, cocientes, potencias, raíces) sin volver a analizar el comportamiento cerca del punto desde cero. A este conjunto de reglas se le llama las leyes de los límites.
 
 Estas leyes solo son válidas cuando los límites individuales de $f$ y $g$ existen. Si alguno no existe, la ley correspondiente no se puede aplicar directamente y hay que recurrir a otras herramientas (factorización, racionalización, límites laterales).
 
@@ -399,7 +399,7 @@ Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórm
         contenido: `
 ## Introducción
 
-Una [función](/saberes-previos#funciones) es continua en un número $a$ si no tiene interrupciones, saltos o agujeros. 
+Una [función](/conceptos-previos#funciones) es continua en un número $a$ si no tiene interrupciones, saltos o agujeros. 
 
 ## Definición formal
 
@@ -424,7 +424,7 @@ Una función $f$ es continua en $x = a$ si se satisfacen tres condiciones obliga
         contenido: `
 ## Introducción
 
-Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/saberes-previos#exponenciales) y [funciones logarítmicas](/saberes-previos#logaritmos).
+Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/conceptos-previos#exponenciales) y [funciones logarítmicas](/conceptos-previos#logaritmos).
 
 ## Funciones exponenciales
 
@@ -453,7 +453,7 @@ $$\\lim_{x \\to \\infty} \\frac{e^x}{2x} = \\lim_{x \\to \\infty} \\frac{e^x}{2}
 
 $$\\lim_{x \\to \\infty} \\frac{\\ln(x)}{x} = 0$$
 
-El [logaritmo](/saberes-previos#logaritmos) crece más lento que cualquier [polinomio](/saberes-previos#polinomios).
+El [logaritmo](/conceptos-previos#logaritmos) crece más lento que cualquier [polinomio](/conceptos-previos#polinomios).
 
 ## Aplicación
 - Crecimiento poblacional
@@ -551,7 +551,7 @@ Las dos primeras son subtipos de la **discontinuidad esencial**; la tercera es l
     titulo: 'Derivadas',
     descripcion: 'Mide cómo cambia una función en un instante específico. Representa la razón de cambio instantánea y la pendiente de la recta tangente.',
     icono: '∂',
-    color: '#2563EB',
+    color: '#4F46E5',
     temas: [
       {
         id: '2.1',
@@ -560,14 +560,14 @@ Las dos primeras son subtipos de la **discontinuidad esencial**; la tercera es l
         contenido: `
 ## Introducción
 
-La [derivada](/calculo1/derivadas/2.1) es uno de los conceptos más importantes del cálculo diferencial, ya que mide cómo cambia una [función](/saberes-previos#funciones) en un instante específico. Representa la razón de cambio instantánea.
+La [derivada](/calculo1/derivadas/2.1) es uno de los conceptos más importantes del cálculo diferencial, ya que mide cómo cambia una [función](/conceptos-previos#funciones) en un instante específico. Representa la razón de cambio instantánea.
 
 ## Definición formal
 
 $$f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$
 
 Donde:
-- $f(x+h) - f(x)$ representa el cambio en la [función](/saberes-previos#funciones).
+- $f(x+h) - f(x)$ representa el cambio en la [función](/conceptos-previos#funciones).
 - $h$ representa un cambio muy pequeño en $x$.
 
 ## Interpretación práctica
@@ -591,10 +591,10 @@ En $t = 3$: $v = 2(3) = 6$ unidades/segundo.
         contenido: `
 ## Interpretación geométrica
 
-Geométricamente, la [derivada](/calculo1/derivadas/2.1) representa la pendiente de la [recta tangente](/saberes-previos#recta-tangente) a una curva en un punto.
+Geométricamente, la [derivada](/calculo1/derivadas/2.1) representa la pendiente de la [recta tangente](/conceptos-previos#recta-tangente) a una curva en un punto.
 
-- Pendiente positiva → la [función](/saberes-previos#funciones) crece.
-- Pendiente negativa → la [función](/saberes-previos#funciones) decrece.
+- Pendiente positiva → la [función](/conceptos-previos#funciones) crece.
+- Pendiente negativa → la [función](/conceptos-previos#funciones) decrece.
 - Pendiente cero → punto [máximo o mínimo](/calculo1/aplicaciones/3.3).
 
 **Ejemplo:** $f(x) = x^2 \\implies f'(x) = 2x$
@@ -624,7 +624,7 @@ $$a(t) = v'(t)$$
         contenido: `
 ## Introducción
 
-Permiten derivar [funciones](/saberes-previos#funciones) sin usar siempre la [definición por límite](/calculo1/derivadas/2.1).
+Permiten derivar [funciones](/conceptos-previos#funciones) sin usar siempre la [definición por límite](/calculo1/derivadas/2.1).
 
 ## Reglas fundamentales
 
@@ -657,7 +657,7 @@ $$f(x) = x^2 + 3x \\implies f'(x) = 2x + 3$$
         contenido: `
 ## Introducción
 
-Se utiliza cuando una [función](/saberes-previos#funciones) está dentro de otra [función](/saberes-previos#funciones) (funciones compuestas).
+Se utiliza cuando una [función](/conceptos-previos#funciones) está dentro de otra [función](/conceptos-previos#funciones) (funciones compuestas).
 
 ## Fórmula
 
@@ -687,7 +687,7 @@ $$y' = 4(3x + 2)^3 \\cdot (3) = 12(3x + 2)^3$$
         contenido: `
 ## Introducción
 
-Incluye [funciones polinomiales](/saberes-previos#polinomios), [racionales](/saberes-previos#racionales) y [radicales](/saberes-previos#radicales).
+Incluye [funciones polinomiales](/conceptos-previos#polinomios), [racionales](/conceptos-previos#racionales) y [radicales](/conceptos-previos#radicales).
 
 ## Funciones polinomiales
 
@@ -714,7 +714,7 @@ Diseño estructural, áreas, volúmenes.
         contenido: `
 ## Introducción
 
-[Derivadas](/calculo1/derivadas/2.1) de [funciones trigonométricas](/saberes-previos#trigonometria) básicas y sus inversas.
+[Derivadas](/calculo1/derivadas/2.1) de [funciones trigonométricas](/conceptos-previos#trigonometria) básicas y sus inversas.
 
 ## Principales
 
@@ -746,7 +746,7 @@ $$f(x) = \\sin x + x^2 \\implies f'(x) = \\cos x + 2x$$
         contenido: `
 ## Introducción
 
-Incluye la [función](/saberes-previos#funciones) especial $e^x$ cuya [derivada](/calculo1/derivadas/2.1) es ella misma.
+Incluye la [función](/conceptos-previos#funciones) especial $e^x$ cuya [derivada](/calculo1/derivadas/2.1) es ella misma.
 
 ## Exponencial natural
 
@@ -800,7 +800,7 @@ Circunferencias, elipses, geometría analítica.
         contenido: `
 ## Introducción
 
-Son [derivadas](/calculo1/derivadas/2.1) sucesivas que dan información sobre el comportamiento de la [función](/saberes-previos#funciones).
+Son [derivadas](/calculo1/derivadas/2.1) sucesivas que dan información sobre el comportamiento de la [función](/conceptos-previos#funciones).
 
 ## Jerarquía
 
@@ -833,7 +833,7 @@ $$f'''(x) = 24x$$
         contenido: `
 ## Introducción
 
-El diferencial permite aproximar pequeños cambios en una [función](/saberes-previos#funciones) usando su [derivada](/calculo1/derivadas/2.1).
+El diferencial permite aproximar pequeños cambios en una [función](/conceptos-previos#funciones) usando su [derivada](/calculo1/derivadas/2.1).
 
 ## Fórmula
 
@@ -861,7 +861,7 @@ $$dy = 2(4)(0.1) = 0.8$$
     titulo: 'Aplicaciones de la Derivada',
     descripcion: 'Herramientas para resolver problemas reales de optimización, movimiento, economía e ingeniería usando derivadas.',
     icono: '⚡',
-    color: '#059669',
+    color: '#047857',
     temas: [
       {
         id: '3.1',
@@ -870,12 +870,12 @@ $$dy = 2(4)(0.1) = 0.8$$
         contenido: `
 ## Introducción
 
-Las razones de cambio relacionadas estudian situaciones donde dos o más [variables](/saberes-previos#variables) cambian con respecto al tiempo y están conectadas por una [ecuación](/saberes-previos#ecuaciones).
+Las razones de cambio relacionadas estudian situaciones donde dos o más [variables](/conceptos-previos#variables) cambian con respecto al tiempo y están conectadas por una [ecuación](/conceptos-previos#ecuaciones).
 
 ## Procedimiento general
 
-1. Identificar [variables](/saberes-previos#variables).
-2. Relacionarlas mediante una [ecuación](/saberes-previos#ecuaciones).
+1. Identificar [variables](/conceptos-previos#variables).
+2. Relacionarlas mediante una [ecuación](/conceptos-previos#ecuaciones).
 3. [Derivar](/calculo1/derivadas/2.1) implícitamente respecto al tiempo.
 4. Sustituir valores.
 
@@ -903,12 +903,12 @@ Si aumenta el volumen, también cambia el radio.
         contenido: `
 ## Introducción
 
-La primera [derivada](/calculo1/derivadas/2.1) permite determinar si una [función](/saberes-previos#funciones) aumenta o disminuye.
+La primera [derivada](/calculo1/derivadas/2.1) permite determinar si una [función](/conceptos-previos#funciones) aumenta o disminuye.
 
 ## Criterios
 
-- Si $f'(x) > 0$ → La [función](/saberes-previos#funciones) **crece**.
-- Si $f'(x) < 0$ → La [función](/saberes-previos#funciones) **decrece**.
+- Si $f'(x) > 0$ → La [función](/conceptos-previos#funciones) **crece**.
+- Si $f'(x) < 0$ → La [función](/conceptos-previos#funciones) **decrece**.
 
 ## Ejemplo
 
@@ -934,7 +934,7 @@ $$f'(x) = 2x - 4$$
         contenido: `
 ## Introducción
 
-Son puntos donde la [función](/saberes-previos#funciones) alcanza valores mayores o menores respecto a puntos cercanos.
+Son puntos donde la [función](/conceptos-previos#funciones) alcanza valores mayores o menores respecto a puntos cercanos.
 
 ## Criterio de la primera [derivada](/calculo1/derivadas/2.1)
 
@@ -964,7 +964,7 @@ $$f'(x) = 2x - 6 \\implies x = 3$$
         contenido: `
 ## Introducción
 
-La segunda [derivada](/calculo1/derivadas/2.1) indica cómo se curva la gráfica de una [función](/saberes-previos#funciones).
+La segunda [derivada](/calculo1/derivadas/2.1) indica cómo se curva la gráfica de una [función](/conceptos-previos#funciones).
 
 ## Criterios
 
@@ -1028,7 +1028,7 @@ Busca el mejor valor posible:
 
 ## Pasos
 
-1. Definir [función](/saberes-previos#funciones) objetivo.
+1. Definir [función](/conceptos-previos#funciones) objetivo.
 2. [Derivar](/calculo1/derivadas/2.1).
 3. Igualar a cero.
 4. Evaluar.
@@ -1056,11 +1056,11 @@ Arquitectura, economía, logística.
         contenido: `
 ## Introducción
 
-Si una [función](/saberes-previos#funciones) continua en $[a,b]$ cumple $f(a) = f(b)$, existe un punto con [tangente](/calculo1/derivadas/2.2) horizontal.
+Si una [función](/conceptos-previos#funciones) continua en $[a,b]$ cumple $f(a) = f(b)$, existe un punto con [tangente](/calculo1/derivadas/2.2) horizontal.
 
 ## Condiciones
 
-Si una [función](/saberes-previos#funciones):
+Si una [función](/conceptos-previos#funciones):
 1. Es continua en $[a,b]$
 2. Es [derivable](/calculo1/derivadas/2.1) en $(a,b)$
 3. $f(a) = f(b)$
@@ -1153,8 +1153,8 @@ Cálculos rápidos.
         contenido: `
 ## Introducción
 
-Estudio integral de una [función](/saberes-previos#funciones):
-- [Dominio](/saberes-previos#dominio)
+Estudio integral de una [función](/conceptos-previos#funciones):
+- [Dominio](/conceptos-previos#dominio)
 - Intersecciones
 - [Límites](/calculo1/limites/1.1)
 - [Continuidad](/calculo1/limites/1.7)

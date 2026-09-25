@@ -87,7 +87,7 @@ export default function SaberesPrevios() {
         {/* Header */}
         <div style={styles.header}>
           <span style={styles.tag}>Preparación</span>
-          <h1 style={styles.title}>Saberes Previos</h1>
+          <h1 style={styles.title}>Conceptos Previos</h1>
           <p style={styles.desc}>
             Antes de adentrarte en el mundo del Cálculo, es importante que revises estos conceptos 
             fundamentales. Dominarlos te permitirá avanzar con confianza y reducir la frustración 
@@ -146,7 +146,7 @@ export default function SaberesPrevios() {
             <p style={styles.calloutText}>
               No te preocupes. El asistente IA pronto podrá ayudarte a repasar cualquier concepto 
               paso a paso. Mientras tanto, te recomendamos repasar con tus apuntes de pre-cálculo 
-              o buscar recursos complementarios en la biblioteca.
+              o buscar recursos complementarios en la videoteca.
             </p>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function SaberesPrevios() {
 
 const styles = {
   page: {
-    padding: '64px 0',
+    padding: '32px 0 80px',
   },
   header: {
     textAlign: 'center',
@@ -167,8 +167,8 @@ const styles = {
   tag: {
     display: 'inline-block',
     padding: '6px 14px',
-    background: 'rgba(244,180,0,0.15)',
-    color: '#F4B400',
+    background: '#FFFBEB',
+    color: '#B45309',
     fontSize: '13px',
     fontWeight: 700,
     borderRadius: '999px',
@@ -179,13 +179,13 @@ const styles = {
   title: {
     fontSize: '36px',
     fontWeight: 800,
-    color: '#fff',
+    color: '#252350',
     margin: '0 0 12px',
     fontFamily: "'Poppins', sans-serif",
   },
   desc: {
     fontSize: '17px',
-    color: 'rgba(255,255,255,0.6)',
+    color: '#64628A',
     lineHeight: 1.6,
     margin: 0,
   },
@@ -197,16 +197,16 @@ const styles = {
     margin: '0 auto',
   },
   card: {
-    background: 'linear-gradient(145deg, rgba(15,26,53,0.8), rgba(11,16,32,0.9))',
+    background: 'linear-gradient(145deg, #FFFFFF, #FFFFFF)',
     borderRadius: '16px',
-    border: '1px solid rgba(244,180,0,0.08)',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+    border: '1px solid #E6E5F5',
+    boxShadow: '0 1px 3px rgba(37,35,80,0.04)',
     overflow: 'hidden',
     transition: 'box-shadow 0.2s ease',
   },
   cardOpen: {
-    boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
-    borderColor: 'rgba(244,180,0,0.3)',
+    boxShadow: '0 10px 25px rgba(37,35,80,0.08)',
+    borderColor: 'rgba(245,158,11,0.35)',
   },
   cardHeader: {
     width: '100%',
@@ -231,19 +231,19 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'rgba(244,180,0,0.1)',
-    color: '#F4B400',
+    background: '#FFFBEB',
+    color: '#B45309',
     borderRadius: '10px',
   },
   cardTitle: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#fff',
+    color: '#252350',
     fontFamily: "'Poppins', sans-serif",
   },
   cardArrow: {
     fontSize: '20px',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#64628A',
     fontWeight: 300,
     width: '28px',
     height: '28px',
@@ -267,26 +267,26 @@ const styles = {
     alignItems: 'flex-start',
     gap: '10px',
     fontSize: '14px',
-    color: 'rgba(255,255,255,0.8)',
+    color: '#252350',
     lineHeight: 1.5,
     padding: '8px 12px',
-    background: 'rgba(244,180,0,0.04)',
+    background: '#FFFBEB',
     borderRadius: '8px',
   },
   bullet: {
-    color: '#F4B400',
+    color: '#B45309',
     fontWeight: 700,
     lineHeight: 1.5,
   },
   cardFooter: {
     marginTop: '14px',
     padding: '10px 12px',
-    background: 'rgba(244,180,0,0.08)',
+    background: '#FFFBEB',
     borderRadius: '8px',
   },
   note: {
     fontSize: '13px',
-    color: '#F4B400',
+    color: '#B45309',
     fontWeight: 500,
   },
   callout: {
@@ -296,25 +296,25 @@ const styles = {
     maxWidth: '720px',
     margin: '40px auto 0',
     padding: '24px',
-    background: 'rgba(244,180,0,0.06)',
+    background: '#FFFBEB',
     borderRadius: '16px',
-    border: '1px solid rgba(244,180,0,0.15)',
+    border: '1px solid rgba(245,158,11,0.35)',
   },
   calloutEmoji: {
     fontSize: '28px',
     lineHeight: 1,
-    color: '#F4B400',
+    color: '#B45309',
   },
   calloutTitle: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#F4B400',
+    color: '#B45309',
     margin: '0 0 6px',
     fontFamily: "'Poppins', sans-serif",
   },
   calloutText: {
     fontSize: '14px',
-    color: 'rgba(255,255,255,0.7)',
+    color: '#64628A',
     lineHeight: 1.55,
     margin: 0,
   },

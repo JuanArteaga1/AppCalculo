@@ -26,9 +26,9 @@ export default function AnimatedIcon({ type, size = 52 }) {
   }, []);
 
   const color =
-    normalizedType === 'limite' ? '#F4B400' :
-    normalizedType === 'derivada' ? '#60A5FA' :
-    '#34D399';
+    normalizedType === 'limite' ? '#F59E0B' :
+    normalizedType === 'derivada' ? '#4F46E5' :
+    '#10B981';
 
   const bg = color + '12';
 
@@ -45,7 +45,7 @@ export default function AnimatedIcon({ type, size = 52 }) {
         style={{ animation: 'drawStroke 1.8s ease-out forwards, pulseGlow 3s ease-in-out infinite 1.8s' }}
       />
       <circle cx={cx - 10} cy={cy - 6} r="2.5" fill={color} stroke="none" style={{ animation: 'floatUp 2s ease-in-out infinite' }} />
-      <circle cx={cx + 10} cy={cy + 6} r="2.5" fill="#F4B400" stroke="none" style={{ animation: 'floatUp 2.2s ease-in-out infinite 0.4s' }} />
+      <circle cx={cx + 10} cy={cy + 6} r="2.5" fill="#F59E0B" stroke="none" style={{ animation: 'floatUp 2.2s ease-in-out infinite 0.4s' }} />
     </g>
   );
 
@@ -95,9 +95,9 @@ export default function AnimatedIcon({ type, size = 52 }) {
         strokeLinejoin="round"
         style={{ animation: 'pulseGlow 2s ease-in-out infinite' }}
       />
-      <circle cx={cx - 10} cy={cy - 8} r="1.5" fill="#F4B400" style={{ animation: 'flash 1.5s ease-in-out infinite' }} />
-      <circle cx={cx + 10} cy={cy + 2} r="1.5" fill="#F4B400" style={{ animation: 'flash 1.7s ease-in-out infinite 0.3s' }} />
-      <circle cx={cx - 6} cy={cy + 12} r="1.5" fill="#F4B400" style={{ animation: 'flash 1.4s ease-in-out infinite 0.6s' }} />
+      <circle cx={cx - 10} cy={cy - 8} r="1.5" fill="#F59E0B" style={{ animation: 'flash 1.5s ease-in-out infinite' }} />
+      <circle cx={cx + 10} cy={cy + 2} r="1.5" fill="#F59E0B" style={{ animation: 'flash 1.7s ease-in-out infinite 0.3s' }} />
+      <circle cx={cx - 6} cy={cy + 12} r="1.5" fill="#F59E0B" style={{ animation: 'flash 1.4s ease-in-out infinite 0.6s' }} />
     </g>
   );
 

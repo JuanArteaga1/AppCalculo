@@ -129,9 +129,8 @@ export default function Calculo1() {
 
 const styles = {
   page: {
-    padding: '40px 0 80px',
-    background: '#0b1020',
-    minHeight: '100vh',
+    padding: '32px 0 80px',
+    background: '#F8F8FE',
   },
   breadcrumb: {
     display: 'flex',
@@ -141,15 +140,15 @@ const styles = {
     fontSize: '14px',
   },
   breadcrumbLink: {
-    color: '#F4B400',
+    color: '#B45309',
     textDecoration: 'none',
     fontWeight: 600,
   },
   breadcrumbSep: {
-    color: 'rgba(255,255,255,0.3)',
+    color: '#64628A',
   },
   breadcrumbCurrent: {
-    color: '#fff',
+    color: '#252350',
     fontWeight: 700,
   },
   unidadHeader: {
@@ -158,10 +157,10 @@ const styles = {
     gap: '24px',
     marginBottom: '32px',
     padding: '28px',
-    background: 'linear-gradient(145deg, rgba(15,26,53,0.9) 0%, rgba(11,16,32,0.95) 100%)',
+    background: 'linear-gradient(145deg, #FFFFFF 0%, #FFFFFF 100%)',
     borderRadius: '20px',
-    border: '1px solid rgba(244,180,0,0.1)',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(244,180,0,0.05)',
+    border: '1px solid #E6E5F5',
+    boxShadow: '0 8px 32px rgba(37,35,80,0.1), inset 0 1px 0 rgba(245,158,11,0.05)',
   },
   unidadIcon: {
     width: '64px',
@@ -176,13 +175,13 @@ const styles = {
   unidadTitle: {
     fontSize: '28px',
     fontWeight: 800,
-    color: '#fff',
+    color: '#252350',
     margin: '0 0 6px',
     fontFamily: "'Poppins', sans-serif",
   },
   unidadDesc: {
     fontSize: '15px',
-    color: 'rgba(255,255,255,0.6)',
+    color: '#64628A',
     margin: 0,
     maxWidth: '640px',
   },
@@ -204,34 +203,34 @@ const styles = {
     minWidth: 0,
   },
   temaCard: {
-    background: 'linear-gradient(145deg, rgba(15,26,53,0.7) 0%, rgba(11,16,32,0.85) 100%)',
+    background: 'linear-gradient(145deg, #FFFFFF 0%, #FFFFFF 100%)',
     borderRadius: '18px',
     padding: '22px',
-    border: '1px solid rgba(244,180,0,0.08)',
+    border: '1px solid #E6E5F5',
     textDecoration: 'none',
     color: 'inherit',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+    boxShadow: '0 4px 20px rgba(37,35,80,0.07)',
   },
   temaNumber: {
     fontSize: '13px',
     fontWeight: 800,
-    color: '#F4B400',
+    color: '#B45309',
     letterSpacing: '1px',
   },
   temaTitle: {
     fontSize: '17px',
     fontWeight: 700,
-    color: '#fff',
+    color: '#252350',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
   },
   temaDesc: {
     fontSize: '13.5px',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#64628A',
     lineHeight: 1.5,
     margin: 0,
     flex: 1,
@@ -247,21 +246,21 @@ const styles = {
     fontWeight: 700,
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
-    color: 'rgba(255,255,255,0.5)',
-    background: 'rgba(255,255,255,0.06)',
+    color: '#64628A',
+    background: '#F3F2FC',
     padding: '4px 10px',
     borderRadius: '999px',
   },
   temaArrow: {
-    color: '#F4B400',
+    color: '#B45309',
     fontWeight: 700,
     fontSize: '16px',
     transition: 'transform 0.2s ease',
   },
 
   hero: {
-    background: 'linear-gradient(135deg, #0f1a35 0%, #0b1020 50%, #0b1020 100%)',
-    color: '#fff',
+    background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F8FE 50%, #F8F8FE 100%)',
+    color: '#252350',
     padding: '56px 0',
   },
   heroContainer: {
@@ -278,8 +277,8 @@ const styles = {
   heroTag: {
     display: 'inline-flex',
     padding: '6px 14px',
-    background: 'rgba(244,180,0,0.15)',
-    color: '#F4B400',
+    background: '#FFFBEB',
+    color: '#B45309',
     fontSize: '12px',
     fontWeight: 700,
     borderRadius: '999px',
@@ -290,14 +289,14 @@ const styles = {
   heroTitle: {
     fontSize: '40px',
     fontWeight: 800,
-    color: '#fff',
+    color: '#252350',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
   },
   heroDesc: {
     fontSize: '17px',
     lineHeight: 1.6,
-    color: 'rgba(255,255,255,0.7)',
+    color: '#64628A',
     margin: 0,
     maxWidth: '520px',
   },
@@ -315,12 +314,12 @@ const styles = {
   statNum: {
     fontSize: '24px',
     fontWeight: 800,
-    color: '#F4B400',
+    color: '#B45309',
     fontFamily: "'Poppins', sans-serif",
   },
   statLabel: {
     fontSize: '13px',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#64628A',
   },
   heroRight: {
     borderRadius: '20px',
@@ -328,7 +327,7 @@ const styles = {
   },
   unitsSection: {
     padding: '56px 0',
-    background: '#0b1020',
+    background: '#F8F8FE',
   },
   unitsHeader: {
     textAlign: 'center',
@@ -338,13 +337,13 @@ const styles = {
   unitsTitle: {
     fontSize: '28px',
     fontWeight: 800,
-    color: '#fff',
+    color: '#252350',
     margin: '0 0 10px',
     fontFamily: "'Poppins', sans-serif",
   },
   unitsDesc: {
     fontSize: '16px',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#64628A',
     margin: 0,
     lineHeight: '1.55',
   },
@@ -354,22 +353,22 @@ const styles = {
     gap: '22px',
   },
   unitCard: {
-    background: 'linear-gradient(145deg, rgba(15,26,53,0.8) 0%, rgba(11,16,32,0.9) 100%)',
+    background: 'linear-gradient(145deg, #FFFFFF 0%, #FFFFFF 100%)',
     borderRadius: '20px',
     padding: '28px 24px',
-    border: '1px solid rgba(244,180,0,0.08)',
+    border: '1px solid #E6E5F5',
     textDecoration: 'none',
     color: 'inherit',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.25)',
+    boxShadow: '0 4px 24px rgba(37,35,80,0.09)',
   },
   unitTitle: {
     fontSize: '20px',
     fontWeight: 800,
-    color: '#fff',
+    color: '#252350',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
   },
@@ -377,13 +376,13 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderTop: '1px solid rgba(255,255,255,0.08)',
+    borderTop: '1px solid #E6E5F5',
     paddingTop: '14px',
   },
   unitCount: {
     fontSize: '12px',
     fontWeight: 700,
-    color: 'rgba(255,255,255,0.4)',
+    color: '#64628A',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
   },
@@ -400,16 +399,16 @@ if (typeof document !== 'undefined' && !document.getElementById('calculo1-styles
     /* Hover states */
     .calculo-tema-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
-      border-color: rgba(244,180,0,0.3) !important;
+      box-shadow: 0 12px 32px rgba(37,35,80,0.12);
+      border-color: rgba(245,158,11,0.35) !important;
     }
     .calculo-tema-card:hover span:last-child {
       transform: translateX(3px);
     }
     .calculo-unit-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
-      border-color: rgba(244,180,0,0.3) !important;
+      box-shadow: 0 16px 40px rgba(37,35,80,0.14);
+      border-color: rgba(245,158,11,0.35) !important;
     }
 
     /* Tablet: layout de unidad pasa a 1 columna, chat debajo */

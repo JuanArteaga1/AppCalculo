@@ -10,9 +10,11 @@ const PARTICLES = Array.from({ length: 20 }, () => ({
   size: 4 + Math.random() * 6,
 }));
 
+// El fondo va por diapositiva: el GIF trae el suyo oscuro dentro de la imagen
+// y la mascota, con transparencia, se funde con el fondo de la página.
 const CAROUSEL_ITEMS = [
-  { src: '/gift2.gif', alt: 'Gráfica animada de derivada' },
-  { src: '/Quimerito.png', alt: 'Quimerito - Mascota universitaria' },
+  { src: '/gift2.gif', alt: 'Gráfica animada de derivada', fondo: '#312E81' },
+  { src: '/Quimerito.png', alt: 'Quimerito - Mascota universitaria', fondo: '#F8F8FE' },
 ];
 
 const SWIPE_THRESHOLD = 50;
@@ -83,8 +85,8 @@ export default function Home() {
                 Explorar cursos
                 <FiArrowRight />
               </Link>
-              <Link to="/saberes-previos" className="hero-btn hero-btn-ghost">
-                Saberes previos
+              <Link to="/conceptos-previos" className="hero-btn hero-btn-ghost">
+                Conceptos previos
               </Link>
             </div>
           </div>
@@ -97,6 +99,7 @@ export default function Home() {
               {CAROUSEL_ITEMS.map((item, i) => (
                 <div key={i} style={{
                   ...styles.carouselSlide,
+                  background: item.fondo,
                   opacity: i === currentSlide ? 1 : 0,
                   transform: i === currentSlide ? 'scale(1)' : 'scale(0.95)',
                 }}>
@@ -121,7 +124,7 @@ export default function Home() {
                   onClick={() => setCurrentSlide(i)}
                   className="carousel-dot"
                   style={{
-                    background: i === currentSlide ? '#F4B400' : 'rgba(255,255,255,0.3)',
+                    background: i === currentSlide ? '#F59E0B' : '#8B89AE',
                     transform: i === currentSlide ? 'scale(1.3)' : 'scale(1)',
                   }}
                   aria-label={`Slide ${i + 1}`}
@@ -211,8 +214,8 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          background: rgba(255,255,255,0.08);
-          color: rgba(255,255,255,0.9);
+          background: #F3F2FC;
+          color: #252350;
           padding: 8px 14px;
           border-radius: 999px;
           font-size: 12px;
@@ -220,14 +223,14 @@ export default function Home() {
           width: fit-content;
           max-width: 100%;
           backdrop-filter: blur(4px);
-          border: 1px solid rgba(255,255,255,0.1);
+          border: 1px solid #E6E5F5;
           animation: slideIn 0.6s ease forwards;
         }
         .hero-title {
           font-size: clamp(28px, 7.5vw, 52px);
           font-weight: 800;
           line-height: 1.15;
-          color: #fff;
+          color: #252350;
           margin: 0;
           font-family: 'Poppins', sans-serif;
           overflow-wrap: break-word;
@@ -236,7 +239,7 @@ export default function Home() {
         .hero-desc {
           font-size: 15px;
           line-height: 1.6;
-          color: rgba(255,255,255,0.7);
+          color: #64628A;
           max-width: 480px;
           margin: 0;
           animation: slideIn 1s ease forwards;
@@ -261,16 +264,16 @@ export default function Home() {
           transition: all 0.2s ease;
         }
         .hero-btn-primary {
-          background: #F4B400;
-          color: #0b1020;
+          background: #F59E0B;
+          color: #252350;
           font-weight: 700;
-          box-shadow: 0 8px 24px rgba(244,180,0,0.3);
+          box-shadow: 0 8px 24px rgba(245,158,11,0.3);
         }
         .hero-btn-ghost {
-          background: rgba(255,255,255,0.06);
-          color: #fff;
+          background: #F3F2FC;
+          color: #252350;
           font-weight: 600;
-          border: 1px solid rgba(255,255,255,0.15);
+          border: 1px solid #E6E5F5;
           backdrop-filter: blur(4px);
         }
 
@@ -281,7 +284,7 @@ export default function Home() {
           height: clamp(220px, 60vw, 400px);
           overflow: hidden;
           border-radius: 16px;
-          background: rgba(255,255,255,0.03);
+          background: #F8F8FE;
           touch-action: pan-y;
         }
         .carousel-image {
@@ -295,9 +298,9 @@ export default function Home() {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          background: rgba(11,16,32,0.7);
-          color: #fff;
-          border: 1px solid rgba(255,255,255,0.15);
+          background: #FFFFFF;
+          color: #252350;
+          border: 1px solid #E6E5F5;
           border-radius: 50%;
           width: 36px;
           height: 36px;
@@ -323,7 +326,7 @@ export default function Home() {
 
         /* ---------- SECCIÓN DE ICONOS ---------- */
         .calculus-section {
-          background: #0b1020;
+          background: #F8F8FE;
           padding: 32px 0 48px;
         }
         .calculus-grid {
@@ -338,7 +341,7 @@ export default function Home() {
         }
         .calculus-icon-card:hover {
           transform: translateY(-6px);
-          box-shadow: 0 12px 32px rgba(244, 180, 0, 0.15);
+          box-shadow: 0 12px 32px rgba(245,158,11,0.15);
         }
 
         /* ---------- TABLET ---------- */
@@ -378,41 +381,41 @@ function CalculusIcon({ title, animation, to }) {
       case 'limit':
         return (
           <svg className="icon-svg" width="80" height="80" viewBox="0 0 50 50">
-            <line x1="5" y1="40" x2="45" y2="40" stroke="#F4B400" strokeWidth="2" opacity="0.3" />
-            <line x1="5" y1="5" x2="5" y2="45" stroke="#F4B400" strokeWidth="2" opacity="0.3" />
-            <path d="M 5 35 Q 15 10 25 20 Q 35 30 45 15" fill="none" stroke="#F4B400" strokeWidth="2.5"
+            <line x1="5" y1="40" x2="45" y2="40" stroke="#F59E0B" strokeWidth="2" opacity="0.3" />
+            <line x1="5" y1="5" x2="5" y2="45" stroke="#F59E0B" strokeWidth="2" opacity="0.3" />
+            <path d="M 5 35 Q 15 10 25 20 Q 35 30 45 15" fill="none" stroke="#F59E0B" strokeWidth="2.5"
               strokeDasharray="100" strokeDashoffset="100" style={{ animation: 'drawLine 2s ease forwards' }} />
-            <circle cx="30" cy="22" r="4" fill="#fff"
+            <circle cx="30" cy="22" r="4" fill="#252350"
               style={{ animation: 'pointGlow 1.5s ease-in-out infinite' }} />
-            <circle cx="30" cy="22" r="8" fill="none" stroke="#fff" strokeWidth="1.5" opacity="0.4"
+            <circle cx="30" cy="22" r="8" fill="none" stroke="#252350" strokeWidth="1.5" opacity="0.4"
               style={{ animation: 'pulse 2s ease-in-out infinite' }} />
-            <text x="33" y="18" fontSize="8" fill="#F4B400" fontWeight="700" fontFamily="Poppins">x→a</text>
+            <text x="33" y="18" fontSize="8" fill="#F59E0B" fontWeight="700" fontFamily="Poppins">x→a</text>
           </svg>
         );
       case 'derivative':
         return (
           <svg className="icon-svg" width="80" height="80" viewBox="0 0 50 50">
-            <path d="M 5 40 Q 15 35 25 25 Q 35 15 45 10" fill="none" stroke="#F4B400" strokeWidth="2.5"
+            <path d="M 5 40 Q 15 35 25 25 Q 35 15 45 10" fill="none" stroke="#F59E0B" strokeWidth="2.5"
               strokeDasharray="80" strokeDashoffset="80" style={{ animation: 'drawLine 1.8s ease forwards' }} />
-            <line x1="15" y1="32" x2="40" y2="12" stroke="#fff" strokeWidth="2" strokeDasharray="4 3"
+            <line x1="15" y1="32" x2="40" y2="12" stroke="#252350" strokeWidth="2" strokeDasharray="4 3"
               style={{ animation: 'tangentMove 3s ease-in-out infinite', transformOrigin: '25px 25px' }} />
-            <circle cx="25" cy="25" r="4" fill="#fff"
+            <circle cx="25" cy="25" r="4" fill="#252350"
               style={{ animation: 'pulse 1.5s ease-in-out infinite' }} />
-            <text x="6" y="37" fontSize="7" fill="#10B981" fontWeight="600" fontFamily="Poppins">f'</text>
+            <text x="6" y="37" fontSize="7" fill="#059669" fontWeight="600" fontFamily="Poppins">f'</text>
           </svg>
         );
       case 'application':
         return (
           <svg className="icon-svg" width="80" height="80" viewBox="0 0 50 50">
-            <line x1="5" y1="40" x2="45" y2="40" stroke="#F4B400" strokeWidth="1.5" opacity="0.3" />
-            <line x1="5" y1="5" x2="5" y2="45" stroke="#F4B400" strokeWidth="1.5" opacity="0.3" />
-            <path d="M 8 35 Q 15 8 25 20 Q 35 32 42 10" fill="none" stroke="#F4B400" strokeWidth="2"
+            <line x1="5" y1="40" x2="45" y2="40" stroke="#F59E0B" strokeWidth="1.5" opacity="0.3" />
+            <line x1="5" y1="5" x2="5" y2="45" stroke="#F59E0B" strokeWidth="1.5" opacity="0.3" />
+            <path d="M 8 35 Q 15 8 25 20 Q 35 32 42 10" fill="none" stroke="#F59E0B" strokeWidth="2"
               strokeDasharray="80" strokeDashoffset="80" style={{ animation: 'drawLine 2s ease forwards' }} />
-            <rect x="20" y="10" width="10" height="28" fill="#10B981" opacity="0"
+            <rect x="20" y="10" width="10" height="28" fill="#059669" opacity="0"
               style={{ animation: 'fillUp 0.8s ease 1.5s forwards', transformOrigin: 'bottom' }} />
-            <circle cx="25" cy="20" r="3" fill="#fff" opacity="0"
+            <circle cx="25" cy="20" r="3" fill="#252350" opacity="0"
               style={{ animation: 'scaleIn 0.4s ease 2s forwards' }} />
-            <text x="32" y="16" fontSize="7" fill="#10B981" fontWeight="700" fontFamily="Poppins">max</text>
+            <text x="32" y="16" fontSize="7" fill="#059669" fontWeight="700" fontFamily="Poppins">max</text>
           </svg>
         );
       default:
@@ -434,13 +437,12 @@ function CalculusIcon({ title, animation, to }) {
 
 const styles = {
   page: {
-    background: '#0b1020',
-    minHeight: '100vh',
+    background: '#F8F8FE',
     overflowX: 'hidden',
   },
   hero: {
-    background: 'linear-gradient(135deg, #0f1a35 0%, #0b1020 50%, #0b1020 100%)',
-    color: '#fff',
+    background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F8FE 50%, #F8F8FE 100%)',
+    color: '#252350',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -453,7 +455,7 @@ const styles = {
   particle: {
     position: 'absolute',
     borderRadius: '50%',
-    background: 'rgba(244, 180, 0, 0.3)',
+    background: 'rgba(245,158,11,0.18)',
     animation: 'float 4s ease-in-out infinite',
   },
   heroBadgeDot: {
@@ -466,8 +468,8 @@ const styles = {
     animation: 'pulse 2s ease-in-out infinite',
   },
   heroAccent: {
-    color: '#F4B400',
-    background: 'linear-gradient(90deg, #F4B400, #FFD54F)',
+    color: '#4F46E5',
+    background: 'linear-gradient(90deg, #4F46E5, #7C3AED)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
   },
@@ -493,11 +495,11 @@ const styles = {
   },
 
   calculusCard: {
-    background: 'rgba(255,255,255,0.04)',
+    background: '#F3F2FC',
     borderRadius: '20px',
     padding: '32px 20px 28px',
     textAlign: 'center',
-    border: '1px solid rgba(255,255,255,0.08)',
+    border: '1px solid #E6E5F5',
     transition: 'all 0.3s ease',
     cursor: 'pointer',
   },
@@ -514,7 +516,7 @@ const styles = {
   iconTitle: {
     fontSize: '17px',
     fontWeight: 700,
-    color: '#fff',
+    color: '#252350',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
   },
