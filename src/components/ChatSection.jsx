@@ -16,9 +16,8 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '', later
   const primeraVez = useRef(true);
 
   // Auto-scroll al ultimo mensaje, DENTRO de la caja de mensajes.
-  // Antes se usaba scrollIntoView sobre un ancla, y como el efecto tambien corre
-  // al montar (el saludo ya esta en el estado), al entrar en la unidad la pagina
-  // saltaba sola hasta el chat.
+  // Con scrollIntoView sobre un ancla la pagina saltaba sola hasta el chat al
+  // entrar en la unidad, porque el efecto tambien corre al montar.
   useEffect(() => {
     if (primeraVez.current) {
       primeraVez.current = false;
@@ -29,7 +28,6 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '', later
     caja.scrollTo({ top: caja.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Renderizar LaTeX en mensajes
   useEffect(() => {
     if (mathRef.current) {
       renderMathInElement(mathRef.current, {
@@ -40,7 +38,7 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '', later
           { left: '$', right: '$', display: false },
         ],
         throwOnError: false,
-        errorColor: '#DC2626',
+        errorColor: '#EF4444',
       });
     }
   }, [messages]);
@@ -89,22 +87,30 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '', later
   };
 
   return (
-    <div style={{ ...styles.container, ...(lateral ? styles.containerLateral : {}) }}>
+    <div style={{ ...styles.container, ...(lateral ? styles.containerLateral : {}) }} className="chat-card">
       <div style={styles.headerSection}>
+        <div style={styles.headerGlow} />
         <div style={styles.headerIcon}>🎓</div>
-        <div>
-          <h2 style={styles.title}>Asistente de {getNombreTema()}</h2>
+        <div style={styles.headerTextWrap}>
+          <div style={styles.headerTitleRow}>
+            <h2 style={styles.title}>Asistente de {getNombreTema()}</h2>
+            <span style={styles.liveDot}>
+              <span style={styles.pulse} />
+              <span style={styles.liveText}>En línea</span>
+            </span>
+          </div>
           <p style={styles.subtitle}>
             Pregunta cualquier ejercicio de este tema. Te lo resuelvo paso a paso.
           </p>
         </div>
       </div>
 
-      <div style={styles.chatWrap}>
+      <div style={{ ...styles.chatWrap, ...(lateral ? styles.chatWrapLateral : {}) }}>
         <div ref={mathRef} style={{ ...styles.messages, ...(lateral ? styles.messagesLateral : {}) }}>
           {messages.map((m, i) => (
             <div
               key={i}
+              className="chat-row-anim"
               style={{
                 ...styles.row,
                 ...(m.from === 'user' ? styles.rowUser : {}),
@@ -129,7 +135,7 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '', later
           ))}
 
           {loading && (
-            <div style={styles.row}>
+            <div style={styles.row} className="chat-row-anim">
               <div style={styles.avatarWrap}>
                 <div style={styles.avatarBot}>🎓</div>
               </div>
@@ -140,24 +146,24 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '', later
               </div>
             </div>
           )}
-
         </div>
 
         <form onSubmit={handleSend} style={styles.form}>
           <input
             style={styles.input}
+            className="chat-input"
             placeholder="Escribe tu ejercicio o pregunta... Ej: 'Calcula el límite de x² cuando x→3'"
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <button type="submit" style={styles.sendBtn} disabled={loading}>
-            {loading ? '...' : 'Enviar ➤'}
+          <button type="submit" style={styles.sendBtn} className="chat-send-btn" disabled={loading}>
+            {loading ? '···' : 'Enviar ➤'}
           </button>
         </form>
       </div>
 
       <div style={styles.tips}>
-        <strong>💡 Tips:</strong> Puedes preguntar ejercicios específicos, pedir explicaciones de conceptos, o solicitar ejemplos adicionales. ¡Sé específico para mejores respuestas!
+        <strong style={styles.tipsStrong}>💡 Tips:</strong> Puedes preguntar ejercicios específicos, pedir explicaciones de conceptos, o solicitar ejemplos adicionales. ¡Sé específico para mejores respuestas!
       </div>
     </div>
   );
@@ -170,63 +176,122 @@ function getMensajeBienvenida(tema, unidadTitulo) {
 
 const styles = {
   container: {
-    background: '#FFFFFF',
-    borderRadius: '20px',
+    background: 'linear-gradient(145deg, #FFFFFF 0%, #FFFFFF 100%)',
+    borderRadius: '22px',
     border: '1px solid #E6E5F5',
-    boxShadow: '0 4px 6px -1px rgba(37,35,80,0.05), 0 2px 4px -2px rgba(37,35,80,0.05)',
+    boxShadow: '0 10px 40px rgba(37,35,80,0.12), inset 0 1px 0 rgba(245,158,11,0.05)',
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
     marginTop: '24px',
+    minHeight: 0,
   },
   headerSection: {
+    position: 'relative',
     display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    padding: '24px 28px',
-    background: '#FFFFFF',
+    alignItems: 'flex-start',
+    gap: '14px',
+    padding: '20px 22px',
+    background: 'linear-gradient(135deg, #FFFFFF 0%, #F8F8FE 55%, #F3F2FC 130%)',
     color: '#252350',
+    overflow: 'hidden',
+    borderBottom: '1px solid rgba(245,158,11,0.35)',
+    flexShrink: 0,
+  },
+  headerGlow: {
+    position: 'absolute',
+    top: '-40%',
+    right: '-10%',
+    width: '220px',
+    height: '220px',
+    borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(245,158,11,0.16) 0%, rgba(255,251,235,0) 70%)',
+    pointerEvents: 'none',
   },
   headerIcon: {
-    fontSize: '36px',
-    width: '56px',
-    height: '56px',
-    borderRadius: '16px',
-    background: '#F3F2FC',
+    fontSize: '28px',
+    width: '48px',
+    height: '48px',
+    borderRadius: '14px',
+    background: '#FFFBEB',
+    border: '1px solid rgba(245,158,11,0.35)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+    position: 'relative',
+    zIndex: 1,
+  },
+  headerTextWrap: {
+    position: 'relative',
+    zIndex: 1,
+    minWidth: 0,
+    flex: 1,
+  },
+  headerTitleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    rowGap: '6px',
+    columnGap: '10px',
   },
   title: {
-    fontSize: '22px',
+    fontSize: '19px',
     fontWeight: 800,
     color: '#252350',
-    margin: '0 0 4px',
+    margin: 0,
     fontFamily: "'Poppins', sans-serif",
+    wordBreak: 'break-word',
   },
   subtitle: {
-    fontSize: '14px',
+    fontSize: '13.5px',
     color: '#64628A',
-    margin: 0,
+    margin: '4px 0 0',
+  },
+  liveDot: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    flexShrink: 0,
+    padding: '3px 10px',
+    borderRadius: '999px',
+    background: 'rgba(52,211,153,0.12)',
+  },
+  pulse: {
+    width: '7px',
+    height: '7px',
+    borderRadius: '50%',
+    background: '#059669',
+    animation: 'chatPulse 1.8s infinite',
+  },
+  liveText: {
+    fontSize: '11.5px',
+    fontWeight: 600,
+    color: '#047857',
+    whiteSpace: 'nowrap',
   },
   chatWrap: {
     display: 'flex',
     flexDirection: 'column',
-    background: '#F8F8FE',
+    background: '#FFFFFF',
     borderBottom: '1px solid #E6E5F5',
+  },
+  chatWrapLateral: {
+    flex: 1,
+    minHeight: 0,
   },
   containerLateral: {
     marginTop: 0,
-    maxHeight: 'calc(100vh - 110px)',
+    // 90px del top sticky + un margen de seguridad abajo para que no toque el borde
+    maxHeight: 'calc(100vh - 130px)',
   },
   messagesLateral: {
-    // En el lateral la caja se estira con la tarjeta en vez de un alto fijo.
     flex: 1,
-    minHeight: '160px',
+    minHeight: 0,
     maxHeight: 'none',
   },
   messages: {
-    padding: '24px 28px',
+    padding: '20px 22px',
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
@@ -237,7 +302,7 @@ const styles = {
   row: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '12px',
+    gap: '10px',
   },
   rowUser: {
     flexDirection: 'row-reverse',
@@ -246,45 +311,50 @@ const styles = {
     flexShrink: 0,
   },
   avatarBot: {
-    width: '36px',
-    height: '36px',
+    width: '32px',
+    height: '32px',
     borderRadius: '50%',
-    background: '#FFFFFF',
-    color: '#252350',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '16px',
-  },
-  avatarUser: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '50%',
-    background: '#4F46E5',
+    background: 'linear-gradient(135deg, #4F46E5, #3730A3)',
+    border: '1px solid rgba(79,70,229,0.35)',
     color: '#FFFFFF',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '16px',
+    fontSize: '14px',
+    boxShadow: '0 4px 10px rgba(37,35,80,0.12)',
+  },
+  avatarUser: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #F59E0B, #F59E0B)',
+    color: '#252350',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '14px',
+    boxShadow: '0 4px 10px rgba(245,158,11,0.3)',
   },
   bubble: {
-    padding: '14px 18px',
+    padding: '12px 16px',
     borderRadius: '16px',
-    fontSize: '15px',
-    lineHeight: 1.65,
-    maxWidth: '80%',
+    fontSize: '14.5px',
+    lineHeight: 1.6,
+    maxWidth: '85%',
     wordBreak: 'break-word',
   },
   bubbleBot: {
-    background: '#FFFFFF',
+    background: '#F3F2FC',
     color: '#252350',
     border: '1px solid #E6E5F5',
     borderTopLeftRadius: '4px',
   },
   bubbleUser: {
-    background: '#4F46E5',
-    color: '#FFFFFF',
+    background: 'linear-gradient(135deg, #F59E0B, #F59E0B)',
+    color: '#252350',
+    fontWeight: 500,
     borderTopRightRadius: '4px',
+    boxShadow: '0 4px 14px rgba(245,158,11,0.25)',
   },
   line: {
     margin: '0 0 6px',
@@ -292,53 +362,114 @@ const styles = {
   },
   dot: {
     fontSize: '10px',
-    color: '#64628A',
+    color: '#B45309',
     animation: 'blink 1.4s infinite both',
   },
   form: {
     display: 'flex',
-    gap: '12px',
-    padding: '16px 28px',
+    gap: '10px',
+    padding: '14px 22px',
     background: '#FFFFFF',
-    borderTop: '1px solid #E6E5F5',
+    flexShrink: 0,
   },
   input: {
     flex: 1,
-    padding: '14px 18px',
+    minWidth: 0,
+    padding: '12px 16px',
     borderRadius: '12px',
-    border: '1px solid #E6E5F5',
-    fontSize: '15px',
+    border: '1.5px solid rgba(245,158,11,0.35)',
+    fontSize: '14.5px',
     outline: 'none',
     fontFamily: "'Inter', sans-serif",
-    background: '#F8F8FE',
+    background: '#F3F2FC',
+    color: '#252350',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
   },
   sendBtn: {
-    padding: '14px 28px',
+    padding: '12px 20px',
     borderRadius: '12px',
     border: 'none',
-    background: '#F59E0B',
+    background: 'linear-gradient(135deg, #F59E0B, #F59E0B)',
     color: '#252350',
-    fontSize: '15px',
+    fontSize: '14.5px',
     fontWeight: 700,
     cursor: 'pointer',
     whiteSpace: 'nowrap',
-    boxShadow: '0 4px 12px rgba(245,158,11,0.25)',
+    boxShadow: '0 4px 14px rgba(245,158,11,0.3)',
+    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+    flexShrink: 0,
   },
   tips: {
-    padding: '16px 28px',
-    background: '#EEF2FF',
-    color: '#3730A3',
-    fontSize: '13px',
+    padding: '14px 22px',
+    background: '#FFFBEB',
+    color: '#64628A',
+    fontSize: '12.5px',
     lineHeight: 1.5,
+    flexShrink: 0,
+  },
+  tipsStrong: {
+    color: '#B45309',
   },
 };
 
-if (typeof document !== 'undefined') {
+if (typeof document !== 'undefined' && !document.getElementById('chat-section-styles')) {
   const style = document.createElement('style');
+  style.id = 'chat-section-styles';
   style.textContent = `
     @keyframes blink {
       0%, 80%, 100% { opacity: 0.2; }
       40% { opacity: 1; }
+    }
+    @keyframes chatPulse {
+      0% { box-shadow: 0 0 0 0 rgba(5,150,105,0.35); }
+      70% { box-shadow: 0 0 0 8px rgba(5,150,105,0); }
+      100% { box-shadow: 0 0 0 0 rgba(5,150,105,0); }
+    }
+    @keyframes chatRowIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-row-anim {
+      animation: chatRowIn 0.25s ease-out;
+    }
+    .chat-card {
+      transition: box-shadow 0.25s ease;
+    }
+    .chat-card:hover {
+      box-shadow: 0 14px 46px rgba(37,35,80,0.16), inset 0 1px 0 rgba(245,158,11,0.08);
+    }
+    .chat-input::placeholder {
+      color: #8B89AE;
+    }
+    .chat-input:focus {
+      border-color: #F59E0B !important;
+      background: #F3F2FC !important;
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+    }
+    .chat-send-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(245,158,11,0.3);
+    }
+    .chat-send-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    .chat-send-btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    .chat-card *::-webkit-scrollbar {
+      width: 8px;
+    }
+    .chat-card *::-webkit-scrollbar-thumb {
+      background: rgba(245,158,11,0.18);
+      border-radius: 999px;
+    }
+
+    @media (max-width: 1024px) {
+      .calculo-chat-lateral .chat-card,
+      .tema-layout .chat-card {
+        max-height: none !important;
+      }
     }
   `;
   document.head.appendChild(style);
