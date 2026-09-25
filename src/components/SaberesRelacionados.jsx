@@ -39,8 +39,8 @@ export default function SaberesRelacionados({ unidadId }) {
           </div>
         ))}
       </div>
-      <Link to="/saberes-previos" style={styles.link}>
-        Repasar saberes previos →
+      <Link to="/conceptos-previos" style={styles.link}>
+        Repasar conceptos previos →
       </Link>
     </div>
   );
@@ -48,9 +48,9 @@ export default function SaberesRelacionados({ unidadId }) {
 
 const styles = {
   container: {
-    background: '#FEFCE8',
+    background: '#FFFBEB',
     borderRadius: '16px',
-    border: '1px solid #FDE047',
+    border: '1px solid #FCD34D',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
@@ -68,13 +68,13 @@ const styles = {
   title: {
     fontSize: '16px',
     fontWeight: 800,
-    color: '#854D0E',
+    color: '#B45309',
     margin: 0,
     fontFamily: "'Poppins', sans-serif",
   },
   text: {
     fontSize: '14px',
-    color: '#713F12',
+    color: '#B45309',
     lineHeight: 1.55,
     margin: 0,
   },
@@ -88,11 +88,11 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     padding: '6px 12px',
-    background: '#FEF9C3',
+    background: '#FFFBEB',
     borderRadius: '999px',
     fontSize: '13px',
     fontWeight: 600,
-    color: '#854D0E',
+    color: '#B45309',
   },
   chipIcon: {
     fontSize: '14px',
@@ -101,20 +101,20 @@ const styles = {
   chipLabel: {
     fontSize: '13px',
     fontWeight: 600,
-    color: '#854D0E',
+    color: '#B45309',
   },
   link: {
     display: 'inline-flex',
     alignItems: 'center',
     padding: '10px 18px',
-    background: '#FACC15',
-    color: '#422006',
+    background: '#F59E0B',
+    color: '#252350',
     fontSize: '14px',
     fontWeight: 700,
     borderRadius: '10px',
     textDecoration: 'none',
     width: 'fit-content',
-    boxShadow: '0 4px 12px rgba(250,204,21,0.35)',
+    boxShadow: '0 4px 12px rgba(245,158,11,0.3)',
     transition: 'all 0.2s ease',
     marginTop: '4px',
   },

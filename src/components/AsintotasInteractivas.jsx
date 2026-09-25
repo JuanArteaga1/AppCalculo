@@ -7,10 +7,10 @@ const DURACION_CURVA_MS = 1500;
 const INTERVALO_PASO_MS = 1000;
 const ALTO = 300;
 
-const COLOR_CURVA = '#F4B400';
-const COLOR_VERTICAL = '#EF4444';
-const COLOR_HORIZONTAL = '#10B981';
-const COLOR_OBLICUA = '#3B82F6';
+const COLOR_CURVA = '#4F46E5';
+const COLOR_VERTICAL = '#DC2626';
+const COLOR_HORIZONTAL = '#059669';
+const COLOR_OBLICUA = '#7C3AED';
 
 /**
  * Ejercicio de asíntotas: la función, su gráfica y la resolución paso a paso.
@@ -209,10 +209,10 @@ export default function AsintotasInteractivas({ expr, titulo }) {
             role="img"
             aria-label={`Gráfica de f(x) = ${expr} con sus asíntotas`}
           >
-            <rect x="0" y="0" width={ancho} height={alto} fill="rgba(11,16,32,0.55)" rx="10" />
+            <rect x="0" y="0" width={ancho} height={alto} fill="rgba(255,255,255,0.96)" rx="10" />
 
             {/* ejes */}
-            <g stroke="rgba(255,255,255,0.22)" strokeWidth="1">
+            <g stroke="#E6E5F5" strokeWidth="1">
               {vista.yMin < 0 && vista.yMax > 0 && (
                 <line x1={pad.izq} y1={escalas.py(0)} x2={ancho - pad.der} y2={escalas.py(0)} />
               )}
@@ -280,14 +280,14 @@ export default function AsintotasInteractivas({ expr, titulo }) {
                 style={{
                   ...estilos.paso,
                   borderLeftColor: color,
-                  background: hayRecta ? `${color}14` : 'rgba(255,255,255,0.04)',
+                  background: hayRecta ? `${color}14` : '#F3F2FC',
                 }}
               >
                 <div style={estilos.pasoTitulo}>
-                  <span style={{ ...estilos.pasoLetra, background: `${color}2E`, color }}>
+                  <span style={{ ...estilos.pasoLetra, background: `${color}24`, color: textoDeTipo[p.tipo] || COLOR_NEUTRO_TEXTO }}>
                     {p.etiqueta}
                   </span>
-                  <span style={{ color }}>{p.titulo}</span>
+                  <span style={{ color: textoDeTipo[p.tipo] || COLOR_NEUTRO_TEXTO }}>{p.titulo}</span>
                   {hayRecta && (
                     // Misma línea discontinua que se dibuja en la gráfica, para que
                     // el paso y su recta se reconozcan como lo mismo.
@@ -321,7 +321,8 @@ function texDe(expr) {
  * Cada tipo de asíntota lleva el mismo color aquí abajo que la recta que le
  * corresponde en la gráfica: así se ve de un vistazo qué línea es cada paso.
  */
-const COLOR_NEUTRO = 'rgba(255,255,255,0.35)';
+const COLOR_NEUTRO = '#8B89AE';
+const COLOR_NEUTRO_TEXTO = '#64628A';
 
 const colorDeTipo = {
   horizontal: COLOR_HORIZONTAL,
@@ -330,14 +331,25 @@ const colorDeTipo = {
   ninguna: COLOR_NEUTRO,
 };
 
+/**
+ * El mismo tono, un par de pasos más oscuro: la recta necesita brillo sobre el
+ * blanco de la gráfica y el título necesita contraste sobre el fondo teñido.
+ */
+const textoDeTipo = {
+  horizontal: '#065F46',
+  vertical: '#991B1B',
+  oblicua: '#5B21B6',
+  ninguna: COLOR_NEUTRO_TEXTO,
+};
+
 const estilos = {
   contenedor: {
     margin: '14px 0',
     minWidth: 0,
     maxWidth: '100%',
-    border: '1px solid rgba(244,180,0,0.15)',
+    border: '1px solid rgba(245,158,11,0.35)',
     borderRadius: '14px',
-    background: 'rgba(15,26,53,0.5)',
+    background: 'rgba(255,255,255,0.9)',
     overflow: 'hidden',
   },
   cabecera: {
@@ -347,14 +359,14 @@ const estilos = {
     gap: '12px',
     flexWrap: 'wrap',
     padding: '10px 14px',
-    borderBottom: '1px solid rgba(244,180,0,0.12)',
-    background: 'rgba(244,180,0,0.05)',
+    borderBottom: '1px solid rgba(245,158,11,0.35)',
+    background: '#FFFBEB',
   },
   titulo: {
     fontFamily: "'Poppins', sans-serif",
     fontSize: '13.5px',
     fontWeight: 700,
-    color: '#F4B400',
+    color: '#B45309',
     display: 'inline-flex',
     alignItems: 'center',
     gap: '7px',
@@ -364,8 +376,8 @@ const estilos = {
     padding: '7px 16px',
     borderRadius: '9px',
     border: 'none',
-    background: '#F4B400',
-    color: '#0b1020',
+    background: '#F59E0B',
+    color: '#252350',
     fontSize: '13px',
     fontWeight: 800,
     cursor: 'pointer',
@@ -373,9 +385,9 @@ const estilos = {
   btnSecundario: {
     padding: '7px 14px',
     borderRadius: '9px',
-    border: '1px solid rgba(244,180,0,0.35)',
+    border: '1px solid rgba(245,158,11,0.35)',
     background: 'transparent',
-    color: '#F4B400',
+    color: '#B45309',
     fontSize: '12.5px',
     fontWeight: 700,
     cursor: 'pointer',
@@ -395,8 +407,8 @@ const estilos = {
   paso: {
     padding: '10px 12px',
     borderRadius: '10px',
-    background: 'rgba(255,255,255,0.04)',
-    borderLeft: '3px solid rgba(255,255,255,0.2)',
+    background: '#F3F2FC',
+    borderLeft: '3px solid #E6E5F5',
   },
   pasoTitulo: {
     display: 'flex',
@@ -424,19 +436,19 @@ const estilos = {
   },
   pasoTex: {
     padding: '4px 0',
-    color: '#fff',
+    color: '#252350',
     overflowX: 'auto',
   },
   pasoConclusion: {
     margin: '6px 0 0',
     fontSize: '13.5px',
     lineHeight: 1.5,
-    color: 'rgba(255,255,255,0.72)',
+    color: '#64628A',
   },
   pista: {
     margin: 0,
     fontSize: '13.5px',
-    color: 'rgba(255,255,255,0.45)',
+    color: '#64628A',
   },
   error: {
     margin: '14px 0',
@@ -444,7 +456,7 @@ const estilos = {
     borderRadius: '12px',
     background: 'rgba(239,68,68,0.12)',
     border: '1px solid rgba(239,68,68,0.35)',
-    color: '#FCA5A5',
+    color: '#DC2626',
     fontSize: '13.5px',
   },
 };

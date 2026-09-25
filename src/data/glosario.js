@@ -195,8 +195,11 @@ const MAXIMO_EN_TEXTO = 5;
 /** Cuántas referencias se listan al final del tema. */
 const MAXIMO_REFERENCIAS = 3;
 
-/** Fórmulas y enlaces ya escritos: no se tocan. */
-const INTOCABLE = /(\$\$[\s\S]*?\$\$|\$[^$\n]*\$|\[[^\]]*\]\([^)]*\))/g;
+/**
+ * Fórmulas y enlaces ya escritos: no se tocan. El sufijo del glosario entra aquí
+ * para que un término nuevo no se cuele dentro de una definición ya insertada.
+ */
+const INTOCABLE = /(\$\$[\s\S]*?\$\$|\$[^$\n]*\$|\[[^\]]*\]\([^)]*\)(?:\{data-definicion="[^"]*"\})?)/g;
 
 /** Líneas sin enlaces: títulos, tablas, marcadores y bloques de fórmula. */
 function esLineaExcluida(linea) {
@@ -244,8 +247,7 @@ export function enlazarTerminos(texto, maximo = MAXIMO_EN_TEXTO) {
   for (let i = 0; i < lineas.length && insertados < maximo; i++) {
     if (esLineaExcluida(lineas[i])) continue;
 
-    // Trozos libres en los índices pares; los impares son fórmulas o enlaces.
-    const trozos = lineas[i].split(INTOCABLE);
+    let linea = lineas[i];
 
     for (const { clave, variantes, url, definicion } of GLOSARIO) {
       if (insertados >= maximo) break;
@@ -255,10 +257,16 @@ export function enlazarTerminos(texto, maximo = MAXIMO_EN_TEXTO) {
       for (const variante of variantes) {
         if (colocado) break;
         const patron = patronDe(variante);
+        // Se vuelve a partir en cada intento: lo ya insertado cuenta como intocable.
+        // Trozos libres en los índices pares; los impares son fórmulas o enlaces.
+        const trozos = linea.split(INTOCABLE);
         for (let j = 0; j < trozos.length; j += 2) {
+          patron.lastIndex = 0;
           if (!patron.test(trozos[j])) continue;
-          const defAttr = definicion ? ` data-definicion="${definicion}"` : '';
-          trozos[j] = trozos[j].replace(patron, (_, antes, palabra) => `${antes}[${palabra}](${url}){${defAttr}}`);
+          // Sin espacios ni llaves vacias: TemaPage espera {data-definicion="..."} tal cual.
+          const sufijo = definicion ? `{data-definicion="${definicion}"}` : '';
+          trozos[j] = trozos[j].replace(patron, (_, antes, palabra) => `${antes}[${palabra}](${url})${sufijo}`);
+          linea = trozos.join('');
           colocado = true;
           break;
         }
@@ -271,7 +279,7 @@ export function enlazarTerminos(texto, maximo = MAXIMO_EN_TEXTO) {
       }
     }
 
-    lineas[i] = trozos.join('');
+    lineas[i] = linea;
   }
 
   return lineas.join('\n');

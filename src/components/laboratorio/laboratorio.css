@@ -1,17 +1,19 @@
 /* ================================================
    LABORATORIO DE GRAFICACIÓN
-   Panel lateral oscuro + plano cartesiano claro.
+   Panel lateral claro + plano cartesiano claro.
    ================================================ */
 
 .lab-pagina {
-  --lab-fondo: #0b1020;
-  --lab-superficie: #111a30;
-  --lab-panel: rgba(255, 255, 255, 0.04);
-  --lab-borde: rgba(255, 255, 255, 0.10);
-  --lab-texto: #E2E8F0;
-  --lab-tenue: #94A3B8;
-  --lab-acento: #F4B400;
-  --lab-azul: #3B82F6;
+  --lab-fondo: #F8F8FE;
+  --lab-superficie: #FFFFFF;
+  --lab-panel: #FFFFFF;
+  --lab-borde: #E6E5F5;
+  --lab-texto: #252350;
+  --lab-tenue: #64628A;
+  --lab-acento: #F59E0B;
+  /* Mismo ambar, legible como texto sobre fondo claro (AA). */
+  --lab-acento-texto: #B45309;
+  --lab-azul: #4F46E5;
 
   display: flex;
   flex-direction: column;
@@ -29,7 +31,7 @@
   gap: 14px;
   padding: 8px 14px;
   border-bottom: 1px solid var(--lab-borde);
-  background: rgba(255, 255, 255, 0.03);
+  background: #F3F2FC;
   flex-shrink: 0;
 }
 
@@ -40,7 +42,7 @@
   padding: 9px 16px;
   border-radius: 10px;
   border: 1px solid var(--lab-borde);
-  background: rgba(255, 255, 255, 0.06);
+  background: #F3F2FC;
   color: var(--lab-texto);
   font-size: 13.5px;
   font-weight: 700;
@@ -50,7 +52,7 @@
 
 .lab-btn-volver:hover {
   border-color: var(--lab-acento);
-  color: var(--lab-acento);
+  color: var(--lab-acento-texto);
 }
 
 .lab-cabecera-tema {
@@ -110,7 +112,7 @@
 }
 
 .lab-entrada-nombre {
-  color: var(--lab-acento);
+  color: var(--lab-acento-texto);
   font-size: 15px;
   flex-shrink: 0;
 }
@@ -121,8 +123,8 @@
   padding: 11px 12px;
   border-radius: 10px;
   border: 1px solid var(--lab-borde);
-  background: rgba(0, 0, 0, 0.25);
-  color: #fff;
+  background: #FFFFFF;
+  color: #252350;
   font-family: 'Courier New', monospace;
   font-size: 15px;
   outline: none;
@@ -130,11 +132,11 @@
 
 .lab-entrada-input:focus {
   border-color: var(--lab-acento);
-  box-shadow: 0 0 0 3px rgba(244, 180, 0, 0.15);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
 }
 
 .lab-entrada-input::placeholder {
-  color: #64748B;
+  color: #64628A;
 }
 
 .lab-entrada-btn-enviar {
@@ -144,7 +146,7 @@
   border-radius: 10px;
   border: 1px solid var(--lab-acento);
   background: var(--lab-acento);
-  color: #0b1020;
+  color: #252350;
   font-size: 14px;
   font-weight: 800;
   cursor: pointer;
@@ -159,9 +161,9 @@
   margin-top: 7px;
   padding: 0 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #F3F2FC;
   border: 1px solid transparent;
-  color: #fff;
+  color: #252350;
   overflow: auto;
 }
 
@@ -170,7 +172,7 @@
 .lab-entrada-estado.con-error {
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.35);
-  color: #FCA5A5;
+  color: #DC2626;
   font-size: 12.5px;
   font-weight: 600;
 }
@@ -187,7 +189,7 @@
   border-radius: 10px;
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #FCA5A5;
+  color: #DC2626;
   font-size: 12.5px;
   font-weight: 600;
 }
@@ -216,10 +218,10 @@
   z-index: 40;
   padding: 8px 10px 10px;
   border-radius: 14px;
-  border: 1px solid #CBD5E1;
-  background: rgba(241, 245, 249, 0.98);
+  border: 1px solid #E6E5F5;
+  background: rgba(255,255,255,0.98);
   backdrop-filter: blur(8px);
-  box-shadow: 0 16px 38px rgba(2, 6, 23, 0.35);
+  box-shadow: 0 16px 38px rgba(37,35,80,0.12);
 }
 
 .lab-teclado-cabecera {
@@ -243,22 +245,22 @@
   border-radius: 999px;
   border: none;
   background: transparent;
-  color: #475569;
+  color: #64628A;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .lab-teclado-tabs button.activo {
-  background: #0047CC;
-  color: #fff;
+  background: #4F46E5;
+  color: #FFFFFF;
 }
 
 /* Zona neutra para agarrar y mover la cajita. */
 .lab-teclado-agarre {
   flex: 1;
   text-align: center;
-  color: #94A3B8;
+  color: #64628A;
   font-size: 14px;
   letter-spacing: 2px;
   user-select: none;
@@ -269,15 +271,15 @@
   height: 24px;
   flex-shrink: 0;
   border-radius: 7px;
-  border: 1px solid #CBD5E1;
-  background: #fff;
-  color: #475569;
+  border: 1px solid #E6E5F5;
+  background: #FFFFFF;
+  color: #64628A;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
 }
 
-.lab-teclado-icono:hover { background: #E2E8F0; }
+.lab-teclado-icono:hover { background: #F3F2FC; }
 
 /* Dos bloques: funciones a la izquierda, numérico y acciones a la derecha. */
 .lab-teclado-cuerpo {
@@ -296,9 +298,9 @@
 .lab-tecla {
   height: 38px;
   border-radius: 8px;
-  border: 1px solid #CBD5E1;
-  background: #fff;
-  color: #1E293B;
+  border: 1px solid #E6E5F5;
+  background: #FFFFFF;
+  color: #252350;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -306,23 +308,23 @@
   padding: 0 2px;
 }
 
-.lab-tecla:hover { background: #E2E8F0; }
-.lab-tecla:active { background: #CBD5E1; transform: translateY(1px); }
+.lab-tecla:hover { background: #F3F2FC; }
+.lab-tecla:active { background: #E6E5F5; transform: translateY(1px); }
 
-.lab-tecla-op { color: #0047CC; }
+.lab-tecla-op { color: #4F46E5; }
 .lab-tecla-var { color: #7C3AED; font-style: italic; }
 .lab-tecla-fn { font-size: 12.5px; }
-.lab-tecla-accion { background: #E2E8F0; font-size: 16px; }
-.lab-tecla-accion:hover { background: #CBD5E1; }
+.lab-tecla-accion { background: #F3F2FC; font-size: 16px; }
+.lab-tecla-accion:hover { background: #E6E5F5; }
 
 .lab-tecla-enter {
-  background: #0047CC;
-  border-color: #0047CC;
-  color: #fff;
+  background: #4F46E5;
+  border-color: #4F46E5;
+  color: #FFFFFF;
   font-size: 17px;
 }
 
-.lab-tecla-enter:hover { background: #003399; }
+.lab-tecla-enter:hover { background: #312E81; }
 
 /* Botón que devuelve el teclado cuando está minimizado. */
 .lab-teclado-abrir {
@@ -334,15 +336,15 @@
   width: 48px;
   height: 44px;
   border-radius: 12px;
-  border: 1px solid #CBD5E1;
-  background: rgba(241, 245, 249, 0.98);
-  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.3);
-  color: #1E293B;
+  border: 1px solid #E6E5F5;
+  background: rgba(255,255,255,0.98);
+  box-shadow: 0 10px 26px rgba(37,35,80,0.1);
+  color: #252350;
   font-size: 20px;
   cursor: pointer;
 }
 
-.lab-teclado-abrir:hover { background: #E2E8F0; }
+.lab-teclado-abrir:hover { background: #F3F2FC; }
 
 /* ---------- secciones del panel ---------- */
 .lab-seccion-titulo {
@@ -366,7 +368,7 @@
   height: 20px;
   padding: 0 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #F3F2FC;
   color: var(--lab-texto);
   font-size: 11px;
 }
@@ -393,7 +395,7 @@
 }
 
 .lab-item.activo {
-  background: rgba(255, 255, 255, 0.09);
+  background: #F3F2FC;
   border-color: var(--color-fn);
   border-left-color: var(--color-fn);
 }
@@ -429,7 +431,7 @@
   text-align: left;
   border: none;
   background: none;
-  color: #fff;
+  color: #252350;
   cursor: pointer;
   padding: 2px 0;
   font-size: 15px;
@@ -453,8 +455,8 @@
 }
 
 .lab-item-acciones button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: #F3F2FC;
+  color: #252350;
 }
 
 .lab-lista-vacia,
@@ -487,9 +489,9 @@
 }
 
 .lab-herramientas-tabs button.activo {
-  background: rgba(59, 130, 246, 0.18);
+  background: rgba(79,70,229,0.18);
   border-color: var(--lab-azul);
-  color: #BFDBFE;
+  color: #4F46E5;
 }
 
 .lab-herramientas-campos {
@@ -519,8 +521,8 @@
   padding: 9px 10px;
   border-radius: 9px;
   border: 1px solid var(--lab-borde);
-  background: rgba(0, 0, 0, 0.25);
-  color: #fff;
+  background: #FFFFFF;
+  color: #252350;
   font-family: 'Courier New', monospace;
   font-size: 14px;
   outline: none;
@@ -545,9 +547,9 @@
 .lab-resultado-principal {
   padding: 12px;
   border-radius: 12px;
-  background: rgba(59, 130, 246, 0.10);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: #fff;
+  background: rgba(79,70,229,0.1);
+  border: 1px solid rgba(79,70,229,0.3);
+  color: #252350;
   overflow-x: auto;
 }
 
@@ -562,7 +564,7 @@
   border-radius: 10px;
   background: var(--lab-panel);
   border-left: 3px solid var(--lab-borde);
-  color: #E2E8F0;
+  color: #64628A;
   font-size: 14px;
   overflow-x: auto;
 }
@@ -570,7 +572,7 @@
 .lab-fila-lado.lado-izq { border-left-color: #10B981; }
 .lab-fila-lado.lado-der { border-left-color: #EF4444; }
 .lab-fila-lado.lado-tangente { border-left-color: #EF4444; }
-.lab-fila-lado.lado-secante { border-left-color: #0EA5E9; }
+.lab-fila-lado.lado-secante { border-left-color: #4F46E5; }
 
 .lab-etiqueta {
   display: block;
@@ -588,22 +590,22 @@
   border-radius: 10px;
   background: rgba(16, 185, 129, 0.10);
   border: 1px solid rgba(16, 185, 129, 0.28);
-  color: #A7F3D0;
+  color: #047857;
   font-size: 13px;
   line-height: 1.5;
 }
 
 .lab-conclusion.tipo-lateralesDistintos,
 .lab-conclusion.tipo-infinito {
-  background: rgba(244, 180, 0, 0.10);
-  border-color: rgba(244, 180, 0, 0.3);
-  color: #FDE68A;
+  background: #FFFBEB;
+  border-color: rgba(245,158,11,0.35);
+  color: #B45309;
 }
 
 .lab-conclusion.tipo-indefinido {
   background: rgba(239, 68, 68, 0.10);
   border-color: rgba(239, 68, 68, 0.3);
-  color: #FCA5A5;
+  color: #DC2626;
 }
 
 .lab-error {
@@ -611,7 +613,7 @@
   border-radius: 10px;
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #FCA5A5;
+  color: #DC2626;
   font-size: 13px;
 }
 
@@ -624,7 +626,7 @@
 
 .lab-tabla-titulo {
   padding: 8px 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #F3F2FC;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -655,14 +657,14 @@
 .lab-tabla td {
   padding: 6px 8px;
   text-align: right;
-  color: #CBD5E1;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #64628A;
+  border-bottom: 1px solid #E6E5F5;
 }
 
 .lab-tabla tr.destacada td {
-  color: #fff;
+  color: #252350;
   font-weight: 700;
-  background: rgba(244, 180, 0, 0.08);
+  background: #FFFBEB;
 }
 
 /* ---------- IA ---------- */
@@ -674,7 +676,7 @@
   border-radius: 10px;
   border: 1px solid rgba(168, 85, 247, 0.4);
   background: rgba(168, 85, 247, 0.14);
-  color: #E9D5FF;
+  color: #7C3AED;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -686,11 +688,11 @@
   margin-top: 10px;
   padding: 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: #F3F2FC;
   border: 1px solid var(--lab-borde);
   font-size: 13px;
   line-height: 1.65;
-  color: #CBD5E1;
+  color: #64628A;
   max-height: 380px;
   overflow-y: auto;
 }
@@ -705,7 +707,7 @@
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--lab-borde);
-  background: #fff;
+  background: #FFFFFF;
 }
 
 .lab-lienzo:fullscreen { border-radius: 0; border: none; }
@@ -726,10 +728,10 @@
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid;
-  background: rgba(15, 23, 42, 0.94);
-  color: #fff;
+  background: #FFFFFF;
+  color: #252350;
   font-size: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(37,35,80,0.09);
 }
 
 .lab-lectura-titulo {
@@ -744,7 +746,7 @@
   font-family: 'Courier New', monospace;
 }
 
-.lab-lectura-fila span { color: #94A3B8; }
+.lab-lectura-fila span { color: #64628A; }
 
 .lab-controles {
   position: absolute;
@@ -759,16 +761,16 @@
   width: 36px;
   height: 36px;
   border-radius: 9px;
-  border: 1px solid #DCE4EF;
-  background: rgba(255, 255, 255, 0.95);
-  color: #1E293B;
+  border: 1px solid #E6E5F5;
+  background: rgba(255,255,255,0.95);
+  color: #252350;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 2px 6px rgba(37,35,80,0.12);
 }
 
-.lab-controles button:hover { background: #F1F5F9; }
+.lab-controles button:hover { background: #F3F2FC; }
 
 .lab-vacio {
   position: absolute;
@@ -777,8 +779,8 @@
   transform: translate(-50%, -50%);
   padding: 14px 20px;
   border-radius: 12px;
-  background: rgba(15, 23, 42, 0.85);
-  color: #E2E8F0;
+  background: #FFFFFF;
+  color: #64628A;
   font-size: 14px;
   text-align: center;
   pointer-events: none;
@@ -833,7 +835,7 @@
     padding: 12px;
     border-radius: 10px;
     border: 1px solid var(--lab-borde);
-    background: rgba(255, 255, 255, 0.06);
+    background: #F3F2FC;
     color: var(--lab-texto);
     font-size: 14px;
     font-weight: 700;

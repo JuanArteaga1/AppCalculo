@@ -4,9 +4,9 @@ import { compilar } from './laboratorio/mathUtils';
 const DURACION_MS = 1600;
 const ALTO = 240;
 
-const COLOR_UNICO = '#F4B400';
-const COLOR_IZQ = '#3B82F6';
-const COLOR_DER = '#EF4444';
+const COLOR_UNICO = '#4F46E5';
+const COLOR_IZQ = '#4F46E5';
+const COLOR_DER = '#DC2626';
 
 /**
  * Gráfica del ejercicio de límites.
@@ -180,9 +180,9 @@ export default function GraficaLimite({
         role="img"
         aria-label={`Gráfica de la función cerca de x igual a ${punto}`}
       >
-        <rect x="0" y="0" width={ancho} height={alto} fill="rgba(11,16,32,0.55)" rx="10" />
+        <rect x="0" y="0" width={ancho} height={alto} fill="rgba(255,255,255,0.96)" rx="10" />
 
-        <g stroke="rgba(244,180,0,0.07)" strokeWidth="1">
+        <g stroke="#F0EFFA" strokeWidth="1">
           {marcasX.map((x) => (
             <line key={x} x1={escalas.px(x)} y1={pad.arriba} x2={escalas.px(x)} y2={alto - pad.abajo} />
           ))}
@@ -190,18 +190,18 @@ export default function GraficaLimite({
 
         {ejeY > pad.arriba && ejeY < alto - pad.abajo && (
           <line x1={pad.izq} y1={ejeY} x2={ancho - pad.der} y2={ejeY}
-            stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+            stroke="#E6E5F5" strokeWidth="1" />
         )}
 
-        <g fill="rgba(255,255,255,0.45)" fontSize="10" fontFamily="'Inter', sans-serif" textAnchor="middle">
+        <g fill="#64628A" fontSize="10" fontFamily="'Inter', sans-serif" textAnchor="middle">
           {marcasX.map((x) => (
             <text key={x} x={escalas.px(x)} y={alto - 9}>{Number(x.toFixed(2))}</text>
           ))}
         </g>
 
         <line x1={xPunto} y1={pad.arriba} x2={xPunto} y2={alto - pad.abajo}
-          stroke="#F4B400" strokeWidth="1.5" strokeDasharray="6 5" opacity="0.75" />
-        <text x={xPunto + 5} y={pad.arriba + 11} fill="#F4B400" fontSize="10.5" fontWeight="700"
+          stroke="#F59E0B" strokeWidth="1.5" strokeDasharray="6 5" opacity="0.75" />
+        <text x={xPunto + 5} y={pad.arriba + 11} fill="#F59E0B" fontSize="10.5" fontWeight="700"
           fontFamily="'Inter', sans-serif">
           x = {punto}
         </text>
@@ -214,23 +214,23 @@ export default function GraficaLimite({
 
         {puntos.slice(0, puntosVisibles).map((p, i) => (
           <circle key={`${p.lado}-${i}`} cx={escalas.px(p.x)} cy={escalas.py(p.y)} r="3.6"
-            fill={p.lado === 'izq' ? (porLados ? COLOR_IZQ : '#10B981') : COLOR_DER}
-            stroke="#0b1020" strokeWidth="1.5" />
+            fill={p.lado === 'izq' ? (porLados ? COLOR_IZQ : '#059669') : COLOR_DER}
+            stroke="#FFFFFF" strokeWidth="1.5" />
         ))}
 
         {/* Extremos abiertos: el salto entre las dos ramas */}
         {visible && salto && (
           <>
-            <circle cx={xPunto} cy={escalas.py(limiteIzq)} r="5" fill="#0b1020" stroke={COLOR_IZQ} strokeWidth="2" />
-            <circle cx={xPunto} cy={escalas.py(limiteDer)} r="5" fill="#0b1020" stroke={COLOR_DER} strokeWidth="2" />
+            <circle cx={xPunto} cy={escalas.py(limiteIzq)} r="5" fill="#FFFFFF" stroke={COLOR_IZQ} strokeWidth="2" />
+            <circle cx={xPunto} cy={escalas.py(limiteDer)} r="5" fill="#FFFFFF" stroke={COLOR_DER} strokeWidth="2" />
             <line x1={xPunto} y1={escalas.py(limiteIzq)} x2={xPunto} y2={escalas.py(limiteDer)}
-              stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeDasharray="3 3" />
+              stroke="#64628A" strokeWidth="1.5" strokeDasharray="3 3" />
           </>
         )}
 
         {/* Agujero: la función no está definida en el punto, pero el límite existe */}
         {visible && !salto && limite !== null && limite !== undefined && (
-          <circle cx={xPunto} cy={escalas.py(limite)} r="5" fill="#0b1020" stroke="#fff" strokeWidth="2" />
+          <circle cx={xPunto} cy={escalas.py(limite)} r="5" fill="#FFFFFF" stroke={COLOR_UNICO} strokeWidth="2" />
         )}
       </svg>
 
@@ -239,13 +239,13 @@ export default function GraficaLimite({
           <>
             <span><i style={{ ...estilos.punto, background: COLOR_IZQ }} /> rama izquierda</span>
             <span><i style={{ ...estilos.punto, background: COLOR_DER }} /> rama derecha</span>
-            {salto && <span style={{ color: '#FDE68A' }}>salto en x = {punto}: el límite no existe</span>}
+            {salto && <span style={{ color: '#B45309' }}>salto en x = {punto}: el límite no existe</span>}
           </>
         ) : (
           <>
             <span><i style={{ ...estilos.punto, background: '#10B981' }} /> por la izquierda</span>
             <span><i style={{ ...estilos.punto, background: COLOR_DER }} /> por la derecha</span>
-            <span><i style={{ ...estilos.punto, background: '#0b1020', border: '2px solid #fff' }} /> no definida en x = {punto}</span>
+            <span><i style={{ ...estilos.punto, background: '#F8F8FE', border: '2px solid #E6E5F5' }} /> no definida en x = {punto}</span>
           </>
         )}
       </div>
@@ -266,7 +266,7 @@ const estilos = {
     gap: '14px',
     padding: '8px 2px 2px',
     fontSize: '11.5px',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#64628A',
   },
   punto: {
     display: 'inline-block',

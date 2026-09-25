@@ -70,7 +70,7 @@ const styles = {
   },
   desc: {
     fontSize: '14px',
-    color: '#991B1B',
+    color: '#B91C1C',
     margin: '0 0 16px',
   },
   details: {
@@ -88,7 +88,7 @@ const styles = {
     padding: '12px',
     borderRadius: '8px',
     fontSize: '12px',
-    color: '#7F1D1D',
+    color: '#B91C1C',
     overflowX: 'auto',
     marginTop: '8px',
     textAlign: 'left',
@@ -98,7 +98,7 @@ const styles = {
     borderRadius: '8px',
     border: 'none',
     background: '#DC2626',
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: '14px',
     fontWeight: 700,
     cursor: 'pointer',

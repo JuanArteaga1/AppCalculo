@@ -451,7 +451,7 @@ export default function TemaPage() {
                 <NavLink
                   href="#seccion-saberes"
                   icon={<HiOutlineLightBulb />}
-                  label="Saberes previos"
+                  label="Conceptos previos"
                 />
               </nav>
             </div>
@@ -523,9 +523,9 @@ function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
         style={styles.lanzadorPreview}
         aria-hidden="true"
       >
-        <rect x="0" y="0" width="200" height="130" rx="12" fill="#0F172A" />
+        <rect x="0" y="0" width="200" height="130" rx="12" fill="#FFFFFF" />
 
-        <g stroke="rgba(255,255,255,0.08)" strokeWidth="1">
+        <g stroke="#E6E5F5" strokeWidth="1">
           {[20, 50, 80, 110, 140, 170].map(x => (
             <line key={x} x1={x} y1="10" x2={x} y2="120" />
           ))}
@@ -540,7 +540,7 @@ function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
           y1="75"
           x2="190"
           y2="75"
-          stroke="#475569"
+          stroke="#64628A"
           strokeWidth="1.5"
         />
 
@@ -549,14 +549,14 @@ function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
           y1="10"
           x2="80"
           y2="120"
-          stroke="#475569"
+          stroke="#64628A"
           strokeWidth="1.5"
         />
 
         <path
           d="M 15 110 Q 60 15 105 70 T 190 25"
           fill="none"
-          stroke="#F4B400"
+          stroke="#F59E0B"
           strokeWidth="3"
           strokeLinecap="round"
         />
@@ -564,7 +564,7 @@ function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
         <path
           d="M 15 95 Q 70 95 190 45"
           fill="none"
-          stroke="#38BDF8"
+          stroke="#4F46E5"
           strokeWidth="2"
           strokeDasharray="6 4"
         />
@@ -573,8 +573,8 @@ function LanzadorLaboratorio({ titulo, modo, unidadId, temaId }) {
           cx="105"
           cy="70"
           r="5"
-          fill="#EF4444"
-          stroke="#fff"
+          fill="#DC2626"
+          stroke="#252350"
           strokeWidth="2"
         />
       </svg>
@@ -617,17 +617,17 @@ const styles = {
   },
 
   breadcrumbLink: {
-    color: '#F4B400',
+    color: '#B45309',
     textDecoration: 'none',
     fontWeight: 600
   },
 
   breadcrumbSep: {
-    color: '#94A3B8'
+    color: '#64628A'
   },
 
   breadcrumbCurrent: {
-    color: '#fff',
+    color: '#252350',
     fontWeight: 700
   },
 
@@ -649,17 +649,17 @@ const styles = {
   },
 
   card: {
-    background: 'linear-gradient(145deg, rgba(15,26,53,0.85) 0%, rgba(11,16,32,0.95) 100%)',
+    background: 'linear-gradient(145deg, #FFFFFF 0%, #FFFFFF 100%)',
     borderRadius: '20px',
-    border: '1px solid rgba(244,180,0,0.08)',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(244,180,0,0.05)',
+    border: '1px solid #E6E5F5',
+    boxShadow: '0 10px 40px rgba(37,35,80,0.12), inset 0 1px 0 rgba(245,158,11,0.05)',
     overflow: 'hidden'
   },
 
   cardHeader: {
     padding: '28px 32px',
-    borderBottom: '1px solid rgba(244,180,0,0.1)',
-    background: 'linear-gradient(180deg, rgba(244,180,0,0.03) 0%, transparent 100%)'
+    borderBottom: '1px solid #E6E5F5',
+    background: 'linear-gradient(180deg, #FFFBEB 0%, transparent 100%)'
   },
 
   cardHeaderTop: {
@@ -672,8 +672,8 @@ const styles = {
   cardTag: {
     display: 'inline-flex',
     padding: '4px 10px',
-    background: 'rgba(244,180,0,0.15)',
-    color: '#F4B400',
+    background: '#FFFBEB',
+    color: '#B45309',
     fontSize: '11px',
     fontWeight: 700,
     borderRadius: '999px',
@@ -685,14 +685,14 @@ const styles = {
   cardTitle: {
     fontSize: '24px',
     fontWeight: 800,
-    color: '#fff',
+    color: '#252350',
     margin: '0 0 8px',
     fontFamily: "'Poppins', sans-serif"
   },
 
   cardDesc: {
     fontSize: '15px',
-    color: 'rgba(255,255,255,0.6)',
+    color: '#64628A',
     margin: 0,
     lineHeight: 1.5
   },
@@ -707,7 +707,7 @@ const styles = {
   h2: {
     fontSize: '20px',
     fontWeight: 700,
-    color: '#fff',
+    color: '#252350',
     margin: '16px 0 6px',
     fontFamily: "'Poppins', sans-serif"
   },
@@ -715,14 +715,14 @@ const styles = {
   h3: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#fff',
+    color: '#252350',
     margin: '12px 0 4px',
     fontFamily: "'Poppins', sans-serif"
   },
 
   paragraph: {
     fontSize: '15px',
-    color: 'rgba(255,255,255,0.75)',
+    color: '#64628A',
     lineHeight: 1.7,
     margin: 0
   },
@@ -740,21 +740,21 @@ const styles = {
     position: 'relative',
     paddingLeft: '20px',
     fontSize: '15px',
-    color: 'rgba(255,255,255,0.75)',
+    color: '#64628A',
     lineHeight: 1.6
   },
 
   equation: {
-    background: 'linear-gradient(135deg, rgba(244,180,0,0.06) 0%, rgba(15,26,53,0.8) 100%)',
+    background: 'linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%)',
     borderRadius: '12px',
     padding: '16px 20px',
     margin: '8px 0',
     textAlign: 'center',
-    border: '1px solid rgba(244,180,0,0.1)'
+    border: '1px solid #E6E5F5'
   },
 
   equationCode: {
-    color: '#F4B400',
+    color: '#B45309',
     fontFamily: "'Courier New', monospace",
     fontSize: '16px',
     letterSpacing: '0.5px'
@@ -775,10 +775,10 @@ const styles = {
   },
 
   columnBox: {
-    background: 'rgba(15,26,53,0.4)',
+    background: 'rgba(255,255,255,0.9)',
     padding: '14px',
     borderRadius: '12px',
-    border: '1px solid rgba(244,180,0,0.08)',
+    border: '1px solid #E6E5F5',
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
@@ -786,12 +786,12 @@ const styles = {
   },
 
   conclusionBox: {
-    background: 'linear-gradient(135deg, rgba(244,180,0,0.08) 0%, rgba(15,26,53,0.6) 100%)',
+    background: 'linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%)',
     padding: '16px 20px',
     borderRadius: '12px',
-    border: '1px solid rgba(244,180,0,0.15)',
+    border: '1px solid rgba(245,158,11,0.35)',
     textAlign: 'center',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+    boxShadow: '0 4px 20px rgba(37,35,80,0.07)'
   },
 
   graphWrap: {
@@ -805,9 +805,9 @@ const styles = {
     alignItems: 'center',
     padding: '28px 32px',
     borderRadius: '20px',
-    background: 'linear-gradient(135deg, rgba(244,180,0,0.08) 0%, rgba(15,26,53,0.9) 50%, rgba(11,16,32,0.95) 100%)',
-    border: '1px solid rgba(244,180,0,0.12)',
-    boxShadow: '0 12px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(244,180,0,0.08)'
+    background: 'linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 50%, #FFFFFF 100%)',
+    border: '1px solid rgba(245,158,11,0.35)',
+    boxShadow: '0 12px 40px rgba(37,35,80,0.12), inset 0 1px 0 rgba(245,158,11,0.08)'
   },
 
   lanzadorTexto: {
@@ -818,8 +818,8 @@ const styles = {
     display: 'inline-flex',
     padding: '4px 10px',
     borderRadius: '999px',
-    background: 'rgba(244,180,0,0.15)',
-    color: '#F4B400',
+    background: '#FFFBEB',
+    color: '#B45309',
     fontSize: '11px',
     fontWeight: 800,
     textTransform: 'uppercase',
@@ -830,7 +830,7 @@ const styles = {
     margin: '10px 0 8px',
     fontSize: '22px',
     fontWeight: 800,
-    color: '#fff',
+    color: '#252350',
     fontFamily: "'Poppins', sans-serif"
   },
 
@@ -838,7 +838,7 @@ const styles = {
     margin: '0 0 18px',
     fontSize: '14.5px',
     lineHeight: 1.6,
-    color: 'rgba(255,255,255,0.72)'
+    color: '#64628A'
   },
 
   lanzadorBtn: {
@@ -847,23 +847,23 @@ const styles = {
     gap: '8px',
     padding: '13px 24px',
     borderRadius: '12px',
-    background: '#F4B400',
-    color: '#0b1020',
+    background: '#F59E0B',
+    color: '#252350',
     fontSize: '15px',
     fontWeight: 800,
     textDecoration: 'none',
-    boxShadow: '0 8px 20px rgba(244,180,0,0.25)'
+    boxShadow: '0 8px 20px rgba(245,158,11,0.25)'
   },
 
   lanzadorPista: {
     margin: '14px 0 0',
     fontSize: '12.5px',
-    color: 'rgba(255,255,255,0.5)'
+    color: '#64628A'
   },
 
   lanzadorCode: {
     fontFamily: "'Courier New', monospace",
-    color: '#7DD3FC'
+    color: '#4F46E5'
   },
 
   lanzadorPreview: {
@@ -881,17 +881,17 @@ const styles = {
   },
 
   sidebarCard: {
-    background: 'linear-gradient(145deg, rgba(15,26,53,0.8) 0%, rgba(11,16,32,0.9) 100%)',
+    background: 'linear-gradient(145deg, #FFFFFF 0%, #FFFFFF 100%)',
     borderRadius: '16px',
-    border: '1px solid rgba(244,180,0,0.08)',
+    border: '1px solid #E6E5F5',
     padding: '20px',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+    boxShadow: '0 8px 32px rgba(37,35,80,0.1)'
   },
 
   sidebarTitle: {
     fontSize: '14px',
     fontWeight: 700,
-    color: '#fff',
+    color: '#252350',
     margin: '0 0 12px',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
@@ -911,19 +911,19 @@ const styles = {
     padding: '10px 12px',
     borderRadius: '10px',
     textDecoration: 'none',
-    color: 'rgba(255,255,255,0.7)',
+    color: '#64628A',
     fontSize: '14px',
     fontWeight: 600,
-    background: 'rgba(244,180,0,0.04)',
+    background: '#FFFBEB',
     transition: 'all 0.2s ease',
     cursor: 'pointer',
-    border: '1px solid rgba(244,180,0,0.06)'
+    border: '1px solid #E6E5F5'
   },
 
   navIcon: {
     fontSize: '16px',
     lineHeight: 1,
-    color: '#F4B400'
+    color: '#B45309'
   },
 
   navLabel: {
@@ -936,7 +936,7 @@ const styles = {
     borderCollapse: 'collapse',
     margin: '8px 0',
     fontSize: '14px',
-    background: 'rgba(15,26,53,0.5)',
+    background: 'rgba(255,255,255,0.9)',
     borderRadius: '12px',
     overflow: 'hidden'
   },
@@ -944,17 +944,17 @@ const styles = {
   th: {
     padding: '10px 12px',
     textAlign: 'left',
-    borderBottom: '2px solid rgba(244,180,0,0.2)',
-    color: '#F4B400',
+    borderBottom: '2px solid rgba(245,158,11,0.35)',
+    color: '#B45309',
     fontWeight: 700,
     fontFamily: "'Poppins', sans-serif",
-    background: 'rgba(244,180,0,0.06)'
+    background: '#FFFBEB'
   },
 
   td: {
     padding: '10px 12px',
-    borderBottom: '1px solid rgba(244,180,0,0.08)',
-    color: 'rgba(255,255,255,0.85)'
+    borderBottom: '1px solid #E6E5F5',
+    color: '#252350'
   }
 };
 
@@ -1010,29 +1010,29 @@ if (typeof document !== 'undefined') {
       }
     }
     .tema-enlace {
-      color: #F4B400;
+      color: #B45309;
       text-decoration: underline;
       text-underline-offset: 3px;
-      text-decoration-color: rgba(244,180,0,0.4);
+      text-decoration-color: #B45309;
       transition: all 0.2s ease;
     }
     .tema-enlace:hover {
-      text-decoration-color: #F4B400;
+      text-decoration-color: #B45309;
     }
     .glosario-enlace {
       position: relative;
       display: inline-block;
-      background: rgba(244,180,0,0.08);
+      background: #FFFBEB;
       padding: 1px 6px;
       border-radius: 6px;
-      border: 1px solid rgba(244,180,0,0.15);
+      border: 1px solid rgba(245,158,11,0.35);
       font-weight: 600;
       text-decoration: none !important;
     }
     .glosario-enlace:hover {
-      background: rgba(244,180,0,0.18);
-      border-color: rgba(244,180,0,0.4);
-      box-shadow: 0 2px 8px rgba(244,180,0,0.15);
+      background: #FFFBEB;
+      border-color: rgba(245,158,11,0.35);
+      box-shadow: 0 2px 8px rgba(245,158,11,0.15);
     }
     .glosario-enlace::after {
       content: attr(data-definicion);
@@ -1043,14 +1043,14 @@ if (typeof document !== 'undefined') {
       width: max-content;
       max-width: 280px;
       padding: 10px 14px;
-      background: #0A1628;
-      color: #E2E8F0;
+      background: #FFFFFF;
+      color: #64628A;
       font-size: 12.5px;
       font-weight: 500;
       line-height: 1.5;
       border-radius: 10px;
-      border: 1px solid rgba(244,180,0,0.2);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      border: 1px solid rgba(245,158,11,0.35);
+      box-shadow: 0 8px 24px rgba(37,35,80,0.1);
       opacity: 0;
       visibility: hidden;
       transition: all 0.2s ease;
@@ -1066,7 +1066,7 @@ if (typeof document !== 'undefined') {
       transform: translateX(-50%);
       border-width: 6px;
       border-style: solid;
-      border-color: rgba(244,180,0,0.2) transparent transparent transparent;
+      border-color: rgba(245,158,11,0.35) transparent transparent transparent;
       opacity: 0;
       visibility: hidden;
       transition: all 0.2s ease;
@@ -1080,10 +1080,10 @@ if (typeof document !== 'undefined') {
       transform: translateX(-50%) scale(1);
     }
     .tema-sidebar a:hover {
-      background: rgba(244,180,0,0.1) !important;
-      border-color: rgba(244,180,0,0.25) !important;
-      color: #F4B400 !important;
-      box-shadow: 0 2px 12px rgba(244,180,0,0.1);
+      background: #FFFBEB !important;
+      border-color: rgba(245,158,11,0.35) !important;
+      color: #B45309 !important;
+      box-shadow: 0 2px 12px rgba(245,158,11,0.1);
     }
 
     #seccion-contenido,

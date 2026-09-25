@@ -260,25 +260,25 @@ export default function PlotCanvas({
         <rect x="0" y="0" width={w} height={h} fill="#FFFFFF" />
 
         {/* cuadrícula menor */}
-        <g stroke="#EEF2F7" strokeWidth="1">
+        <g stroke="#E6E5F5" strokeWidth="1">
           {menoresX.map((v, i) => <line key={`mx${i}`} x1={pxDe(v)} y1={0} x2={pxDe(v)} y2={h} />)}
           {menoresY.map((v, i) => <line key={`my${i}`} x1={0} y1={pyDe(v)} x2={w} y2={pyDe(v)} />)}
         </g>
 
         {/* cuadrícula mayor */}
-        <g stroke="#DCE4EF" strokeWidth="1">
+        <g stroke="#E6E5F5" strokeWidth="1">
           {ticksX.map((v, i) => <line key={`gx${i}`} x1={pxDe(v)} y1={0} x2={pxDe(v)} y2={h} />)}
           {ticksY.map((v, i) => <line key={`gy${i}`} x1={0} y1={pyDe(v)} x2={w} y2={pyDe(v)} />)}
         </g>
 
         {/* ejes */}
-        <g stroke="#475569" strokeWidth="1.6">
+        <g stroke="#64628A" strokeWidth="1.6">
           <line x1={0} y1={ejeX} x2={w} y2={ejeX} />
           <line x1={ejeY} y1={0} x2={ejeY} y2={h} />
         </g>
 
         {/* números de los ejes */}
-        <g fontSize="11" fontFamily="'Inter', system-ui, sans-serif" fill="#475569">
+        <g fontSize="11" fontFamily="'Inter', system-ui, sans-serif" fill="#64628A">
           {ticksX.map((v, i) => (
             v === 0 ? null : (
               <text key={`tx${i}`} x={pxDe(v)} y={etiquetaX + 14} textAnchor="middle">
@@ -301,12 +301,12 @@ export default function PlotCanvas({
           <g key={`v${i}`}>
             <line
               x1={pxDe(m.x)} y1={0} x2={pxDe(m.x)} y2={h}
-              stroke={m.color || '#F4B400'} strokeWidth="2" strokeDasharray="7 5"
+              stroke={m.color || '#F59E0B'} strokeWidth="2" strokeDasharray="7 5"
             />
             {m.etiqueta && (
               <text
                 x={pxDe(m.x) + 6} y={16}
-                fontSize="12" fontWeight="700" fill={m.color || '#F4B400'}
+                fontSize="12" fontWeight="700" fill={m.color || '#F59E0B'}
                 fontFamily="'Inter', system-ui, sans-serif"
               >
                 {m.etiqueta}
@@ -321,7 +321,7 @@ export default function PlotCanvas({
             key={`r${i}`}
             x1={0} y1={pyDe(r.m * xMin + r.b)}
             x2={w} y2={pyDe(r.m * xMax + r.b)}
-            stroke={r.color || '#EF4444'} strokeWidth="2"
+            stroke={r.color || '#DC2626'} strokeWidth="2"
             strokeDasharray={r.punteada ? '7 5' : undefined}
           />
         ))}
@@ -348,8 +348,8 @@ export default function PlotCanvas({
             <circle
               key={`p${i}`}
               cx={px} cy={py} r={p.r || 5}
-              fill={p.hueco ? '#FFFFFF' : (p.color || '#EF4444')}
-              stroke={p.color || '#EF4444'}
+              fill={p.hueco ? '#FFFFFF' : (p.color || '#DC2626')}
+              stroke={p.color || '#DC2626'}
               strokeWidth="2"
             />
           );
@@ -360,7 +360,7 @@ export default function PlotCanvas({
           <g pointerEvents="none">
             <line x1={cursor.px} y1={cursor.py} x2={cursor.px} y2={ejeX} stroke={funcionActiva.color} strokeWidth="1" strokeDasharray="4 4" opacity="0.7" />
             <line x1={cursor.px} y1={cursor.py} x2={ejeY} y2={cursor.py} stroke={funcionActiva.color} strokeWidth="1" strokeDasharray="4 4" opacity="0.7" />
-            <circle cx={cursor.px} cy={cursor.py} r="6" fill={funcionActiva.color} stroke="#fff" strokeWidth="2" />
+            <circle cx={cursor.px} cy={cursor.py} r="6" fill={funcionActiva.color} stroke="#FFFFFF" strokeWidth="2" />
           </g>
         )}
       </svg>

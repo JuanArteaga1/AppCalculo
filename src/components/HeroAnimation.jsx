@@ -66,11 +66,11 @@ export default function MountainSlopeInteractive() {
   const mathY = Math.round(300 - point.y);
 
   let slopeText = 'Plano';
-  let slopeColor = '#F4B400';
-  if (slope < -0.25) { slopeText = 'Subiendo rápido ↑'; slopeColor = '#34D399'; }
-  else if (slope < -0.06) { slopeText = 'Subiendo ↑'; slopeColor = '#6EE7B7'; }
-  else if (slope > 0.25) { slopeText = 'Bajando rápido ↓'; slopeColor = '#F87171'; }
-  else if (slope > 0.06) { slopeText = 'Bajando ↓'; slopeColor = '#FCA5A5'; }
+  let slopeColor = '#F59E0B';
+  if (slope < -0.25) { slopeText = 'Subiendo rápido ↑'; slopeColor = '#10B981'; }
+  else if (slope < -0.06) { slopeText = 'Subiendo ↑'; slopeColor = '#10B981'; }
+  else if (slope > 0.25) { slopeText = 'Bajando rápido ↓'; slopeColor = '#DC2626'; }
+  else if (slope > 0.06) { slopeText = 'Bajando ↓'; slopeColor = '#EF4444'; }
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -135,9 +135,9 @@ export default function MountainSlopeInteractive() {
         >
           <defs>
             <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#60A5FA" />
-              <stop offset="50%" stopColor="#3B82F6" />
-              <stop offset="100%" stopColor="#93C5FD" />
+              <stop offset="0%" stopColor="#4F46E5" />
+              <stop offset="50%" stopColor="#4F46E5" />
+              <stop offset="100%" stopColor="#A5B4FC" />
             </linearGradient>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="blur" />
@@ -157,10 +157,10 @@ export default function MountainSlopeInteractive() {
 
           {/* Rejilla */}
           {[50, 100, 150, 200, 250, 300, 350, 400, 450].map((x) => (
-            <line key={`v${x}`} x1={x} y1="20" x2={x} y2="280" stroke="rgba(255,255,255,0.04)" />
+            <line key={`v${x}`} x1={x} y1="20" x2={x} y2="280" stroke="#E6E5F5" />
           ))}
           {[50, 100, 150, 200, 250].map((y) => (
-            <line key={`h${y}`} x1="20" y1={y} x2="480" y2={y} stroke="rgba(255,255,255,0.04)" />
+            <line key={`h${y}`} x1="20" y1={y} x2="480" y2={y} stroke="#E6E5F5" />
           ))}
 
           {/* Curva azul */}
@@ -201,12 +201,12 @@ export default function MountainSlopeInteractive() {
               {/* Cuerpo */}
               <rect x={point.x - 4} y={point.y - 12} width="8" height="16" rx="4" fill={slopeColor} />
               {/* Ventana */}
-              <circle cx={point.x} cy={point.y - 4} r="2" fill="#0b1020" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" />
+              <circle cx={point.x} cy={point.y - 4} r="2" fill="#252350" stroke="#64628A" strokeWidth="0.8" />
               {/* Aletas */}
               <polygon points={`${point.x - 4},${point.y - 2} ${point.x - 8},${point.y + 6} ${point.x - 4},${point.y + 4}`} fill={slopeColor} opacity="0.7" />
               <polygon points={`${point.x + 4},${point.y - 2} ${point.x + 8},${point.y + 6} ${point.x + 4},${point.y + 4}`} fill={slopeColor} opacity="0.7" />
               {/* Punta */}
-              <polygon points={`${point.x},${point.y - 16} ${point.x - 3.5},${point.y - 12} ${point.x + 3.5},${point.y - 12}`} fill="#fff" opacity="0.9" />
+              <polygon points={`${point.x},${point.y - 16} ${point.x - 3.5},${point.y - 12} ${point.x + 3.5},${point.y - 12}`} fill="#252350" opacity="0.9" />
 
               {/* Coordenadas */}
               <rect
@@ -215,7 +215,7 @@ export default function MountainSlopeInteractive() {
                 width="90"
                 height="18"
                 rx="5"
-                fill="rgba(11, 16, 32, 0.9)"
+                fill="rgba(255,255,255,0.96)"
                 stroke={slopeColor}
                 strokeWidth="1"
               />
@@ -223,7 +223,7 @@ export default function MountainSlopeInteractive() {
                 x={point.x}
                 y={point.y - 23}
                 textAnchor="middle"
-                fill="white"
+                fill="#252350"
                 fontSize="10"
                 fontFamily="monospace"
               >
@@ -234,35 +234,35 @@ export default function MountainSlopeInteractive() {
 
           {/* Texto izquierda */}
           <g style={{ animation: 'fadeIn 1s ease-out forwards', opacity: 0 }}>
-            <text x="20" y="35" fill="white" fontSize="14" fontWeight="bold" fontFamily="sans-serif">
+            <text x="20" y="35" fill="#252350" fontSize="14" fontWeight="bold" fontFamily="sans-serif">
               Posición del cohete
             </text>
-            <text x="20" y="52" fill="rgba(255,255,255,0.45)" fontSize="10" fontFamily="sans-serif">
+            <text x="20" y="52" fill="#64628A" fontSize="10" fontFamily="sans-serif">
               Curva B(t):
             </text>
-            <text x="20" y="68" fill="#60A5FA" fontSize="11" fontWeight="600" fontFamily="monospace">
+            <text x="20" y="68" fill="#4F46E5" fontSize="11" fontWeight="600" fontFamily="monospace">
               {isNear ? `B(${t.toFixed(2)}) = (${mathX}, ${mathY})` : 'Esperando...'}
             </text>
           </g>
 
           {/* Texto derecha */}
           <g style={{ textAnchor: 'end' }}>
-            <text x="480" y="35" fill={isNear ? slopeColor : 'rgba(255,255,255,0.3)'} fontSize="14" fontWeight="bold" fontFamily="sans-serif">
+            <text x="480" y="35" fill={isNear ? slopeColor : '#8B89AE'} fontSize="14" fontWeight="bold" fontFamily="sans-serif">
               {isNear ? slopeText : '---'}
             </text>
-            <text x="480" y="52" fill="rgba(255,255,255,0.45)" fontSize="10" fontFamily="sans-serif">
+            <text x="480" y="52" fill="#64628A" fontSize="10" fontFamily="sans-serif">
               Pendiente:
             </text>
-            <text x="480" y="68" fill={isNear ? slopeColor : 'rgba(255,255,255,0.3)'} fontSize="11" fontWeight="bold" fontFamily="monospace">
+            <text x="480" y="68" fill={isNear ? slopeColor : '#8B89AE'} fontSize="11" fontWeight="bold" fontFamily="monospace">
               {isNear ? `m = ${slope.toFixed(3)}` : 'm = ---'}
             </text>
           </g>
 
           {/* Guías */}
-          <text x="440" y="270" textAnchor="end" fill="rgba(255,255,255,0.15)" fontSize="10" fontFamily="sans-serif">
+          <text x="440" y="270" textAnchor="end" fill="#8B89AE" fontSize="10" fontFamily="sans-serif">
             Eje X
           </text>
-          <text x="250" y="165" textAnchor="middle" fill="rgba(255,255,255,0.15)" fontSize="10" fontFamily="sans-serif">
+          <text x="250" y="165" textAnchor="middle" fill="#8B89AE" fontSize="10" fontFamily="sans-serif">
             Vértice
           </text>
         </svg>
@@ -275,20 +275,20 @@ const styles = {
   containerMaster: { display: 'contents' },
   expandedBackdrop: {
     display: 'flex', position: 'fixed', inset: 0,
-    backgroundColor: 'rgba(11, 16, 32, 0.9)', backdropFilter: 'blur(16px)',
+    backgroundColor: '#FFFFFF', backdropFilter: 'blur(16px)',
     justifyContent: 'center', alignItems: 'center', zIndex: 9998,
     animation: 'fadeIn 0.2s ease-out', padding: '12px',
   },
   wrap: {
     width: '100%', height: '320px', borderRadius: '18px', overflow: 'hidden',
-    position: 'relative', background: 'linear-gradient(135deg, #0b1020, #0f1a35)',
-    boxShadow: '0 15px 35px rgba(0,0,0,0.35)',
+    position: 'relative', background: 'linear-gradient(135deg, #F8F8FE, #FFFFFF)',
+    boxShadow: '0 15px 35px rgba(37,35,80,0.12)',
     transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px',
   },
   expandedCard: {
     width: '96vw', height: '92vh', maxWidth: '1400px', maxHeight: '900px',
-    borderRadius: '24px', boxShadow: '0 40px 80px rgba(0,0,0,0.7)',
+    borderRadius: '24px', boxShadow: '0 40px 80px rgba(37,35,80,0.24)',
     animation: 'fadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
     padding: '50px 24px 24px 24px',
   },
@@ -296,13 +296,14 @@ const styles = {
   svgExpanded: { width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' },
   expandBtn: {
     position: 'absolute', top: '18px', right: '18px', width: '40px', height: '40px',
-    border: 'none', borderRadius: '12px', background: 'rgba(255,255,255,0.1)',
-    color: 'white', cursor: 'pointer', fontSize: '20px', zIndex: 10,
+    border: 'none', borderRadius: '12px', background: '#F3F2FC',
+    color: '#252350', cursor: 'pointer', fontSize: '20px', zIndex: 10,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   },
   instruction: {
     position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)',
-    background: 'rgba(0,0,0,0.5)', color: 'rgba(255,255,255,0.7)',
+    background: 'rgba(255,255,255,0.92)', color: '#64628A',
+    border: '1px solid #E6E5F5',
     padding: '6px 16px', borderRadius: '20px', fontSize: '11px',
     fontFamily: 'sans-serif', pointerEvents: 'none',
   },

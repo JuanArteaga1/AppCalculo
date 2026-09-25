@@ -9,8 +9,8 @@ import { parse, derivative } from 'mathjs';
  */
 
 export const COLORES = [
-  '#2563EB', // azul
-  '#F4B400', // amarillo institucional
+  '#4F46E5', // azul
+  '#F59E0B', // amarillo institucional
   '#10B981', // verde
   '#EF4444', // rojo
   '#A855F7', // morado
