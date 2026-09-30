@@ -1,71 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { analizarLimite, compilar, formatearValor } from './laboratorio/mathUtils';
+import { useEffect, useRef, useState } from 'react';
+import { formatearValor } from './laboratorio/mathUtils';
+import { PASOS_DEFECTO, useDatosLimite } from './laboratorio/useDatosLimite';
 import Tex from './laboratorio/Tex';
 import GraficaLimite from './GraficaLimite';
 
 /** Un segundo entre fila y fila, como pide el criterio de aceptación. */
 const INTERVALO_MS = 1000;
-const PASOS = [0.1, 0.01, 0.001, 0.0001];
 
 /**
  * Tabla de aproximación que el estudiante resuelve.
  * Muestra los dos lados del punto en una sola tabla compacta y, al pulsar
  * "Resolver", va rellenando una fila por segundo hasta llegar a la conclusión.
  */
-export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', pasos = PASOS, visual = 'interactivo' }) {
+export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', pasos = PASOS_DEFECTO, visual = 'interactivo' }) {
   const esEstatico = visual === 'estatico';
   const porLados = modo === 'laterales';
   const [reveladas, setReveladas] = useState(esEstatico ? pasos.length : 0);
   const [corriendo, setCorriendo] = useState(false);
   const temporizador = useRef(null);
 
-  const filas = useMemo(() => {
-    let evaluar;
-    try {
-      evaluar = compilar(expr);
-    } catch {
-      return [];
-    }
-    return pasos.map((h) => ({
-      h,
-      izqX: punto - h,
-      izqY: evaluar(punto - h),
-      derX: punto + h,
-      derY: evaluar(punto + h),
-    }));
-  }, [expr, punto, pasos]);
-
-  // El límite no es el valor de la última fila (8.0001), sino aquel al que ambos
-  // lados se acercan: se calcula con la misma rutina que usa el laboratorio.
-  const limite = useMemo(() => {
-    try {
-      return analizarLimite(compilar(expr), punto).valor ?? null;
-    } catch {
-      return null;
-    }
-  }, [expr, punto]);
-
-  // Cada fila aporta dos puntos a la gráfica: el de la izquierda y el de la derecha.
-  const puntosGrafica = useMemo(
-    () => filas.flatMap((f) => [
-      { x: f.izqX, y: f.izqY, lado: 'izq' },
-      { x: f.derX, y: f.derY, lado: 'der' },
-    ]).filter((p) => p.y !== null),
-    [filas],
-  );
-
-  const laterales = useMemo(() => {
-    try {
-      const evaluar = compilar(expr);
-      const h = 1e-6;
-      return { izq: evaluar(punto - h), der: evaluar(punto + h) };
-    } catch {
-      return { izq: null, der: null };
-    }
-  }, [expr, punto]);
-
-  const coinciden = laterales.izq !== null && laterales.der !== null
-    && Math.abs(laterales.izq - laterales.der) < 1e-4;
+  const { filas, limite, puntosGrafica, laterales, coinciden, valorEnPunto } = useDatosLimite(expr, punto, pasos);
 
   useEffect(() => () => clearInterval(temporizador.current), []);
 
@@ -128,6 +82,7 @@ export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', p
         porLados={porLados}
         limiteIzq={laterales.izq}
         limiteDer={laterales.der}
+        valorEnPunto={valorEnPunto}
       />
 
       <div style={estilos.envoltura}>

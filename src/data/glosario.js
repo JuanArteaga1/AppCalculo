@@ -264,7 +264,11 @@ export function enlazarTerminos(texto, maximo = MAXIMO_EN_TEXTO) {
           patron.lastIndex = 0;
           if (!patron.test(trozos[j])) continue;
           // Sin espacios ni llaves vacias: TemaPage espera {data-definicion="..."} tal cual.
-          const sufijo = definicion ? `{data-definicion="${definicion}"}` : '';
+          // Las comillas dobles de la definicion romperian el atributo:
+          // se escapan para que el marcador siga siendo reconocible.
+          const sufijo = definicion
+            ? `{data-definicion="${definicion.replace(/"/g, '&quot;')}"}`
+            : '';
           trozos[j] = trozos[j].replace(patron, (_, antes, palabra) => `${antes}[${palabra}](${url})${sufijo}`);
           linea = trozos.join('');
           colocado = true;

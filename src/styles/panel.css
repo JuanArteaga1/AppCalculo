@@ -813,3 +813,30 @@
   .item > .pnl-btn { margin-left: auto; }
   .tabla-panel { font-size: 13px; }
 }
+
+/* ===== bloques desplegables del contenido de un tema =====
+   <details> nativo: ya trae teclado y lector de pantalla. Solo le falta el
+   signo que avise de que se abre, porque el triangulo se oculto. */
+.tema-desplegable > summary { position: relative; padding-right: 44px !important; }
+.tema-desplegable > summary::-webkit-details-marker { display: none; }
+.tema-desplegable > summary::after {
+  content: "+";
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  color: var(--color-primary-vivid);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+.tema-desplegable[open] > summary::after { content: "−"; }
+.tema-desplegable > summary:hover { background: #EEEDFA !important; }
+.tema-desplegable > summary:focus-visible { outline: 2px solid var(--color-primary-vivid); outline-offset: -2px; }

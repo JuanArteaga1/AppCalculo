@@ -31,7 +31,11 @@ export default function AsintotasInteractivas({ expr, titulo }) {
   useLayoutEffect(() => {
     const nodo = contenedorRef.current;
     if (!nodo) return;
+    // Una medida de cero significa que el bloque esta oculto (dentro de un
+    // desplegable cerrado): se ignora para no dejar la grafica con ancho 1,
+    // porque asi ya no se recupera al abrirlo.
     const aplicar = (medida) => {
+      if (medida <= 0) return;
       const nuevo = Math.max(1, Math.round(medida));
       setAncho((previo) => (Math.abs(previo - nuevo) > 1 ? nuevo : previo));
     };
