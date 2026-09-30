@@ -7,10 +7,23 @@ import ChatSection from '../components/ChatSection';
 import AnimatedIcon from '../components/AnimatedIcon';
 import TablaLimiteInteractiva from '../components/TablaLimiteInteractiva';
 import AsintotasInteractivas from '../components/AsintotasInteractivas';
+import GraficaEstatica from '../components/GraficaEstatica';
+import GraficaConceptualInfinito from '../components/GraficaConceptualInfinito';
+import GraficaLimiteInfinito from '../components/GraficaLimiteInfinito';
+import GraficaAsintotaDefinicion from '../components/GraficaAsintotaDefinicion';
+import GraficaDiscontinuidad from '../components/GraficaDiscontinuidad';
 import { FiBookOpen, FiVideo, FiBarChart2, FiArrowRight, FiMessageCircle } from 'react-icons/fi';
 import { HiOutlineLightBulb } from 'react-icons/hi';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+
+/**
+ * KaTeX dibuja la raiz con un <svg> cuyo atributo d trae saltos de linea. Como
+ * el contenido se recorre linea a linea, esos saltos partian la formula y las
+ * coordenadas del trazo aparecian impresas como texto. Dentro del HTML el salto
+ * no significa nada, asi que se cambia por un espacio.
+ */
+const enUnaLinea = (html) => html.replace(/\r?\n/g, ' ');
 
 function renderLatex(text) {
   if (!text) return text;
@@ -21,7 +34,7 @@ function renderLatex(text) {
 
   result = result.replace(/\$\$([\s\S]*?)\$\$/g, (_, latex) => {
     try {
-      return katex.renderToString(latex.trim(), { displayMode: true, throwOnError: false });
+      return enUnaLinea(katex.renderToString(latex.trim(), { displayMode: true, throwOnError: false }));
     } catch {
       return latex;
     }
@@ -29,7 +42,7 @@ function renderLatex(text) {
 
   result = result.replace(/\$([^$\n]+?)\$/g, (_, latex) => {
     try {
-      return katex.renderToString(latex.trim(), { displayMode: false, throwOnError: false });
+      return enUnaLinea(katex.renderToString(latex.trim(), { displayMode: false, throwOnError: false }));
     } catch {
       return latex;
     }
@@ -51,6 +64,24 @@ function renderEnlaces(html) {
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
     '<a class="tema-enlace" href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
   );
+}
+
+/** Negritas **...** dentro de un párrafo o cita; mismo resultado que antes. */
+function hijosEnLinea(texto) {
+  return texto.split(/(\*\*.*?\*\*)/g).map((part, pIdx) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={pIdx} dangerouslySetInnerHTML={{ __html: part.slice(2, -2) }} />
+      );
+    }
+
+    return (
+      <span
+        key={pIdx}
+        dangerouslySetInnerHTML={{ __html: part }}
+      />
+    );
+  });
 }
 
 export default function TemaPage() {
@@ -95,7 +126,63 @@ export default function TemaPage() {
 
   const renderContent = (text) => {
     const preprocessed = renderEnlaces(renderLatex(enlazarTerminos(text)));
-    const lines = preprocessed.split('\n');
+    return renderLineas(preprocessed.split('\n'));
+  };
+
+  /**
+   * Renderiza las líneas ya preprocesadas. Va línea a línea, así que los
+   * bloques que abarcan varias (los desplegables) se extraen antes y se dejan
+   * marcados con un hueco que el recorrido sustituye por su elemento.
+   */
+  const renderLineas = (lineasOriginales) => {
+    const desplegables = [];
+    const lines = [];
+
+    for (let i = 0; i < lineasOriginales.length; i++) {
+      const apertura = lineasOriginales[i].trim().match(/^:::desplegable\s+(.+)$/);
+      if (!apertura) {
+        lines.push(lineasOriginales[i]);
+        continue;
+      }
+      const interior = [];
+      i += 1;
+      while (i < lineasOriginales.length && lineasOriginales[i].trim() !== ':::') {
+        interior.push(lineasOriginales[i]);
+        i += 1;
+      }
+      // Recursivo: dentro de un desplegable vale el mismo contenido de siempre
+      // (párrafos, fórmulas, listas y marcadores de gráfica).
+      desplegables.push({ titulo: apertura[1], cuerpo: renderLineas(interior) });
+      lines.push(`[[desplegable-${desplegables.length - 1}]]`);
+    }
+
+    // Un parrafo escrito en varias lineas (el contenido viene cortado a unas 80
+    // columnas) tiene que salir como un solo <p>. Si no, cada renglon se vuelve
+    // un parrafo suelto y el texto se ve desflechado y con huecos.
+    const esEspecial = (linea) => {
+      const t = linea.trim();
+      if (!t) return true;
+      if (/^(#{1,6} |[-*] |\d+\. |\||> |\[\[|---|:::)/.test(t)) return true;
+      if (t.startsWith('<span class="katex-display"')) return true;
+      if (t.startsWith('[') && t.includes(']=') && !t.includes('](')) return true;
+      // Las lineas que disparan la captura en dos columnas se dejan intactas.
+      const bajo = t.toLowerCase();
+      return bajo.includes('límite por la izquierda')
+        || bajo.includes('límite por la derecha')
+        || bajo.includes('tabla de valores por la')
+        || bajo.includes('conclusión:');
+    };
+
+    const unidas = [];
+    for (const linea of lines) {
+      const previa = unidas[unidas.length - 1];
+      if (previa !== undefined && !esEspecial(linea) && !esEspecial(previa)) {
+        unidas[unidas.length - 1] = previa.trimEnd() + ' ' + linea.trim();
+      } else {
+        unidas.push(linea);
+      }
+    }
+
     const elements = [];
     let listItems = [];
     let inList = false;
@@ -111,8 +198,14 @@ export default function TemaPage() {
       if (inList && listItems.length) {
         const listNode = (
           <ul key={`list-${Math.random()}`} style={styles.list}>
+            {/* Las negritas se convierten aquí: el item entra como HTML y sin
+                esto los ** se veían tal cual dentro de las listas. */}
             {listItems.map((item, i) => (
-              <li key={i} style={styles.listItem} dangerouslySetInnerHTML={{ __html: item }} />
+              <li
+                key={i}
+                style={styles.listItem}
+                dangerouslySetInnerHTML={{ __html: item.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+              />
             ))}
           </ul>
         );
@@ -208,7 +301,7 @@ export default function TemaPage() {
       activeColumn = 1;
     };
 
-    lines.forEach((line, idx) => {
+    unidas.forEach((line, idx) => {
       const trimmed = line.trim();
       const lower = trimmed.toLowerCase();
 
@@ -277,6 +370,87 @@ const marcadorTabla = trimmed.match(
         return;
       }
 
+      // Marcador de contenido: [[grafica-limite expr=<expresion> punto=<numero> modo=<modo>]]
+      // Gráfica de explicación estática (curva completa, sin tabla ni animación).
+      const marcadorGraficaLimite = trimmed.match(
+        /^\[\[grafica-limite\s+expr=(.+?)\s+punto=([-\d.]+)(?:\s+modo=(\w+))?\]\]$/
+      );
+      if (marcadorGraficaLimite) {
+        flushList();
+        flushTable();
+        elements.push(
+          <GraficaEstatica
+            key={idx}
+            expr={marcadorGraficaLimite[1]}
+            punto={Number(marcadorGraficaLimite[2])}
+            modo={marcadorGraficaLimite[3] || undefined}
+          />
+        );
+        return;
+      }
+
+      // Hueco dejado por un bloque :::desplegable. <details> nativo: ya viene
+      // plegado, se abre con Enter o Espacio y los lectores lo anuncian solos.
+      const marcadorDesplegable = trimmed.match(/^\[\[desplegable-(\d+)\]\]$/);
+      if (marcadorDesplegable) {
+        flushList();
+        flushTable();
+        const { titulo, cuerpo } = desplegables[Number(marcadorDesplegable[1])];
+        elements.push(
+          <details key={idx} className="tema-desplegable" style={styles.desplegable}>
+            {/* El título pasó por el preprocesador: puede traer fórmulas ya
+                convertidas a HTML, así que se inserta igual que el resto. */}
+            <summary style={styles.desplegableTitulo}>{hijosEnLinea(titulo)}</summary>
+            <div style={styles.desplegableCuerpo}>{cuerpo}</div>
+          </details>
+        );
+        return;
+      }
+
+      // Marcador de contenido: [[grafica-infinito variante=mas|menos]]
+      // Límite infinito en x = a, con la cota y el intervalo de la definición.
+      const marcadorInfinito = trimmed.match(/^\[\[grafica-infinito\s+variante=(mas|menos)\]\]$/);
+      if (marcadorInfinito) {
+        flushList();
+        flushTable();
+        elements.push(<GraficaLimiteInfinito key={idx} variante={marcadorInfinito[1]} />);
+        return;
+      }
+
+      // Marcador de contenido: [[grafica-asintota tipo=horizontal|vertical|oblicua]]
+      const marcadorAsintotaDef = trimmed.match(
+        /^\[\[grafica-asintota\s+tipo=(horizontal|vertical|oblicua)\]\]$/
+      );
+      if (marcadorAsintotaDef) {
+        flushList();
+        flushTable();
+        elements.push(<GraficaAsintotaDefinicion key={idx} tipo={marcadorAsintotaDef[1]} />);
+        return;
+      }
+
+      // Marcador de contenido: [[grafica tipo=salto|infinita|evitable]] (tema 1.9)
+      const marcadorDiscontinuidad = trimmed.match(
+        /^\[\[grafica\s+tipo=(salto|infinita|evitable)\]\]$/
+      );
+      if (marcadorDiscontinuidad) {
+        flushList();
+        flushTable();
+        elements.push(<GraficaDiscontinuidad key={idx} tipo={marcadorDiscontinuidad[1]} />);
+        return;
+      }
+
+      // Marcador de contenido: [[grafica-conceptual variante=mas|menos]]
+      // Gráfica conceptual estática del límite cuando x → +∞ o x → −∞.
+      const marcadorConceptual = trimmed.match(/^\[\[grafica-conceptual\s+variante=(mas|menos)\]\]$/);
+      if (marcadorConceptual) {
+        flushList();
+        flushTable();
+        elements.push(
+          <GraficaConceptualInfinito key={idx} variante={marcadorConceptual[1]} />
+        );
+        return;
+      }
+
       if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
         flushList();
         inTable = true;
@@ -311,6 +485,16 @@ const marcadorTabla = trimmed.match(
         inList = true;
         listItems.push(trimmed.slice(2));
         return;
+      } else if (/^-{3,}\s*$/.test(trimmed)) {
+        flushList();
+        generatedElement = <hr key={idx} style={styles.hr} />;
+      } else if (trimmed.startsWith('> ')) {
+        flushList();
+        generatedElement = (
+          <blockquote key={idx} style={styles.cita}>
+            {hijosEnLinea(trimmed.replace(/^>\s?/, ''))}
+          </blockquote>
+        );
       } else if (
         trimmed.startsWith('[') &&
         trimmed.includes(']=') &&
@@ -327,26 +511,9 @@ const marcadorTabla = trimmed.match(
       } else {
         flushList();
 
-        const parts = trimmed.split(/(\*\*.*?\*\*)/g);
-
-        const children = parts.map((part, pIdx) => {
-          if (part.startsWith('**') && part.endsWith('**')) {
-            return (
-              <strong key={pIdx} dangerouslySetInnerHTML={{ __html: part.slice(2, -2) }} />
-            );
-          }
-
-          return (
-            <span
-              key={pIdx}
-              dangerouslySetInnerHTML={{ __html: part }}
-            />
-          );
-        });
-
         generatedElement = (
           <p key={idx} style={styles.paragraph}>
-            {children}
+            {hijosEnLinea(trimmed)}
           </p>
         );
       }
@@ -734,6 +901,23 @@ const styles = {
     margin: 0
   },
 
+  hr: {
+    border: 'none',
+    borderTop: '1px solid #E6E5F5',
+    margin: '18px 0'
+  },
+
+  cita: {
+    borderLeft: '3px solid #F59E0B',
+    margin: '8px 0',
+    padding: '10px 16px',
+    background: '#FFFBEB',
+    borderRadius: '0 12px 12px 0',
+    fontSize: '15px',
+    color: '#64628A',
+    lineHeight: 1.7
+  },
+
   list: {
     listStyle: 'none',
     padding: 0,
@@ -912,6 +1096,29 @@ const styles = {
     fontSize: '14.5px',
     lineHeight: 1.6,
     color: '#64628A'
+  },
+
+  desplegable: {
+    margin: '14px 0',
+    border: '1px solid #E6E5F5',
+    borderRadius: '14px',
+    background: '#FFFFFF',
+    overflow: 'hidden'
+  },
+
+  desplegableTitulo: {
+    cursor: 'pointer',
+    listStyle: 'none',
+    padding: '14px 18px',
+    fontFamily: "'Poppins', sans-serif",
+    fontSize: '15px',
+    fontWeight: 700,
+    color: '#3730A3',
+    background: '#F3F2FC'
+  },
+
+  desplegableCuerpo: {
+    padding: '4px 18px 16px'
   },
 
   sidebar: {

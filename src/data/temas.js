@@ -149,99 +149,115 @@ allí el límite sí existía y solo faltaba el valor en el punto.
         titulo: 'Propiedades de los límites de funciones',
         descripcion: 'Las leyes de los límites permiten calcular el límite de sumas, restas, productos, cocientes, potencias y raíces sin analizar la función desde cero, siempre que los límites de las partes existan.',
         contenido: `
-## Introducción
+## Definición informal
 
-Si conocemos los límites de dos [funciones](/conceptos-previos#funciones) en un punto, podemos calcular el límite de combinaciones de esas funciones (sumas, restas, productos, cocientes, potencias, raíces) sin volver a analizar el comportamiento cerca del punto desde cero. A este conjunto de reglas se le llama las leyes de los límites.
+Se interpreta como: es mirar cuál es el comportamiento de la $f$ cuando su variable independiente ($x$) crece o decrece indefinidamente, o cuando se acerca a un punto.
 
-Estas leyes solo son válidas cuando los límites individuales de $f$ y $g$ existen. Si alguno no existe, la ley correspondiente no se puede aplicar directamente y hay que recurrir a otras herramientas (factorización, racionalización, límites laterales).
+## Definición formal
 
-## Leyes de los límites
+Sean $\\lim_{x \\to a} f(x) = L$ y $\\lim_{x \\to a} g(x) = M$, donde ambos límites
+existen, $c$ una constante y $n$ un entero positivo. Entonces valen las siguientes leyes.
 
-Sean $\\lim_{x \\to a} f(x) = L$, $\\lim_{x \\to a} g(x) = M$ (ambos existen), $c$ una constante y $n$ un entero positivo.
+Estas leyes solo son válidas cuando los límites individuales de $f$ y $g$ existen. Si
+alguno no existe, la ley correspondiente no se puede aplicar directamente y hay que
+recurrir a otras herramientas (factorización, racionalización, límites laterales).
+
+## Las leyes, una por una
 
 ### 1. Límite de una constante
 $$\\lim_{x \\to a} c = c$$
 
+Un número que no depende de $x$ no cambia mientras $x$ se mueve: su límite es él mismo.
+
+**Ejemplo:** $\\lim_{x \\to 2} 5 = 5$.
+
+[[grafica-limite expr=5 punto=2]]
+
 ### 2. Límite de la función identidad
 $$\\lim_{x \\to a} x = a$$
+
+La función $y = x$ hace exactamente lo que hace su variable: si $x$ se acerca a $a$,
+el límite es $a$.
+
+**Ejemplo:** $\\lim_{x \\to 2} x = 2$.
+
+[[grafica-limite expr=x punto=2]]
 
 ### 3. Múltiplo constante
 $$\\lim_{x \\to a} [c \\cdot f(x)] = c \\cdot L$$
 
+La constante que multiplica puede salir del límite: primero se calcula el límite
+de $f$ y al final se multiplica por $c$.
+
+**Ejemplo:** $\\lim_{x \\to 2} 4x = 4 \\cdot \\lim_{x \\to 2} x = 4 \\cdot 2 = 8$.
+
+[[grafica-limite expr=4*x punto=2]]
+
 ### 4. Suma
 $$\\lim_{x \\to a} [f(x) + g(x)] = L + M$$
+
+El límite de la suma es la suma de los límites: se parte la expresión en pedazos
+y se calcula cada uno por separado.
+
+**Ejemplo:** $\\lim_{x \\to 2} (x^3 + 4x - 1) = 2^3 + 4(2) - 1 = 8 + 8 - 1 = 15$.
+
+[[grafica-limite expr=x^3+4*x-1 punto=2]]
 
 ### 5. Resta
 $$\\lim_{x \\to a} [f(x) - g(x)] = L - M$$
 
+Igual que la suma, pero restando: el límite de la diferencia es la diferencia
+de los límites.
+
+**Ejemplo:** $\\lim_{x \\to 3} (2x^2 - 5x + 1) = 2(3^2) - 5(3) + 1 = 18 - 15 + 1 = 4$.
+
+[[grafica-limite expr=2*x^2-5*x+1 punto=3]]
+
 ### 6. Producto
 $$\\lim_{x \\to a} [f(x) \\cdot g(x)] = L \\cdot M$$
+
+Se calcula el límite de cada factor por separado y después se multiplican
+los resultados.
+
+**Ejemplo:** $\\lim_{x \\to 2} (x + 1)(x^2 - 3) = 3 \\cdot 1 = 3$, porque
+$\\lim_{x \\to 2} (x + 1) = 3$ y $\\lim_{x \\to 2} (x^2 - 3) = 1$.
+
+[[grafica-limite expr=(x+1)*(x^2-3) punto=2]]
 
 ### 7. Cociente
 $$\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\frac{L}{M}, \\quad \\text{si } M \\neq 0$$
 
+Se divide el límite de arriba entre el de abajo, pero antes hay que confirmar
+que el denominador no tienda a cero.
+
+**Ejemplo:** $\\lim_{x \\to 1} \\frac{x^2 + 3}{x - 4}$. Como
+$\\lim_{x \\to 1} (x - 4) = -3 \\neq 0$, la ley aplica:
+$$\\frac{1^2 + 3}{1 - 4} = \\frac{4}{-3} = -\\frac{4}{3}$$
+
+[[grafica-limite expr=(x^2+3)/(x-4) punto=1]]
+
 ### 8. Potencia
 $$\\lim_{x \\to a} [f(x)]^n = L^n$$
+
+Primero se calcula el límite de adentro y después se eleva al exponente.
+
+**Ejemplo:** $\\lim_{x \\to 2} (x^2) = [\\lim_{x \\to 2} x]^2 = 2^2 = 4$.
+
+[[grafica-limite expr=x^2 punto=2]]
 
 ### 9. Raíz (potencia fraccionaria)
 $$\\lim_{x \\to a} [f(x)]^{1/n} = L^{1/n}$$
 
-Si $n$ es par, esta ley exige además que $L \\geq 0$, porque la raíz par de un número negativo no es un número real.
+Funciona como una potencia con exponente fraccionario: primero el interior,
+luego la raíz. Si $n$ es par, esta ley exige además que $L \\geq 0$, porque la
+raíz par de un número negativo no es un número real.
+
+**Ejemplo:** $\\lim_{x \\to 9} (x + 7)^{1/2}$. El interior tiende a $16 \\geq 0$,
+así que la ley aplica: $16^{1/2} = 4$.
+
+[[grafica-limite expr=sqrt(x+7) punto=9]]
 
 ---
-
-## Ejemplos resueltos
-
-### Ejemplo 1: suma, resta, múltiplo constante y potencia
-
-Calcular $\\lim_{x \\to 2} (x^3 + 4x - 1)$.
-
-Separando la suma y la resta (leyes 4 y 5):
-$$\\lim_{x \\to 2} x^3 + \\lim_{x \\to 2} 4x - \\lim_{x \\to 2} 1$$
-
-Cada término se calcula por separado:
-- $\\lim_{x \\to 2} x^3 = 2^3 = 8$, por la ley de la potencia.
-- $\\lim_{x \\to 2} 4x = 4 \\cdot 2 = 8$, por el múltiplo constante.
-- $\\lim_{x \\to 2} 1 = 1$, por el límite de una constante.
-
-Sumando los tres resultados:
-$$8 + 8 - 1 = 15$$
-
-### Ejemplo 2: potencia y coeficientes
-
-Calcular $\\lim_{x \\to 3} (2x^2 - 5x + 1)$.
-
-$$\\lim_{x \\to 3} 2x^2 - \\lim_{x \\to 3} 5x + \\lim_{x \\to 3} 1 = 2(3^2) - 5(3) + 1 = 18 - 15 + 1 = 4$$
-
-### Ejemplo 3: cociente
-
-Calcular $\\lim_{x \\to 1} \\frac{x^2 + 3}{x - 4}$.
-
-Antes de dividir hay que confirmar que el límite del denominador no sea cero:
-$$\\lim_{x \\to 1} (x - 4) = 1 - 4 = -3 \\neq 0$$
-
-Como el denominador no tiende a cero, la ley del cociente aplica directamente:
-$$\\lim_{x \\to 1} \\frac{x^2 + 3}{x - 4} = \\frac{1^2 + 3}{1 - 4} = \\frac{4}{-3} = -\\frac{4}{3}$$
-
-### Ejemplo 4: producto
-
-Calcular $\\lim_{x \\to 2} (x + 1)(x^2 - 3)$.
-
-Se calcula el límite de cada factor por separado:
-$$\\lim_{x \\to 2} (x + 1) = 3 \\qquad \\lim_{x \\to 2} (x^2 - 3) = 1$$
-
-Y se multiplican los resultados:
-$$3 \\cdot 1 = 3$$
-
-### Ejemplo 5: raíz (potencia fraccionaria)
-
-Calcular $\\lim_{x \\to 9} (x + 7)^{1/2}$.
-
-Primero se resuelve el interior:
-$$\\lim_{x \\to 9} (x + 7) = 16$$
-
-Como $16 \\geq 0$, la ley de la raíz aplica:
-$$16^{1/2} = 4$$
 
 ## Cuándo no se pueden aplicar directamente
 
@@ -253,11 +269,206 @@ Las leyes de los límites solo garantizan un resultado cuando cada límite invol
         titulo: 'Límites al infinito y en infinito',
         descripcion: 'Analizan el comportamiento extremo de una función cuando x crece o decrece sin límite, incluyendo ejercicios y definición formal.',
         contenido: `
-## Definición Formal
+## Definición informal
+
+Un límite al infinito describe qué le pasa a $f(x)$ cuando $x$ crece o decrece sin
+límite, y un límite infinito describe qué pasa cuando, al acercarnos a un valor de
+$x$, los valores de la función crecen o disminuyen sin límite.
+
+Se interpreta como: es mirar cuál es el comportamiento de la $f$ cuando su variable
+independiente ($x$) crece o decrece indefinidamente.
+
+## Definición formal
 
 El límite $\\lim_{x \\to \\infty} f(x) = L$ significa que para todo $\\varepsilon > 0$, existe un número positivo $N$ tal que $|f(x) - L| < \\varepsilon$ siempre que $x > N$. De forma análoga cuando $x \\to -\\infty$.
 
-## Ejercicios Explicados
+## Gráfica conceptual: cuando $x$ tiende a $+\\infty$
+
+Esta gráfica no corresponde a una función específica (no es $f(x) = x^2$ ni
+$f(x) = \\frac{1}{x}$): es una representación conceptual de la definición. La curva
+se acerca cada vez más a la recta punteada $y = L$ mientras la flecha avanza hacia
+$+\\infty$.
+
+[[grafica-conceptual variante=mas]]
+
+## Gráfica conceptual: cuando $x$ tiende a $-\\infty$
+
+La misma idea hacia el otro extremo: cuando $x$ decrece sin límite, la curva se
+pega cada vez más a la recta $y = L$.
+
+[[grafica-conceptual variante=menos]]
+
+## Casos con ejemplos
+
+### Caso 1. Cuando $x$ tiende a $+\\infty$
+
+$$\\lim_{x \\to \\infty} x^2$$
+
+**Resolución.** Se sustituyen valores cada vez más grandes y se mira hacia dónde va el resultado:
+
+| $x$ | $10$ | $100$ | $1\\,000$ | $10\\,000$ |
+|---|---|---|---|---|
+| $x^2$ | $100$ | $10\\,000$ | $1\\,000\\,000$ | $100\\,000\\,000$ |
+
+Cada vez que $x$ se multiplica por $10$, el resultado se multiplica por $100$. No se acerca a ningún número: crece sin tope.
+
+$$\\lim_{x \\to \\infty} x^2 = \\boxed{+\\infty}$$
+
+### Caso 2. Cuando $x$ tiende a $-\\infty$
+
+$$\\lim_{x \\to -\\infty} x^2$$
+
+**Resolución.** Ahora los valores son negativos, pero el exponente es par y el cuadrado borra el signo:
+
+| $x$ | $-10$ | $-100$ | $-1\\,000$ | $-10\\,000$ |
+|---|---|---|---|---|
+| $x^2$ | $100$ | $10\\,000$ | $1\\,000\\,000$ | $100\\,000\\,000$ |
+
+Sale exactamente la misma columna que antes, así que el resultado es el mismo:
+
+$$\\lim_{x \\to -\\infty} x^2 = \\boxed{+\\infty}$$
+
+### Caso 3. Cuidado con el exponente impar
+
+$$\\lim_{x \\to -\\infty} x^3$$
+
+**Resolución.** Con exponente impar el signo sí sobrevive: $(-10)^3 = -1\\,000$ y $(-100)^3 = -1\\,000\\,000$. Los valores se hacen cada vez más negativos.
+
+$$\\lim_{x \\to -\\infty} x^3 = \\boxed{-\\infty}$$
+
+La regla corta: en $x^n$ con $n$ par los dos extremos dan $+\\infty$; con $n$ impar cada extremo se va para su lado.
+
+## Ejemplo animado
+
+Vamos a mirar la función $f(x) = \\frac{4x}{x^2 + 9}$ en los dos extremos. Arriba crece como $4x$ y abajo como $x^2$: el denominador es de grado mayor, así que gana y la fracción se hace pequeña.
+
+Se comprueba dividiendo cada término entre $x^2$, la mayor potencia del denominador:
+
+$$\\lim_{x \\to \\infty} \\frac{4x}{x^2 + 9} = \\lim_{x \\to \\infty} \\frac{\\frac{4x}{x^2}}{\\frac{x^2}{x^2} + \\frac{9}{x^2}} = \\lim_{x \\to \\infty} \\frac{\\frac{4}{x}}{1 + \\frac{9}{x^2}} = \\frac{0}{1} = 0$$
+
+Por $-\\infty$ pasa lo mismo, así que la recta $y = 0$ es asíntota horizontal por los dos lados.
+
+Tampoco hay asíntota vertical: $x^2 + 9$ nunca vale cero, porque $x^2 = -9$ no tiene solución real. La función está definida en todos los reales.
+
+Pulsa **Resolver** y fíjate en tres cosas mientras se dibuja:
+
+- La curva **sube hasta un máximo** cerca de $x = 3$, donde vale $\\frac{2}{3}$, y desde ahí empieza a bajar. Alejarse del origen no siempre significa crecer.
+- Después se **aplasta contra la recta verde** $y = 0$ sin llegar a tocarla. Eso es la asíntota horizontal: el destino, no un tope.
+- En el origen la curva **cruza** esa misma recta, porque $f(0) = 0$. Una asíntota no es una barrera: dice a qué se acerca la función cuando $x$ se va al infinito, no por dónde puede pasar.
+
+[[asintotas expr=4*x/(x^2+9)]]
+
+Abajo, cada paso del procedimiento aparece con el color de su recta en la gráfica, para que se vea de cuál está hablando.
+
+## Límites de solución directa
+
+No todo límite al infinito es una indeterminación. Cuando el comportamiento se decide solo con el término de mayor grado, el resultado se lee directamente y no hay nada que levantar.
+
+Ejemplo: $$\\lim_{x \\to \\infty} (-x^2 + 3x + 5)$$
+
+Al crecer $x$, el término de mayor grado manda sobre los demás: $3x$ y $5$ crecen, pero $-x^2$ crece mucho más rápido y con signo negativo. Basta mirarlo a él.
+
+$$-x^2 \\rightarrow -\\infty$$
+
+$$\\boxed{-\\infty}$$
+
+**Esto no es una indeterminación.** No hay un $\\frac{\\infty}{\\infty}$ ni un $\\infty - \\infty$ que resolver: la respuesta sale de comparar los grados.
+
+## B) Indeterminación $\\frac{\\infty}{\\infty}$
+
+$$\\boxed{\\frac{\\infty}{\\infty}}$$
+
+Aparece en las funciones racionales, donde el numerador y el denominador crecen los dos sin límite:
+
+$$\\lim_{x \\to \\infty} \\frac{P(x)}{Q(x)}$$
+
+Decir que el resultado es "infinito entre infinito" no dice nada: hay que comparar a qué velocidad crece cada uno. Eso lo deciden sus grados.
+
+### Mismo grado: el cociente de los coeficientes
+
+Cuando $P$ y $Q$ tienen el mismo grado, los dos crecen igual de rápido y el límite es el cociente de los coeficientes de mayor grado.
+
+:::desplegable Ejemplo resuelto: $\\lim_{x \\to \\infty} \\frac{5x^3 - 2x + 1}{2x^3 + 7x^2}$
+
+Los dos son de grado 3. Se divide cada término entre $x^3$, la mayor potencia del denominador:
+
+$$\\lim_{x \\to \\infty} \\frac{\\frac{5x^3}{x^3} - \\frac{2x}{x^3} + \\frac{1}{x^3}}{\\frac{2x^3}{x^3} + \\frac{7x^2}{x^3}} = \\lim_{x \\to \\infty} \\frac{5 - \\frac{2}{x^2} + \\frac{1}{x^3}}{2 + \\frac{7}{x}}$$
+
+Todas las fracciones con $x$ en el denominador se van a cero:
+
+$$\\frac{5 - 0 + 0}{2 + 0} = \\boxed{\\frac{5}{2}}$$
+
+Que es justo el cociente de los coeficientes de mayor grado: $5$ entre $2$.
+:::
+
+### Numerador de menor grado: el límite es 0
+
+Si el numerador es de grado menor, el denominador crece más rápido y la fracción se achica sin parar.
+
+:::desplegable Ejemplo resuelto: $\\lim_{x \\to \\infty} \\frac{3x + 4}{x^2 - 1}$
+
+Grado 1 arriba, grado 2 abajo. Se divide todo entre $x^2$:
+
+$$\\lim_{x \\to \\infty} \\frac{\\frac{3x}{x^2} + \\frac{4}{x^2}}{\\frac{x^2}{x^2} - \\frac{1}{x^2}} = \\lim_{x \\to \\infty} \\frac{\\frac{3}{x} + \\frac{4}{x^2}}{1 - \\frac{1}{x^2}} = \\frac{0 + 0}{1 - 0} = \\boxed{0}$$
+:::
+
+## C) Indeterminación $\\infty - \\infty$
+
+$$\\boxed{\\infty - \\infty}$$
+
+Aparece cuando dos cantidades crecen sin límite y una se le resta a la otra. No se puede decir que da cero: depende de cuál crece más rápido y de cuánto se separan.
+
+Cuando hay una raíz de por medio, se resuelve **multiplicando y dividiendo por el conjugado**. Así la resta se convierte en una diferencia de cuadrados, la raíz desaparece del numerador y queda una fracción que ya se puede tratar.
+
+:::desplegable Ejemplo resuelto paso a paso
+
+$$\\lim_{x \\to \\infty} \\left( \\sqrt{x^2 + 3x} - x \\right)$$
+
+**1. Reconocer la indeterminación.** La raíz crece y $x$ también, así que es $\\infty - \\infty$: no se puede decir que dé cero.
+
+**2. Multiplicar por el conjugado.** El conjugado es la misma expresión con el signo del medio cambiado. Se multiplica y se divide por él, que es como multiplicar por 1:
+
+$$\\left( \\sqrt{x^2 + 3x} - x \\right) \\cdot \\frac{\\sqrt{x^2 + 3x} + x}{\\sqrt{x^2 + 3x} + x}$$
+
+**3. La raíz desaparece.** Arriba queda $(a-b)(a+b) = a^2 - b^2$, y el cuadrado deshace la raíz:
+
+$$\\frac{(x^2 + 3x) - x^2}{\\sqrt{x^2 + 3x} + x} = \\frac{3x}{\\sqrt{x^2 + 3x} + x}$$
+
+**4. Ahora es un $\\frac{\\infty}{\\infty}$.** Se divide arriba y abajo entre $x$. Dentro de la raíz eso significa dividir entre $x^2$:
+
+$$\\frac{3}{\\sqrt{1 + \\frac{3}{x}} + 1}$$
+
+**5. Evaluar.** Cuando $x \\to \\infty$, la fracción $\\frac{3}{x}$ se va a cero:
+
+$$\\frac{3}{\\sqrt{1} + 1} = \\boxed{\\frac{3}{2}}$$
+:::
+
+## Límites infinitos: cuando la función se dispara en $x = a$
+
+Un límite infinito describe que, al acercarnos a un valor de $x$, los valores de la función crecen o disminuyen sin límite. Ojo con la diferencia: en un límite al infinito es $x$ la que crece; aquí la que se dispara es $f(x)$.
+
+$$\\lim_{x \\to a} f(x) = +\\infty$$
+
+La curva crece hacia $+\\infty$ cuando $x$ se aproxima a $a$: dentro del intervalo $(a-\\delta, a+\\delta)$ ya superó cualquier cota $y = M$ que se nos ocurra poner, por alta que sea.
+
+[[grafica-infinito variante=mas]]
+
+$$\\lim_{x \\to a} f(x) = -\\infty$$
+
+El caso simétrico: la curva decrece hacia $-\\infty$ y cae por debajo de la cota $-M$.
+
+[[grafica-infinito variante=menos]]
+
+:::desplegable Ejemplo: $\\lim_{x \\to a} f(x) = +\\infty$
+
+Cuando $x$ se acerca a $a$, $f(x)$ se hace cada vez más grande, sin máximo. No importa qué número enorme elijamos: la curva termina pasándolo y sigue subiendo.
+
+Dicho de otro modo, el límite no existe como número; lo que decimos al escribir $+\\infty$ es *cómo* no existe: la función no se queda cerca de ningún valor, se escapa hacia arriba.
+
+[[grafica-infinito variante=mas]]
+:::
+
+## Ejercicios explicados: el método de dividir
 
 ### 1. Calcular $\\lim_{x \\to -\\infty} \\frac{2x^2 - 5}{3x^2 + x + 2}$
 - **Método:** Se divide cada término del numerador y del denominador entre la mayor potencia de $x$ del denominador ($x^2$).
@@ -269,11 +480,6 @@ El límite $\\lim_{x \\to \\infty} f(x) = L$ significa que para todo $\\varepsil
 ### 2. Calcular $\\lim_{x \\to \\infty} \\frac{4x}{x^2 + 9}$
 - **Desarrollo:** Dividiendo cada término entre $x^2$:
   $$\\lim_{x \\to \\infty} \\frac{\\frac{4x}{x^2}}{\\frac{x^2}{x^2} + \\frac{9}{x^2}} = \\lim_{x \\to \\infty} \\frac{\\frac{4}{x}}{1 + \\frac{9}{x^2}} = \\frac{0}{1} = 0$$
-
-## Cómo hacer la gráfica
-- Dibuja un plano cartesiano con los ejes $X$ e $Y$.
-- Traza una línea punteada horizontal en $y = L$ (asíntota horizontal).
-- Dibuja una curva suave que, al extenderse hacia los extremos del eje $X$ ($+\\infty$ o $-\\infty$), se aproxime cada vez más a esa línea punteada sin llegar a cruzarla o tocarla necesariamente.
         `
       },
       {
@@ -295,6 +501,8 @@ $$\\lim_{x \\to \\infty} f(x) = k \\qquad o \\qquad \\lim_{x \\to -\\infty} f(x)
 
 entonces la recta $y = k$ es una asíntota horizontal de $f$.
 
+[[grafica-asintota tipo=horizontal]]
+
 ## 2. Asíntota vertical
 
 Si al acercarse a un punto la función se dispara:
@@ -303,6 +511,8 @@ $$\\lim_{x \\to a} f(x) = \\pm\\infty$$
 
 entonces la recta $x = a$ es una asíntota vertical. En las funciones racionales, esos puntos
 $a$ son justamente los que **no** pertenecen al dominio: los que anulan el denominador.
+
+[[grafica-asintota tipo=vertical]]
 
 ## 3. Asíntota oblicua
 
@@ -318,25 +528,72 @@ $$m = \\lim_{x \\to \\pm\\infty} \\frac{f(x)}{x} \\qquad b = \\lim_{x \\to \\pm\
 mayor que el del denominador. Y se busca únicamente si **no** hay asíntota horizontal: las dos
 son excluyentes.
 
-## Ejemplo 1: hay oblicua, no horizontal
+[[grafica-asintota tipo=oblicua]]
 
-El numerador es de grado 2 y el denominador de grado 1, así que esperamos oblicua.
+:::desplegable Ejemplo 1: hay oblicua, no horizontal
+
+$$f(x) = \\frac{x^2 + 2}{x - 2}$$
+
+**a) Vertical.** Se busca dónde se anula el denominador: $x - 2 = 0$, o sea $x = 2$. Ahí el numerador vale $6 \\neq 0$, así que la fracción se dispara y
+
+$$x = 2 \\text{ es asíntota vertical.}$$
+
+**b) Horizontal.** Se mira el límite en el infinito. Arriba es de grado 2 y abajo de grado 1, así que el numerador gana y el cociente crece sin tope:
+
+$$\\lim_{x \\to \\infty} \\frac{x^2 + 2}{x - 2} = \\infty \\quad \\Rightarrow \\quad \\text{no hay horizontal.}$$
+
+**c) Oblicua.** Como no hay horizontal y el numerador supera al denominador en exactamente un grado, sí puede haberla. Se calculan los dos coeficientes:
+
+$$m = \\lim_{x \\to \\infty} \\frac{f(x)}{x} = \\lim_{x \\to \\infty} \\frac{x^2 + 2}{x^2 - 2x} = 1$$
+
+$$b = \\lim_{x \\to \\infty} \\left[ f(x) - mx \\right] = \\lim_{x \\to \\infty} \\frac{x^2 + 2 - x(x-2)}{x - 2} = \\lim_{x \\to \\infty} \\frac{2x + 2}{x - 2} = 2$$
+
+$$\\boxed{y = x + 2}$$
+
+Pulsa **Resolver** para verlo dibujado:
 
 [[asintotas expr=(x^2+2)/(x-2)]]
+:::
 
-## Ejemplo 2: hay horizontal, no oblicua
+:::desplegable Ejemplo 2: hay horizontal, no oblicua
 
-Aquí numerador y denominador son del mismo grado. El límite en el infinito es el cociente de
-los coeficientes principales, y al haber horizontal ya no puede haber oblicua.
+$$f(x) = \\frac{2x^2 + 3}{x^2 - 1}$$
+
+**a) Vertical.** El denominador se anula en $x^2 - 1 = 0$, es decir $x = 1$ y $x = -1$. En los dos el numerador no se anula, así que
+
+$$x = 1 \\quad \\text{y} \\quad x = -1 \\text{ son asíntotas verticales.}$$
+
+**b) Horizontal.** Numerador y denominador son del mismo grado, así que el límite es el cociente de los coeficientes de mayor grado. Dividiendo todo entre $x^2$:
+
+$$\\lim_{x \\to \\infty} \\frac{2 + \\frac{3}{x^2}}{1 - \\frac{1}{x^2}} = \\frac{2 + 0}{1 - 0} = 2 \\quad \\Rightarrow \\quad \\boxed{y = 2}$$
+
+**c) Oblicua.** No se busca: ya hay horizontal y las dos son excluyentes.
+
+Pulsa **Resolver** para verlo dibujado:
 
 [[asintotas expr=(2x^2+3)/(x^2-1)]]
+:::
 
-## Ejemplo 3: dos verticales y una horizontal
+:::desplegable Ejemplo 3: dos verticales y una horizontal negativa
 
-El denominador se anula en dos puntos, así que aparecen dos asíntotas verticales, una a cada
-lado del eje.
+$$f(x) = \\frac{2x^2}{9 - x^2}$$
+
+**a) Vertical.** El denominador se anula en $9 - x^2 = 0$, o sea $x = 3$ y $x = -3$, una a cada lado del eje:
+
+$$x = 3 \\quad \\text{y} \\quad x = -3 \\text{ son asíntotas verticales.}$$
+
+**b) Horizontal.** Mismo grado arriba y abajo, así que otra vez el cociente de los coeficientes principales. Ojo con el signo: abajo el término de mayor grado es $-x^2$.
+
+$$\\lim_{x \\to \\infty} \\frac{2x^2}{9 - x^2} = \\frac{2}{-1} = -2 \\quad \\Rightarrow \\quad \\boxed{y = -2}$$
+
+La asíntota queda **por debajo** del eje, aunque la función tenga el numerador positivo.
+
+**c) Oblicua.** No hay, por la misma razón que antes.
+
+Pulsa **Resolver** para verlo dibujado:
 
 [[asintotas expr=2x^2/(9-x^2)]]
+:::
 
 ## Resumen
 
@@ -347,6 +604,267 @@ lado del eje.
       },
       {
         id: '1.6',
+        titulo: 'Teoremas básicos sobre límites',
+        descripcion: 'Los diez teoremas que permiten calcular límites y afirmar continuidad sin volver a la definición: composición, operaciones, potencias inversas, raíces, intercalación, polinomios y valor intermedio.',
+        contenido: `
+## De qué trata este tema
+
+Estos son los teoremas que permiten calcular límites y afirmar continuidad sin recurrir cada vez a la definición. Cada uno trae su enunciado, qué significa en palabras y un ejemplo resuelto.
+
+## 1. Teorema de continuidad de una función compuesta
+
+**Enunciado.** Si la función $g$ es continua en $a$ y la función $f$ es continua en $g(a)$, entonces la función compuesta $f \\circ g$ es continua en $a$.
+
+**Explicación.** Si tienes una función anidada dentro de otra, el resultado global no tendrá interrupciones (saltos) si la parte interna es continua en tu punto inicial y la externa también lo es en el resultado que arrojó la primera.
+
+:::desplegable Ejemplo: $f(g(x)) = \\cos(x^2)$ en $x = \\pi$
+
+Sea $g(x) = x^2$ y $f(x) = \\cos(x)$. Queremos evaluar en $x = \\pi$.
+
+Sabemos que $g$ es continua en $\\pi$ y da como resultado $\\pi^2$. Como $f(x)$ también es continua en $\\pi^2$, concluimos que la función compuesta $f(g(x)) = \\cos(x^2)$ es continua en $x = \\pi$.
+:::
+
+## 2. Teorema del límite de una función compuesta
+
+**Enunciado.** Si $\\lim_{x \\to a} g(x) = b$ y la función $f$ es continua en $b$, entonces
+
+$$\\lim_{x \\to a} (f \\circ g)(x) = f(b) \\qquad \\text{o lo que es lo mismo} \\qquad \\lim_{x \\to a} f(g(x)) = f\\left( \\lim_{x \\to a} g(x) \\right)$$
+
+**Explicación.** Este teorema permite meter el límite dentro de la función principal, siempre y cuando esa función exterior sea continua. Calculas hacia dónde tiende la parte de adentro y a ese resultado le aplicas la función de afuera.
+
+:::desplegable Ejemplo: $\\lim_{x \\to 0} e^{2x + 1}$
+
+El límite de la función interna es
+
+$$\\lim_{x \\to 0} (2x + 1) = 1$$
+
+y la función externa $e^x$ es continua en $x = 1$, así que solo hay que evaluar el resultado:
+
+$$\\lim_{x \\to 0} e^{2x + 1} = e^1 = \\boxed{e}$$
+:::
+
+## 3. Teoremas sobre continuidad (operaciones básicas)
+
+**Enunciado.** Si $f$ y $g$ son continuas en un número $a$, entonces también son continuas en $a$:
+
+- Suma o resta: $f \\pm g$
+- Multiplicación: $f \\cdot g$
+- División: $f / g$
+
+**Explicación.** Al combinar funciones continuas con aritmética, la nueva función hereda esa continuidad en el mismo punto, sin romperse. En la división hay que añadir la condición de que el denominador no se anule en ese punto.
+
+:::desplegable Ejemplo: $h(x) = x^3 + \\sin(x)$
+
+Si $f(x) = x^3$ es continua en todo su dominio y $g(x) = \\sin(x)$ también lo es, entonces su suma
+
+$$h(x) = x^3 + \\sin(x)$$
+
+es continua en cualquier punto, por ejemplo en $x = 0$.
+:::
+
+## 4. Teorema de límites al infinito con constantes
+
+**Enunciado.** Si $\\lim_{x \\to a} f(x) = \\infty$ y $\\lim_{x \\to a} g(x) = c$, con $c$ un número real, entonces:
+
+$$\\lim_{x \\to a} \\left[ g(x) + f(x) \\right] = \\infty$$
+
+$$\\text{si } c > 0: \\quad \\lim_{x \\to a} \\left[ g(x) f(x) \\right] = \\infty \\qquad \\text{si } c < 0: \\quad \\lim_{x \\to a} \\left[ g(x) f(x) \\right] = -\\infty$$
+
+**Explicación.** Define las reglas de interacción con el infinito. Sumarle un número real a infinito no le afecta, sigue siendo infinito. Multiplicarlo por un positivo lo mantiene como infinito positivo, y multiplicarlo por un negativo le invierte el signo.
+
+:::desplegable Ejemplo: $\\lim_{x \\to 0^+} \\left( -5 \\cdot \\frac{1}{x} \\right)$
+
+Aquí $g(x) = -5$, así que $c < 0$, y $f(x) = \\frac{1}{x}$ tiende a $\\infty$ por la derecha. Como la constante es negativa, el producto invierte el signo:
+
+$$\\lim_{x \\to 0^+} \\left( -5 \\cdot \\frac{1}{x} \\right) = \\boxed{-\\infty}$$
+:::
+
+## 5. Teorema de límites de potencias inversas
+
+**Enunciado.** Para un entero positivo $n$ en la expresión $\\frac{1}{(x-a)^n}$:
+
+$$\\text{si } n \\text{ es par:} \\quad \\lim_{x \\to a} \\frac{1}{(x-a)^n} = \\infty$$
+
+$$\\text{si } n \\text{ es impar:} \\quad \\lim_{x \\to a^+} \\frac{1}{(x-a)^n} = \\infty \\qquad \\lim_{x \\to a^-} \\frac{1}{(x-a)^n} = -\\infty$$
+
+**Explicación.** Dividir un número constante entre algo que se acerca a cero genera un valor gigantesco. Si el exponente es par la expresión siempre es positiva, así que se dispara al infinito por los dos lados. Si es impar, conserva el signo del lado por el que te acercas.
+
+:::desplegable Ejemplo: exponente par y exponente impar
+
+Con exponente par el límite es el mismo por ambos lados:
+
+$$\\lim_{x \\to 3} \\frac{1}{(x-3)^2} = \\infty$$
+
+Con exponente impar depende del lado. Acercándose por la izquierda:
+
+$$\\lim_{x \\to 3^-} \\frac{1}{(x-3)^3} = -\\infty$$
+:::
+
+## 6. Teorema del límite de una raíz
+
+**Enunciado.** Si el límite $\\lim_{x \\to a} f(x)$ existe, entonces
+
+$$\\lim_{x \\to a} \\sqrt[n]{f(x)} = \\sqrt[n]{\\lim_{x \\to a} f(x)}$$
+
+siempre que $n$ sea un entero positivo impar, o que $n$ sea par y además $\\lim_{x \\to a} f(x) > 0$.
+
+**Explicación.** Se puede calcular el límite metiéndolo directamente dentro de la raíz. La única restricción es que no existen raíces reales de índice par para números negativos, así que en esos casos el interior debe tender a un valor mayor que cero.
+
+:::desplegable Ejemplo: $\\lim_{x \\to 2} \\sqrt{3x + 10}$
+
+$$\\lim_{x \\to 2} \\sqrt{3x + 10} = \\sqrt{\\lim_{x \\to 2} (3x + 10)} = \\sqrt{6 + 10} = \\sqrt{16} = \\boxed{4}$$
+:::
+
+## 7. Teorema de la intercalación (del emparedado)
+
+**Enunciado.** Supóngase que para todo $x$ en un intervalo abierto alrededor de $a$ (excepto quizá en $x = a$) se cumple que $f(x) \\leq h(x) \\leq g(x)$. Si
+
+$$\\lim_{x \\to a} f(x) = L \\qquad \\text{y} \\qquad \\lim_{x \\to a} g(x) = L$$
+
+entonces
+
+$$\\lim_{x \\to a} h(x) = L$$
+
+**Explicación.** Si una función $h(x)$ queda aplastada entre otras dos y esas dos convergen al mismo punto, la del centro está obligada a ir también hacia ese punto.
+
+:::desplegable Ejemplo: $\\lim_{x \\to 0} x^2 \\cos\\left(\\frac{1}{x}\\right)$
+
+El coseno siempre vive entre $-1$ y $1$, pase lo que pase dentro:
+
+$$-1 \\leq \\cos\\left(\\frac{1}{x}\\right) \\leq 1$$
+
+Multiplicando por $x^2$, que es positivo, la desigualdad no cambia de sentido:
+
+$$-x^2 \\leq x^2 \\cos\\left(\\frac{1}{x}\\right) \\leq x^2$$
+
+Los dos extremos van al mismo sitio:
+
+$$\\lim_{x \\to 0} (-x^2) = 0 \\qquad \\lim_{x \\to 0} x^2 = 0$$
+
+Así que la función atrapada en el centro tiene el mismo límite:
+
+$$\\lim_{x \\to 0} x^2 \\cos\\left(\\frac{1}{x}\\right) = \\boxed{0}$$
+:::
+
+## 8. Teorema del límite de un polinomio
+
+**Enunciado.** Si $f$ es un polinomio y $a$ es un número real, entonces
+
+$$\\lim_{x \\to a} f(x) = f(a)$$
+
+**Explicación.** Las funciones polinómicas son continuas en todos los reales. Para hallar su límite en cualquier punto no hacen falta artificios algebraicos: basta sustituir la variable por el valor al que tiende.
+
+:::desplegable Ejemplo: $\\lim_{x \\to 2} (x^3 - 2x + 5)$
+
+Se evalúa directamente:
+
+$$f(2) = (2)^3 - 2(2) + 5 = 8 - 4 + 5 = \\boxed{9}$$
+:::
+
+## 9. Teorema del cero intermedio
+
+**Enunciado.** Si $f$ es continua en el intervalo cerrado $[a, b]$ y los valores en los extremos $f(a)$ y $f(b)$ tienen signos opuestos, entonces existe un número $c$ entre $a$ y $b$ tal que
+
+$$f(c) = 0$$
+
+**Explicación.** Si dibujas un trayecto continuo que empieza por debajo del eje horizontal y termina por encima, o al revés, la línea tiene que atravesar el eje en algún punto del camino.
+
+:::desplegable Ejemplo: $f(x) = x^2 - 3$ en $[1, 2]$
+
+En los extremos del intervalo la función cambia de signo:
+
+$$f(1) = 1^2 - 3 = -2 \\quad (\\text{negativo}) \\qquad f(2) = 2^2 - 3 = 1 \\quad (\\text{positivo})$$
+
+Como hay cambio de signo y la función es continua, el teorema garantiza que se hace cero en algún punto $c$ entre 1 y 2. Esa raíz es $\\sqrt{3} \\approx 1{,}732$.
+:::
+
+## 10. Teorema del valor intermedio
+
+**Enunciado.** Si $f$ es continua en el intervalo cerrado $[a, b]$ y $f(a) \\neq f(b)$, entonces para cada valor $k$ entre $f(a)$ y $f(b)$ existe un número $c$ entre $a$ y $b$ tal que
+
+$$f(c) = k$$
+
+**Explicación.** Es la versión general del teorema anterior. Una función continua no puede saltarse alturas: si va desde una altura inicial hasta una final, tiene que pasar por todas las intermedias.
+
+:::desplegable Ejemplo: el peso de una persona
+
+Supongamos que una persona nace pesando 3 kg y a los 20 años pesa 70 kg. El crecimiento es un proceso continuo.
+
+Entonces, sin importar qué peso elijamos dentro de ese rango (por ejemplo $k = 45$ kg), el teorema garantiza que en algún instante exacto de su vida esa persona pesó exactamente 45 kg.
+:::
+        `
+      },
+      {
+        id: '1.7',
+        titulo: 'Límites de funciones exponenciales y logarítmicas',
+        descripcion: 'Comportamiento de límites cuando participan funciones exponenciales y logarítmicas.',
+        contenido: `
+## Introducción
+
+Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/conceptos-previos#exponenciales) y [funciones logarítmicas](/conceptos-previos#logaritmos).
+
+## Funciones exponenciales
+
+### Límite fundamental
+$$\\lim_{x \\to \\infty} e^x = \\infty$$
+$$\\lim_{x \\to -\\infty} e^x = 0$$
+
+### Con base general
+$$\\lim_{x \\to \\infty} a^x = \\infty \\quad (\\text{si } a > 1)$$
+$$\\lim_{x \\to \\infty} a^x = 0 \\quad (\\text{si } 0 < a < 1)$$
+
+## Funciones logarítmicas
+
+### Límite fundamental
+$$\\lim_{x \\to \\infty} \\ln(x) = \\infty$$
+$$\\lim_{x \\to 0^+} \\ln(x) = -\\infty$$
+
+## Ejemplo práctico
+
+$$\\lim_{x \\to \\infty} \\frac{e^x}{x^2} \\to \\frac{\\infty}{\\infty}$$
+
+Aplicando [Regla de L'Hôpital](/calculo1/aplicaciones/3.9) dos veces:
+$$\\lim_{x \\to \\infty} \\frac{e^x}{2x} = \\lim_{x \\to \\infty} \\frac{e^x}{2} = \\infty$$
+
+## Ejemplo con logaritmo
+
+$$\\lim_{x \\to \\infty} \\frac{\\ln(x)}{x} = 0$$
+
+El [logaritmo](/conceptos-previos#logaritmos) crece más lento que cualquier [polinomio](/conceptos-previos#polinomios).
+
+## Aplicación
+- Crecimiento poblacional
+- [Interés compuesto](/calculo1/derivadas/2.7)
+- Decaimiento radiactivo
+        `
+      },
+      {
+        id: '1.8',
+        titulo: 'Continuidad',
+        descripcion: 'Condición de continuidad en un punto: el límite debe coincidir con el valor de la función.',
+        contenido: `
+## Introducción
+
+Una [función](/conceptos-previos#funciones) es continua en un número $a$ si no tiene interrupciones, saltos o agujeros. 
+
+## Definición formal
+
+Una función $f$ es continua en $x = a$ si se satisfacen tres condiciones obligatorias:
+1. $f(a)$ está definida (el punto existe en el intervalo).
+2. El límite $\\lim_{x \\to a} f(x)$ existe.
+3. El límite coincide con la función: $\\lim_{x \\to a} f(x) = f(a)$.
+
+## Ejemplo de la gráfica: $f(x) = \\frac{1}{x - 2}$
+- Su dominio es $\\mathbb{R} - \\{2\\}$ porque en $x = 2$ el denominador se anula.
+- En $x = 2$ la función **no está definida** ($f(2)$ no existe), por lo que no es continua en ese punto.
+
+## Cómo hacer la gráfica
+- Dibuja una línea punteada vertical en $x = 2$ para representar la asíntota vertical.
+- Traza las dos ramas de la curva que se disparan hacia los infinitos a ambos lados de la asíntota.
+        `
+      },
+      {
+        id: '1.9',
         titulo: 'Límites trigonométricos',
         descripcion: 'Límites fundamentales y ejemplos prácticos explicados paso a paso para evitar indeterminaciones.',
         contenido: `
@@ -393,82 +911,13 @@ Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórm
         `
       },
       {
-        id: '1.7',
-        titulo: 'Continuidad',
-        descripcion: 'Condición de continuidad en un punto: el límite debe coincidir con el valor de la función.',
-        contenido: `
-## Introducción
-
-Una [función](/conceptos-previos#funciones) es continua en un número $a$ si no tiene interrupciones, saltos o agujeros. 
-
-## Definición formal
-
-Una función $f$ es continua en $x = a$ si se satisfacen tres condiciones obligatorias:
-1. $f(a)$ está definida (el punto existe en el intervalo).
-2. El límite $\\lim_{x \\to a} f(x)$ existe.
-3. El límite coincide con la función: $\\lim_{x \\to a} f(x) = f(a)$.
-
-## Ejemplo de la gráfica: $f(x) = \\frac{1}{x - 2}$
-- Su dominio es $\\mathbb{R} - \\{2\\}$ porque en $x = 2$ el denominador se anula.
-- En $x = 2$ la función **no está definida** ($f(2)$ no existe), por lo que no es continua en ese punto.
-
-## Cómo hacer la gráfica
-- Dibuja una línea punteada vertical en $x = 2$ para representar la asíntota vertical.
-- Traza las dos ramas de la curva que se disparan hacia los infinitos a ambos lados de la asíntota.
-        `
-      },
-      {
-        id: '1.8',
-        titulo: 'Límites de funciones exponenciales y logarítmicas',
-        descripcion: 'Comportamiento de límites cuando participan funciones exponenciales y logarítmicas.',
-        contenido: `
-## Introducción
-
-Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/conceptos-previos#exponenciales) y [funciones logarítmicas](/conceptos-previos#logaritmos).
-
-## Funciones exponenciales
-
-### Límite fundamental
-$$\\lim_{x \\to \\infty} e^x = \\infty$$
-$$\\lim_{x \\to -\\infty} e^x = 0$$
-
-### Con base general
-$$\\lim_{x \\to \\infty} a^x = \\infty \\quad (\\text{si } a > 1)$$
-$$\\lim_{x \\to \\infty} a^x = 0 \\quad (\\text{si } 0 < a < 1)$$
-
-## Funciones logarítmicas
-
-### Límite fundamental
-$$\\lim_{x \\to \\infty} \\ln(x) = \\infty$$
-$$\\lim_{x \\to 0^+} \\ln(x) = -\\infty$$
-
-## Ejemplo práctico
-
-$$\\lim_{x \\to \\infty} \\frac{e^x}{x^2} \\to \\frac{\\infty}{\\infty}$$
-
-Aplicando [Regla de L'Hôpital](/calculo1/aplicaciones/3.9) dos veces:
-$$\\lim_{x \\to \\infty} \\frac{e^x}{2x} = \\lim_{x \\to \\infty} \\frac{e^x}{2} = \\infty$$
-
-## Ejemplo con logaritmo
-
-$$\\lim_{x \\to \\infty} \\frac{\\ln(x)}{x} = 0$$
-
-El [logaritmo](/conceptos-previos#logaritmos) crece más lento que cualquier [polinomio](/conceptos-previos#polinomios).
-
-## Aplicación
-- Crecimiento poblacional
-- [Interés compuesto](/calculo1/derivadas/2.7)
-- Decaimiento radiactivo
-        `
-      },
-      {
-        id: '1.9',
+        id: '1.10',
         titulo: 'Discontinuidad esencial y discontinuidad evitable (removible)',
         descripcion: 'No todas las discontinuidades son iguales: unas se pueden "reparar" rellenando un punto y otras no. Clasificación completa con ejercicios resueltos de tus notas de clase.',
         contenido: `
 ## Introducción
 
-En [Continuidad](/calculo1/limites/1.7) vimos que $f$ es continua en $a$ si se cumplen a la vez tres condiciones: $f(a)$ existe, el [límite](/calculo1/limites/1.1) existe, y ambos coinciden. Si al menos una de esas tres falla, la función es discontinua en $a$.
+En [Continuidad](/calculo1/limites/1.8) vimos que $f$ es continua en $a$ si se cumplen a la vez tres condiciones: $f(a)$ existe, el [límite](/calculo1/limites/1.1) existe, y ambos coinciden. Si al menos una de esas tres falla, la función es discontinua en $a$.
 
 Pero no todas las discontinuidades se comportan igual. La pregunta que las separa en dos grandes familias es siempre la misma:
 
@@ -765,7 +1214,7 @@ $$\\frac{d}{dx}(\\ln x) = \\frac{1}{x}$$
 $$f(x) = e^x + \\ln x \\implies f'(x) = e^x + \\frac{1}{x}$$
 
 ## Aplicación
-- [Interés compuesto](/calculo1/limites/1.8)
+- [Interés compuesto](/calculo1/limites/1.7)
 - Crecimiento bacteriano
 - Decaimiento radiactivo
         `
@@ -1157,7 +1606,7 @@ Estudio integral de una [función](/conceptos-previos#funciones):
 - [Dominio](/conceptos-previos#dominio)
 - Intersecciones
 - [Límites](/calculo1/limites/1.1)
-- [Continuidad](/calculo1/limites/1.7)
+- [Continuidad](/calculo1/limites/1.8)
 - [Asíntotas](/calculo1/limites/1.5)
 - [Crecimiento](/calculo1/aplicaciones/3.2)
 - [Extremos](/calculo1/aplicaciones/3.3)

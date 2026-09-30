@@ -27,6 +27,9 @@ export default function GraficaLimite({
   estado = 'oculta', // 'oculta' | 'animando' | 'completa'
   rango = 1.2,
   porLados = false,
+  // Valor de f en el punto, o null si no esta definida. Decide si el marcador
+  // es un circulo relleno (hay valor) o un hueco (no lo hay).
+  valorEnPunto = null,
 }) {
   const contenedorRef = useRef(null);
   const grupoRef = useRef(null);
@@ -39,7 +42,11 @@ export default function GraficaLimite({
     const nodo = contenedorRef.current;
     if (!nodo) return;
 
+    // Una medida de cero significa que el bloque esta oculto (dentro de un
+    // desplegable cerrado): se ignora para no dejar la grafica con ancho 1,
+    // porque asi ya no se recupera al abrirlo.
     const aplicar = (medida) => {
+      if (medida <= 0) return;
       const nuevo = Math.max(1, Math.round(medida));
       setAncho((previo) => (Math.abs(previo - nuevo) > 1 ? nuevo : previo));
     };
@@ -228,9 +235,17 @@ export default function GraficaLimite({
           </>
         )}
 
-        {/* Agujero: la función no está definida en el punto, pero el límite existe */}
+        {/* Relleno si f existe en el punto; hueco si no (ahi el limite existe
+            pero la funcion no toma valor, como en (16-x^2)/(4-x) en x = 4). */}
         {visible && !salto && limite !== null && limite !== undefined && (
-          <circle cx={xPunto} cy={escalas.py(limite)} r="5" fill="#FFFFFF" stroke={COLOR_UNICO} strokeWidth="2" />
+          <circle
+            cx={xPunto}
+            cy={escalas.py(valorEnPunto ?? limite)}
+            r="5"
+            fill={valorEnPunto === null ? '#FFFFFF' : COLOR_UNICO}
+            stroke={COLOR_UNICO}
+            strokeWidth="2"
+          />
         )}
       </svg>
 
@@ -245,7 +260,11 @@ export default function GraficaLimite({
           <>
             <span><i style={{ ...estilos.punto, background: '#10B981' }} /> por la izquierda</span>
             <span><i style={{ ...estilos.punto, background: COLOR_DER }} /> por la derecha</span>
-            <span><i style={{ ...estilos.punto, background: '#F8F8FE', border: '2px solid #E6E5F5' }} /> no definida en x = {punto}</span>
+            {valorEnPunto === null ? (
+              <span><i style={{ ...estilos.punto, background: '#F8F8FE', border: '2px solid #E6E5F5' }} /> no definida en x = {punto}</span>
+            ) : (
+              <span><i style={{ ...estilos.punto, background: COLOR_UNICO }} /> valor en x = {punto}</span>
+            )}
           </>
         )}
       </div>
