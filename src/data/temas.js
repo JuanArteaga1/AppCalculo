@@ -841,26 +841,140 @@ El [logaritmo](/conceptos-previos#logaritmos) crece más lento que cualquier [po
       {
         id: '1.8',
         titulo: 'Continuidad',
-        descripcion: 'Condición de continuidad en un punto: el límite debe coincidir con el valor de la función.',
+        descripcion: 'Las tres condiciones de continuidad en un punto, los dos tipos de discontinuidad y ejemplos resueltos con funciones por partes y racionales.',
         contenido: `
-## Introducción
+## Definición
 
-Una [función](/conceptos-previos#funciones) es continua en un número $a$ si no tiene interrupciones, saltos o agujeros. 
+Una [función](/conceptos-previos#funciones) $f$ es continua en un número $a$ si se satisfacen las tres condiciones siguientes:
 
-## Definición formal
+- **i)** $f$ está definida en un intervalo abierto que contiene a $a$, es decir, $f(a)$ existe.
+- **ii)** $\\lim_{x \\to a} f(x)$ existe.
+- **iii)** $\\lim_{x \\to a} f(x) = f(a)$.
 
-Una función $f$ es continua en $x = a$ si se satisfacen tres condiciones obligatorias:
-1. $f(a)$ está definida (el punto existe en el intervalo).
-2. El límite $\\lim_{x \\to a} f(x)$ existe.
-3. El límite coincide con la función: $\\lim_{x \\to a} f(x) = f(a)$.
+Las tres son obligatorias y se revisan en ese orden. En cuanto una falla, la función es discontinua en $a$ y ya no hace falta mirar las demás.
 
-## Ejemplo de la gráfica: $f(x) = \\frac{1}{x - 2}$
-- Su dominio es $\\mathbb{R} - \\{2\\}$ porque en $x = 2$ el denominador se anula.
-- En $x = 2$ la función **no está definida** ($f(2)$ no existe), por lo que no es continua en ese punto.
+Dicho sin fórmulas: la función tiene que existir en el punto, tiene que acercarse a algo al llegar ahí, y ese algo tiene que ser justamente su valor.
 
-## Cómo hacer la gráfica
-- Dibuja una línea punteada vertical en $x = 2$ para representar la asíntota vertical.
-- Traza las dos ramas de la curva que se disparan hacia los infinitos a ambos lados de la asíntota.
+## Ejemplo: $f(x) = \\frac{1}{x - 2}$
+
+Su dominio es $\\mathbb{R} - \\{2\\}$, porque en $x = 2$ el denominador se anula.
+
+**i)** $f(2)$ no existe, luego $f$ no es continua en $x = 2$.
+
+Falla la primera condición, así que no hay que seguir. En la gráfica se ve como una asíntota vertical: la curva se dispara a ambos lados del punto en vez de pasar por él.
+
+[[asintotas expr=1/(x-2)]]
+
+## Tipos de discontinuidad
+
+Cuando una función falla alguna de las tres condiciones, la discontinuidad puede ser de dos familias, según si el límite existe o no.
+
+### Discontinuidad esencial (no removible)
+
+Tanto en la discontinuidad **de salto** como en la **infinita**, el $\\lim_{x \\to a} f(x)$ **no existe**. Por eso a este tipo se le conoce como discontinuidad esencial: no hay manera de arreglarla redefiniendo un punto.
+
+[[grafica tipo=salto]]
+
+[[grafica tipo=infinita]]
+
+### Discontinuidad removible (evitable)
+
+Aquí $f$ es discontinua en $a$ **pero el $\\lim_{x \\to a} f(x)$ sí existe**. Lo que ocurre es que $f(a)$ no existe, o bien $f(a) \\neq \\lim_{x \\to a} f(x)$.
+
+[[grafica tipo=evitable]]
+
+Como el límite existe, basta redefinir la función en ese único punto para taparle el hueco. De ahí el nombre.
+
+El estudio completo de los dos tipos, con más ejemplos, está en [Discontinuidad esencial y evitable](/calculo1/limites/1.10).
+
+## Ejemplo con función por partes
+
+$$h(x) = \\begin{cases} 3 + x & \\text{si } x \\leq 1 \\\\ 3 - x & \\text{si } x > 1 \\end{cases}$$
+
+Veamos si $h$ es continua en $x = 1$.
+
+**i)** $h(1) = 3 + 1 = 4$. La función sí está definida en el punto.
+
+**ii)** Hay que mirar los dos lados por separado, porque la fórmula cambia justo ahí:
+
+$$\\lim_{x \\to 1^-} (3 + x) = 4 \\qquad \\lim_{x \\to 1^+} (3 - x) = 2$$
+
+Los laterales no coinciden, luego $\\lim_{x \\to 1} h(x)$ **no existe**.
+
+Por tanto $h$ no es continua en $x = 1$. Como el límite no existe, la discontinuidad es **de salto**, es decir, esencial.
+
+## Ejemplos: estudiar la continuidad
+
+:::desplegable Ejemplo 1: $f(x) = 2x + 3$ si $x \\neq 1$, y $f(x) = 2$ si $x = 1$
+
+**i)** $f(1) = 2$. La función está definida en el punto.
+
+**ii)** El límite se calcula con la otra rama, la que vale para $x \\neq 1$:
+
+$$\\lim_{x \\to 1} (2x + 3) = 2(1) + 3 = 5$$
+
+**iii)** Aquí falla:
+
+$$f(1) = 2 \\neq 5 = \\lim_{x \\to 1} f(x)$$
+
+Por tanto $f$ es discontinua en $x = 1$. Pero como el límite **existe** y vale $5$, la discontinuidad es **removible**: basta redefinir la función en ese punto.
+
+$$F(x) = \\begin{cases} 2x + 3 & \\text{si } x \\neq 1 \\\\ 5 & \\text{si } x = 1 \\end{cases}$$
+
+Esta $F$ ya es continua en $x = 1$, porque ahora el valor coincide con el límite.
+:::
+
+:::desplegable Ejemplo 2: $f(x) = \\frac{\\sqrt{x} - 2}{x - 4}$
+
+Su dominio es $(0, \\infty) - \\{4\\}$. Mostremos que $f$ es discontinua en $x = 4$.
+
+**i)** $f(4)$ no existe, porque el denominador se anula.
+
+**ii)** El límite sí existe. Al sustituir sale $\\frac{0}{0}$, así que se multiplica y se divide por el conjugado del numerador para quitar la raíz:
+
+$$\\lim_{x \\to 4} \\frac{\\sqrt{x} - 2}{x - 4} = \\lim_{x \\to 4} \\frac{(\\sqrt{x} - 2)(\\sqrt{x} + 2)}{(x - 4)(\\sqrt{x} + 2)} = \\lim_{x \\to 4} \\frac{x - 4}{(x - 4)(\\sqrt{x} + 2)}$$
+
+Se cancela $x - 4$ y queda:
+
+$$\\lim_{x \\to 4} \\frac{1}{\\sqrt{x} + 2} = \\frac{1}{\\sqrt{4} + 2} = \\boxed{\\frac{1}{4}}$$
+
+Falla la primera condición pero el límite existe, así que $f$ tiene una **discontinuidad removible** en $x = 4$.
+:::
+
+## Ejercicio
+
+Determine todos los valores de $c$ para los cuales $f$ es continua.
+
+$$f(x) = \\begin{cases} c^2 x & \\text{si } x < 1 \\\\ 3cx & \\text{si } x \\geq 1 \\end{cases}$$
+
+:::desplegable Ver la resolución
+
+El único punto dudoso es $x = 1$, donde cambia la fórmula. En el resto la función es un polinomio y es continua siempre.
+
+**i)** La segunda rama cubre $x = 1$, así que el valor existe:
+
+$$f(1) = 3c(1) = 3c$$
+
+**ii)** Para que el límite exista, los dos laterales tienen que coincidir:
+
+$$\\lim_{x \\to 1^-} c^2 x = c^2 \\qquad \\lim_{x \\to 1^+} 3cx = 3c$$
+
+**iii)** Igualando las tres cosas, la condición de continuidad queda:
+
+$$c^2 = 3c$$
+
+Se pasa todo a un lado y se factoriza, sin dividir entre $c$ para no perder una solución:
+
+$$c^2 - 3c = 0 \\quad \\Rightarrow \\quad c(c - 3) = 0$$
+
+$$\\boxed{c = 0 \\quad \\text{o} \\quad c = 3}$$
+
+Comprobación rápida: con $c = 0$ las dos ramas valen $0$ y la función es la constante cero; con $c = 3$ queda $9x$ a la izquierda y $9x$ a la derecha, la misma recta.
+:::
+
+## Teoremas sobre continuidad
+
+Al combinar funciones continuas con sumas, restas, productos, cocientes o composición, el resultado sigue siendo continuo. Esos teoremas, con sus ejemplos, están reunidos en [Teoremas básicos sobre límites](/calculo1/limites/1.6).
         `
       },
       {
