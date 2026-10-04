@@ -796,50 +796,6 @@ Entonces, sin importar qué peso elijamos dentro de ese rango (por ejemplo $k = 
       },
       {
         id: '1.7',
-        titulo: 'Límites de funciones exponenciales y logarítmicas',
-        descripcion: 'Comportamiento de límites cuando participan funciones exponenciales y logarítmicas.',
-        contenido: `
-## Introducción
-
-Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/conceptos-previos#exponenciales) y [funciones logarítmicas](/conceptos-previos#logaritmos).
-
-## Funciones exponenciales
-
-### Límite fundamental
-$$\\lim_{x \\to \\infty} e^x = \\infty$$
-$$\\lim_{x \\to -\\infty} e^x = 0$$
-
-### Con base general
-$$\\lim_{x \\to \\infty} a^x = \\infty \\quad (\\text{si } a > 1)$$
-$$\\lim_{x \\to \\infty} a^x = 0 \\quad (\\text{si } 0 < a < 1)$$
-
-## Funciones logarítmicas
-
-### Límite fundamental
-$$\\lim_{x \\to \\infty} \\ln(x) = \\infty$$
-$$\\lim_{x \\to 0^+} \\ln(x) = -\\infty$$
-
-## Ejemplo práctico
-
-$$\\lim_{x \\to \\infty} \\frac{e^x}{x^2} \\to \\frac{\\infty}{\\infty}$$
-
-Aplicando [Regla de L'Hôpital](/calculo1/aplicaciones/3.9) dos veces:
-$$\\lim_{x \\to \\infty} \\frac{e^x}{2x} = \\lim_{x \\to \\infty} \\frac{e^x}{2} = \\infty$$
-
-## Ejemplo con logaritmo
-
-$$\\lim_{x \\to \\infty} \\frac{\\ln(x)}{x} = 0$$
-
-El [logaritmo](/conceptos-previos#logaritmos) crece más lento que cualquier [polinomio](/conceptos-previos#polinomios).
-
-## Aplicación
-- Crecimiento poblacional
-- [Interés compuesto](/calculo1/derivadas/2.7)
-- Decaimiento radiactivo
-        `
-      },
-      {
-        id: '1.8',
         titulo: 'Continuidad',
         descripcion: 'Las tres condiciones de continuidad en un punto, los dos tipos de discontinuidad y ejemplos resueltos con funciones por partes y racionales.',
         contenido: `
@@ -885,7 +841,7 @@ Aquí $f$ es discontinua en $a$ **pero el $\\lim_{x \\to a} f(x)$ sí existe**. 
 
 Como el límite existe, basta redefinir la función en ese único punto para taparle el hueco. De ahí el nombre.
 
-El estudio completo de los dos tipos, con más ejemplos, está en [Discontinuidad esencial y evitable](/calculo1/limites/1.10).
+El estudio completo de los dos tipos, con más ejemplos, está en [Discontinuidad esencial y evitable](/calculo1/limites/1.8).
 
 ## Ejemplo con función por partes
 
@@ -978,60 +934,13 @@ Al combinar funciones continuas con sumas, restas, productos, cocientes o compos
         `
       },
       {
-        id: '1.9',
-        titulo: 'Límites trigonométricos',
-        descripcion: 'Límites fundamentales y ejemplos prácticos explicados paso a paso para evitar indeterminaciones.',
-        contenido: `
-## Teorema: Límites Fundamentales
-
-Los límites trigonométricos se resuelven utilizando identidades y un grupo de teoremas clave que sirven como herramientas para evitar indeterminaciones del tipo $\\frac{0}{0}$.
-
-1. $\\lim_{x \\to 0} \\operatorname{sen}(x) = 0$
-2. $\\lim_{x \\to 0} \\cos(x) = 1$
-3. $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(x)}{x} = 1$
-4. $\\lim_{x \\to 0} \\frac{1 - \\cos(x)}{x} = 0$
-
----
-
-## Ejemplos Prácticos a Calcular
-
-### Ejemplo 1: Calcular $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{2x}$
-
-1. **Identifica el problema:** Si evalúas directo, obtienes una indeterminación $\\frac{0}{0}$.
-2. **Iguala el argumento:** Para usar el límite especial ($\\frac{\\operatorname{sen}(\\theta)}{\\theta} = 1$ cuando $\\theta \\to 0$), el ángulo del seno y el denominador deben ser iguales. Aquí tienes $5x$ arriba y $2x$ abajo.
-3. **Ajusta las constantes:** Saca el número que sobra del denominador y multiplica y divide por $5$:
-   $$\\frac{1}{2} \\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{x} = \\frac{5}{2} \\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{5x}$$
-4. **Resultado:** Como $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{5x} = 1$, te queda:
-   $$\\frac{5}{2} \\cdot 1 = \\frac{5}{2}$$
-
----
-
-### Ejemplo 2: Calcular $\\lim_{t \\to 0} \\frac{\\tan(t)}{2t}$
-
-1. **Usa identidades:** La tangente se puede expresar como $\\tan(t) = \\frac{\\operatorname{sen}(t)}{\\cos(t)}$. Sustitúyela en el límite:
-   $$\\lim_{t \\to 0} \\frac{\\frac{\\operatorname{sen}(t)}{\\cos(t)}}{2t} = \\lim_{t \\to 0} \\frac{\\operatorname{sen}(t)}{2t \\cos(t)}$$
-2. **Separa los términos:** Agrupa la parte del límite especial y deja el coseno por separado:
-   $$\\frac{1}{2} \\lim_{t \\to 0} \\left( \\frac{\\operatorname{sen}(t)}{t} \\cdot \\frac{1}{\\cos(t)} \\right)$$
-3. **Evalúa cada parte:**
-   - $\\lim_{t \\to 0} \\frac{\\operatorname{sen}(t)}{t} = 1$
-   - $\\lim_{t \\to 0} \\frac{1}{\\cos(t)} = \\frac{1}{\\cos(0)} = \\frac{1}{1} = 1$
-4. **Resultado:**
-   $$\\frac{1}{2} \\cdot 1 \\cdot 1 = \\frac{1}{2}$$
-
-## Aplicación en derivadas
-Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórmulas de derivación](/calculo1/derivadas/2.6):
-- $\\frac{d}{dx}\\sin(x) = \\cos(x)$
-- $\\frac{d}{dx}\\cos(x) = -\\sin(x)$
-        `
-      },
-      {
-        id: '1.10',
+        id: '1.8',
         titulo: 'Discontinuidad esencial y discontinuidad evitable (removible)',
         descripcion: 'No todas las discontinuidades son iguales: unas se pueden "reparar" rellenando un punto y otras no. Clasificación completa con ejercicios resueltos de tus notas de clase.',
         contenido: `
 ## Introducción
 
-En [Continuidad](/calculo1/limites/1.8) vimos que $f$ es continua en $a$ si se cumplen a la vez tres condiciones: $f(a)$ existe, el [límite](/calculo1/limites/1.1) existe, y ambos coinciden. Si al menos una de esas tres falla, la función es discontinua en $a$.
+En [Continuidad](/calculo1/limites/1.7) vimos que $f$ es continua en $a$ si se cumplen a la vez tres condiciones: $f(a)$ existe, el [límite](/calculo1/limites/1.1) existe, y ambos coinciden. Si al menos una de esas tres falla, la función es discontinua en $a$.
 
 Pero no todas las discontinuidades se comportan igual. La pregunta que las separa en dos grandes familias es siempre la misma:
 
@@ -1105,6 +1014,97 @@ Las dos primeras son subtipos de la **discontinuidad esencial**; la tercera es l
 3. **Simplificar y evaluar:**
    $$\\lim_{x \\to 4} \\frac{1}{x^{1/2} + 2} = \\frac{1}{4^{1/2} + 2} = \\frac{1}{4}$$
 4. **Clasificar:** El límite existe y vale $\\frac{1}{4}$, pero $f(4)$ no está definida $\\implies$ **discontinuidad evitable** en $x = 4$.
+        `
+      },
+      {
+        id: '1.9',
+        titulo: 'Límites de funciones exponenciales y logarítmicas',
+        descripcion: 'Comportamiento de límites cuando participan funciones exponenciales y logarítmicas.',
+        contenido: `
+## Introducción
+
+Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/conceptos-previos#exponenciales) y [funciones logarítmicas](/conceptos-previos#logaritmos).
+
+## Funciones exponenciales
+
+### Límite fundamental
+$$\\lim_{x \\to \\infty} e^x = \\infty$$
+$$\\lim_{x \\to -\\infty} e^x = 0$$
+
+### Con base general
+$$\\lim_{x \\to \\infty} a^x = \\infty \\quad (\\text{si } a > 1)$$
+$$\\lim_{x \\to \\infty} a^x = 0 \\quad (\\text{si } 0 < a < 1)$$
+
+## Funciones logarítmicas
+
+### Límite fundamental
+$$\\lim_{x \\to \\infty} \\ln(x) = \\infty$$
+$$\\lim_{x \\to 0^+} \\ln(x) = -\\infty$$
+
+## Ejemplo práctico
+
+$$\\lim_{x \\to \\infty} \\frac{e^x}{x^2} \\to \\frac{\\infty}{\\infty}$$
+
+Aplicando [Regla de L'Hôpital](/calculo1/aplicaciones/3.9) dos veces:
+$$\\lim_{x \\to \\infty} \\frac{e^x}{2x} = \\lim_{x \\to \\infty} \\frac{e^x}{2} = \\infty$$
+
+## Ejemplo con logaritmo
+
+$$\\lim_{x \\to \\infty} \\frac{\\ln(x)}{x} = 0$$
+
+El [logaritmo](/conceptos-previos#logaritmos) crece más lento que cualquier [polinomio](/conceptos-previos#polinomios).
+
+## Aplicación
+- Crecimiento poblacional
+- [Interés compuesto](/calculo1/derivadas/2.7)
+- Decaimiento radiactivo
+        `
+      },
+      {
+        id: '1.10',
+        titulo: 'Límites trigonométricos',
+        descripcion: 'Límites fundamentales y ejemplos prácticos explicados paso a paso para evitar indeterminaciones.',
+        contenido: `
+## Teorema: Límites Fundamentales
+
+Los límites trigonométricos se resuelven utilizando identidades y un grupo de teoremas clave que sirven como herramientas para evitar indeterminaciones del tipo $\\frac{0}{0}$.
+
+1. $\\lim_{x \\to 0} \\operatorname{sen}(x) = 0$
+2. $\\lim_{x \\to 0} \\cos(x) = 1$
+3. $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(x)}{x} = 1$
+4. $\\lim_{x \\to 0} \\frac{1 - \\cos(x)}{x} = 0$
+
+---
+
+## Ejemplos Prácticos a Calcular
+
+### Ejemplo 1: Calcular $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{2x}$
+
+1. **Identifica el problema:** Si evalúas directo, obtienes una indeterminación $\\frac{0}{0}$.
+2. **Iguala el argumento:** Para usar el límite especial ($\\frac{\\operatorname{sen}(\\theta)}{\\theta} = 1$ cuando $\\theta \\to 0$), el ángulo del seno y el denominador deben ser iguales. Aquí tienes $5x$ arriba y $2x$ abajo.
+3. **Ajusta las constantes:** Saca el número que sobra del denominador y multiplica y divide por $5$:
+   $$\\frac{1}{2} \\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{x} = \\frac{5}{2} \\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{5x}$$
+4. **Resultado:** Como $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(5x)}{5x} = 1$, te queda:
+   $$\\frac{5}{2} \\cdot 1 = \\frac{5}{2}$$
+
+---
+
+### Ejemplo 2: Calcular $\\lim_{t \\to 0} \\frac{\\tan(t)}{2t}$
+
+1. **Usa identidades:** La tangente se puede expresar como $\\tan(t) = \\frac{\\operatorname{sen}(t)}{\\cos(t)}$. Sustitúyela en el límite:
+   $$\\lim_{t \\to 0} \\frac{\\frac{\\operatorname{sen}(t)}{\\cos(t)}}{2t} = \\lim_{t \\to 0} \\frac{\\operatorname{sen}(t)}{2t \\cos(t)}$$
+2. **Separa los términos:** Agrupa la parte del límite especial y deja el coseno por separado:
+   $$\\frac{1}{2} \\lim_{t \\to 0} \\left( \\frac{\\operatorname{sen}(t)}{t} \\cdot \\frac{1}{\\cos(t)} \\right)$$
+3. **Evalúa cada parte:**
+   - $\\lim_{t \\to 0} \\frac{\\operatorname{sen}(t)}{t} = 1$
+   - $\\lim_{t \\to 0} \\frac{1}{\\cos(t)} = \\frac{1}{\\cos(0)} = \\frac{1}{1} = 1$
+4. **Resultado:**
+   $$\\frac{1}{2} \\cdot 1 \\cdot 1 = \\frac{1}{2}$$
+
+## Aplicación en derivadas
+Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórmulas de derivación](/calculo1/derivadas/2.6):
+- $\\frac{d}{dx}\\sin(x) = \\cos(x)$
+- $\\frac{d}{dx}\\cos(x) = -\\sin(x)$
         `
       }
     ]
@@ -1328,7 +1328,7 @@ $$\\frac{d}{dx}(\\ln x) = \\frac{1}{x}$$
 $$f(x) = e^x + \\ln x \\implies f'(x) = e^x + \\frac{1}{x}$$
 
 ## Aplicación
-- [Interés compuesto](/calculo1/limites/1.7)
+- [Interés compuesto](/calculo1/limites/1.9)
 - Crecimiento bacteriano
 - Decaimiento radiactivo
         `
@@ -1720,7 +1720,7 @@ Estudio integral de una [función](/conceptos-previos#funciones):
 - [Dominio](/conceptos-previos#dominio)
 - Intersecciones
 - [Límites](/calculo1/limites/1.1)
-- [Continuidad](/calculo1/limites/1.8)
+- [Continuidad](/calculo1/limites/1.7)
 - [Asíntotas](/calculo1/limites/1.5)
 - [Crecimiento](/calculo1/aplicaciones/3.2)
 - [Extremos](/calculo1/aplicaciones/3.3)
