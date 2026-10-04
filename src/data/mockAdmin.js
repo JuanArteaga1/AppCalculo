@@ -34,7 +34,7 @@ export const LECCIONES = [
   { id: 'l1', num: '1.1', titulo: 'Introducción – Definición de límite', unidad: 'Límites', estado: 'publicada', actualizado: 'hace 25 min' },
   { id: 'l2', num: '1.2', titulo: 'Límites laterales', unidad: 'Límites', estado: 'publicada', actualizado: 'hace 3 horas' },
   { id: 'l3', num: '1.5', titulo: 'Asíntotas verticales, horizontales y oblicuas', unidad: 'Límites', estado: 'publicada', actualizado: 'ayer' },
-  { id: 'l4', num: '1.10', titulo: 'Discontinuidad removible y esencial', unidad: 'Límites', estado: 'borrador', actualizado: 'hace 2 días' },
+  { id: 'l4', num: '1.8', titulo: 'Discontinuidad removible y esencial', unidad: 'Límites', estado: 'borrador', actualizado: 'hace 2 días' },
   { id: 'l5', num: '2.4', titulo: 'Regla de la cadena', unidad: 'Derivadas', estado: 'publicada', actualizado: 'hace 4 días' },
   { id: 'l6', num: '3.6', titulo: 'Optimización', unidad: 'Aplicaciones', estado: 'oculta', actualizado: 'hace 9 días' },
 ];
