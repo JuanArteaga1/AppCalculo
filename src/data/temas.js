@@ -1037,9 +1037,131 @@ $$\\lim_{x \\to \\infty} a^x = 0 \\quad (\\text{si } 0 < a < 1)$$
 
 ## Funciones logarítmicas
 
+### Definición
+
+Sea $a > 0$, la expresión $y = \\log_{a}(x)$ se llama **logaritmo en base $a$ de $x$**.
+
+$$y = \\log_{a}(x) \\iff x = a^{y}$$
+
+Es decir: el logaritmo *deshace* la exponencial. Si $x = 2^{3}$, entonces $\\log_{2}(8) = 3$, porque la base elevada a $3$ da el argumento.
+
+> **Nota:** un logaritmo en base $e$ se conoce como **logaritmo natural**, esto es $\\log_{e}(x) = \\ln(x)$.
+
 ### Límite fundamental
 $$\\lim_{x \\to \\infty} \\ln(x) = \\infty$$
 $$\\lim_{x \\to 0^+} \\ln(x) = -\\infty$$
+
+### Propiedades de los límites y gráficas
+
+Todo depende de si la base $a$ es mayor o menor que $1$. El dominio es siempre el mismo, pero el comportamiento se invierte por completo:
+
+| Concepto | Si $a > 1$ | Si $0 < a < 1$ |
+|---|---|---|
+| Gráfica | **Creciente** | **Decreciente** |
+| Dominio $D_f$ | $\\mathbb{R}^{+}$ | $\\mathbb{R}^{+}$ |
+| Cuando $x \\to \\infty$ | $\\lim_{x \\to \\infty} \\log_{a}(x) = \\infty$ | $\\lim_{x \\to \\infty} \\log_{a}(x) = -\\infty$ |
+| Cuando $x \\to 0^{+}$ | $\\lim_{x \\to 0^{+}} \\log_{a}(x) = -\\infty$ | $\\lim_{x \\to 0^{+}} \\log_{a}(x) = \\infty$ |
+
+Fíjate en la simetría: los dos casos intercambian el $+\\infty$ y el $-\\infty$. La diferencia no está en el dominio, sino en si la función **sube o baja**.
+
+### Gráfica del caso $a > 1$
+
+[[grafica-limite expr=log(x) punto=0]]
+
+Esta es $\\log_{e}(x) = \\ln(x)$, de base mayor que $1$. El encuadre es la ventana alrededor de $0$: al acercarse por la derecha, la curva **se hunde** sin cota, que es el $-\\infty$ de la tabla. El $+\\infty$ en $x \\to \\infty$ es la misma curva creciendo, pero fuera de este encuadre.
+
+### Gráfica del caso $0 < a < 1$
+
+[[grafica-limite expr=log(x)/log(0.5) punto=0]]
+
+Esta es $\\log_{0.5}(x) = \\frac{\\ln(x)}{\\ln(0.5)}$, de base menor que $1$. La curva sale **volteada**: al acercarse a $0$ por la derecha, se **dispara** hacia arriba, que es el $+\\infty$ de la tabla.
+
+Los números detrás de las dos gráficas:
+
+| $x$ | $\\log_{e}(x) = \\ln(x)$ | $\\log_{0.5}(x)$ |
+|---|---|---|
+| $0.1$ | $-2.30$ | $3.32$ |
+| $0.01$ | $-4.61$ | $6.64$ |
+| $0.001$ | $-6.91$ | $9.97$ |
+| $0.0001$ | $-9.21$ | $13.29$ |
+
+Una columna baja sin parar y la otra sube sin parar, y las dos son el espejo de la otra. Ninguna se estabiliza, así que **ninguna tiene asíntota horizontal**: en los dos casos el límite en el infinito es infinito.
+
+### Ejemplos Prácticos
+
+:::desplegable Ejemplo 1: Análisis de límites laterales
+
+Sea $f(x) = \\log(x^2 - 9)$. La función de dentro es $x^2 - 9$, y el logaritmo exige que su argumento sea **positivo**, de ahí el dominio:
+
+$$x^2 - 9 > 0 \\implies D_f: (-\\infty, -3) \\cup (3, \\infty)$$
+
+**i)** Lado izquierdo de $x = -3$:
+
+$$\\lim_{x \\to -3^-} \\log(x^2 - 9) = \\log\\left[ \\lim_{x \\to -3^-} (x^2 - 9) \\right] = \\log(0^{+}) = -\\infty$$
+
+**ii)** Lado derecho de $x = 3$:
+
+$$\\lim_{x \\to 3^+} \\log(x^2 - 9) = \\log\\left[ \\lim_{x \\to 3^+} (x^2 - 9) \\right] = \\log(0^{+}) = -\\infty$$
+
+**iii)** En $x = 0$ el argumento es negativo:
+
+$$\\lim_{x \\to 0} \\log(x^2 - 9) = \\log(-9)$$
+
+El logaritmo de un número negativo **no existe en los reales**, así que aquí el límite no existe.
+
+**iv)** Al infinito el argumento crece sin límite:
+
+$$\\lim_{x \\to \\infty} \\log(x^2 - 9) = \\infty$$
+:::
+
+:::desplegable Ejemplo 2: Límites con indeterminación
+
+Sea $g(x) = \\frac{4x + 1}{\\ln(2x + 3)}$ y se pide el límite en $x = -1$.
+
+**i)** Sustituyendo directamente:
+
+$$\\lim_{x \\to -1} \\frac{4x + 1}{\\ln(2x + 3)} = \\frac{4(-1) + 1}{\\ln(2(-1) + 3)} = \\frac{-3}{\\ln(1)} = \\frac{-3}{0}$$
+
+El cociente $\\frac{-3}{0}$ es una **indeterminación**: con solo el resultado no se puede decidir el signo.
+
+**ii)** Lateral derecho, $x \\to -1^{+}$:
+
+$$\\lim_{x \\to -1^{+}} \\frac{4x + 1}{\\ln(2x + 3)} = \\frac{-3}{0^{+}} = -\\infty$$
+
+**iii)** Lateral izquierdo, $x \\to -1^{-}$:
+
+$$\\lim_{x \\to -1^{-}} \\frac{4x + 1}{\\ln(2x + 3)} = \\frac{-3}{0^{-}} = +\\infty$$
+
+> **Conclusión:** los dos laterales dan resultados distintos, así que el límite no existe. La indeterminación $\\frac{-3}{0}$ solo se resuelve mirando cada lado por separado.
+:::
+
+:::desplegable Ejemplo 3: Aplicando órdenes de infinito
+
+$$\\lim_{x \\to \\infty} \\frac{e^x}{x^{25} - 25}$$
+
+**i)** El numerador es una [exponencial](/conceptos-previos#exponenciales) y el denominador un polinomio de grado $25$.
+
+**ii)** Por [órdenes de infinito](/calculo1/limites/1.4), la exponencial le gana a cualquier polinomio: $e^x > x^{25}$ para $x$ suficientemente grande.
+
+**iii)** El cociente crece sin límite:
+
+$$\\lim_{x \\to \\infty} \\frac{e^x}{x^{25} - 25} = \\boxed{\\infty}$$
+:::
+
+:::desplegable Ejemplo 4: Órdenes de infinito con logaritmos
+
+$$\\lim_{x \\to \\infty} \\frac{\\log(x^{30} - 56)}{2x^2}$$
+
+**i)** El numerador es un logaritmo, que crece **muy lento**, y el denominador es un polinomio de grado $2$.
+
+**ii)** El denominador domina porque $x^2 > \\log(x^{30})$: la exponencial de base $a$ crece mucho más rápido que cualquier potencia de $x$.
+
+**iii)** El cociente se achica sin parar:
+
+$$\\lim_{x \\to \\infty} \\frac{\\log(x^{30} - 56)}{2x^2} = \\boxed{0}$$
+
+Es el mismo criterio del tema de [límites al infinito](/calculo1/limites/1.4), solo que ahora el que gana es el denominador.
+:::
 
 ## Ejemplo práctico
 
@@ -1074,6 +1196,18 @@ Los límites trigonométricos se resuelven utilizando identidades y un grupo de 
 3. $\\lim_{x \\to 0} \\frac{\\operatorname{sen}(x)}{x} = 1$
 4. $\\lim_{x \\to 0} \\frac{1 - \\cos(x)}{x} = 0$
 
+### Teorema 3 en la gráfica: $\\frac{\\operatorname{sen}(x)}{x}$
+
+[[tabla-limite expr=sin(x)/x punto=0 visual=estatico]]
+
+Al entrar en $x = 0$ por cualquiera de los dos lados, la curva se acerca a $1$. Ojo con el círculo hueco en el origen: la función **no está definida** ahí (sale $\\frac{0}{0}$), pero el límite existe igual. Eso es exactamente una discontinuidad removible.
+
+### Teorema 4 en la gráfica: $\\frac{1 - \\cos(x)}{x}$
+
+[[tabla-limite expr=(1-cos(x))/x punto=0 visual=estatico]]
+
+Aquí la curva se acerca a $0\) por los dos lados, así que el límite es $0$.
+
 ---
 
 ## Ejemplos Prácticos a Calcular
@@ -1100,6 +1234,33 @@ Los límites trigonométricos se resuelven utilizando identidades y un grupo de 
    - $\\lim_{t \\to 0} \\frac{1}{\\cos(t)} = \\frac{1}{\\cos(0)} = \\frac{1}{1} = 1$
 4. **Resultado:**
    $$\\frac{1}{2} \\cdot 1 \\cdot 1 = \\frac{1}{2}$$
+
+---
+
+### Ejemplo 3: Calcular $\\lim_{\\theta \\to \\pi} \\theta \\sec(\\theta)$
+
+1. **Reescribe la secante:** Como $\\sec(\\theta) = \\frac{1}{\\cos(\\theta)}$, el límite es un producto:
+   $$\\lim_{\\theta \\to \\pi} \\theta \\cdot \\frac{1}{\\cos(\\theta)}$$
+2. **Sustituye:** Aquí **no hay indeterminación**, porque $\\cos(\\pi) = -1$ y el denominador no se anula. Así que cada factor se evalúa por separado:
+   $$\\pi \\cdot \\frac{1}{\\cos(\\pi)} = \\pi \\cdot \\frac{1}{-1}$$
+3. **Resultado:**
+   $$\\boxed{-\\pi}$$
+
+Fíjate en el contraste con los ejemplos anteriores: aquí la función es continua en $\\theta = \\pi$, y por eso se puede sustituir directamente.
+
+---
+
+### Ejemplo 4: Calcular $\\lim_{x \\to 0} \\left( \\frac{2x + 1 - \\cos(x)}{3x} \\right)$
+
+1. **Identifica el problema:** Sustituyendo $x = 0$ en el numerador sale $0 + 1 - 1 = 0$, y el denominador también vale $0$. Otra vez $\\frac{0}{0}$.
+2. **Separa las fracciones:** Como el denominador $3x$ es el mismo en toda la expresión, se reparte entre los dos sumandos del numerador:
+   $$\\lim_{x \\to 0} \\left( \\frac{2x}{3x} + \\frac{1 - \\cos(x)}{3x} \\right)$$
+3. **Factoriza y aplica el teorema 4:** El primer cociente se simplifica y el segundo se saca el $3$ como factor:
+   $$\\lim_{x \\to 0} \\frac{2}{3} + \\frac{1}{3} \\lim_{x \\to 0} \\frac{1 - \\cos(x)}{x} = \\frac{2}{3} + \\frac{1}{3}(0)$$
+4. **Resultado:**
+   $$\\boxed{\\frac{2}{3}}$$
+
+Aquí el teorema 4 entra como una pieza más: no hace falta resolver la indeterminación entera, solo el cociente que la acompaña.
 
 ## Aplicación en derivadas
 Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórmulas de derivación](/calculo1/derivadas/2.6):
