@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { FiSettings, FiUser, FiUsers } from 'react-icons/fi';
 
 /**
@@ -8,6 +8,16 @@ import { FiSettings, FiUser, FiUsers } from 'react-icons/fi';
  * vista para poder revisar el flujo completo con el cliente.
  */
 export default function Acceso() {
+
+
+  const navigate = useNavigate();
+
+  const [correo, setCorreo] = useState('');
+  const [contrasena, setContrasena] = useState('');
+  const [errorLogin, setErrorLogin] = useState('');
+  const [cargando, setCargando] = useState(false);
+
+
   const [params] = useSearchParams();
   const [form, setForm] = useState(params.get('form') === 'registro' ? 'registro' : 'login');
   const [avisoEnviado, setAvisoEnviado] = useState(false);
@@ -16,6 +26,55 @@ export default function Acceso() {
     setForm(cual);
     setAvisoEnviado(false);
   };
+
+
+  const iniciarSesion = async (e) => {
+    e.preventDefault();
+
+    setErrorLogin('');
+    setCargando(true);
+
+    try {
+      const respuesta = await fetch(
+        'http://localhost:5100/usuarios/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            correo,
+            contrasena,
+          }),
+        }
+      );
+
+      const data = await respuesta.json();
+
+      if (!respuesta.ok) {
+        setErrorLogin(
+          data.mensaje || 'No se pudo iniciar sesión.'
+        );
+        return;
+      }
+
+      if (data.usuario.rol === 'administrador') {
+        navigate('/admin/panel');
+      } else {
+        setErrorLogin(
+          'El acceso funciona, pero este ejemplo solo redirige al administrador.'
+        );
+      }
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      setErrorLogin(
+        'No se pudo conectar con el servidor. Comprueba que el backend esté activo.'
+      );
+    } finally {
+      setCargando(false);
+    }
+  };
+
 
   return (
     <div className="acceso">
@@ -35,21 +94,49 @@ export default function Acceso() {
 
       <section className="acceso-der">
         {form === 'login' && (
-          <form className="acceso-form" onSubmit={(e) => e.preventDefault()}>
+          <form className="acceso-form" onSubmit={iniciarSesion}>
             <h2>Inicia sesión</h2>
             <p className="suave-txt">Usa el correo institucional que te dio la universidad.</p>
 
             <div className="campo">
               <label htmlFor="correo">Correo institucional</label>
-              <input id="correo" type="email" placeholder="nombre.apellido@uni.edu" autoComplete="email" />
+              <input
+                id="correo"
+                type="email"
+                placeholder="nombre.apellido@uni.edu"
+                autoComplete="email"
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
+                required
+              />
             </div>
 
             <div className="campo">
               <label htmlFor="clave">Contraseña</label>
-              <input id="clave" type="password" placeholder="••••••••" autoComplete="current-password" />
+              <input
+                id="clave"
+                type="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
+                required
+              />
             </div>
 
-            <button className="pnl-btn pnl-btn-primario" type="submit">Entrar</button>
+            <button
+              className="pnl-btn pnl-btn-primario"
+              type="submit"
+              disabled={cargando}
+            >
+              {cargando ? 'Ingresando...' : 'Entrar'}
+            </button>
+
+            {errorLogin && (
+              <div className="aviso-caja" role="alert">
+                {errorLogin}
+              </div>
+            )}
 
             <div className="acceso-abajo">
               <span>¿Olvidaste tu contraseña?</span>

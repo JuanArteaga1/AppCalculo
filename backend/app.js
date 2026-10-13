@@ -3,12 +3,15 @@ import 'dotenv/config.js';
 import routesUsuarios from "./routes/usuarios.js";
 import bodyParser from "body-parser";
 import dbClient from "./config/dbClient.js";
+import cors from 'cors';
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 app.use('/usuarios', routesUsuarios);
 
 try{
