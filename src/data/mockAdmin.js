@@ -1,42 +1,58 @@
 /**
  * Datos de ejemplo del panel de administrador.
- * Maqueta estática: nada de esto se guarda todavía.
+ * Maqueta estática: los docentes y lo que crean aún no vienen del backend (EG-061).
  */
 
-export const MODULOS = [
+export const DOCENTES = [
   {
-    id: 'calc1',
-    nombre: 'Cálculo I',
-    descripcion: 'Fundamentos del cálculo diferencial: límites, asíntotas y comportamiento de las funciones.',
+    id: 'd1',
+    nombre: 'Andrés Ruiz',
+    correo: 'andres.ruiz@uniautonoma.edu.co',
+    modulos: ['limites', 'derivadas'],
     estado: 'activo',
-    lecciones: 31,
-    actualizado: 'hace 2 horas',
+    acceso: 'hoy',
   },
   {
-    id: 'precalculo',
-    nombre: 'Precálculo (nivelación)',
-    descripcion: 'Repaso de funciones, álgebra y trigonometría para llegar preparado.',
-    estado: 'borrador',
-    lecciones: 0,
-    actualizado: 'hace 6 días',
+    id: 'd2',
+    nombre: 'Marta Rojas',
+    correo: 'marta.rojas@uniautonoma.edu.co',
+    modulos: ['limites'],
+    estado: 'activo',
+    acceso: 'ayer',
   },
   {
-    id: 'calc2',
-    nombre: 'Cálculo II',
-    descripcion: 'Integrales, técnicas de integración y series.',
-    estado: 'inactivo',
-    lecciones: 0,
-    actualizado: 'hace 12 días',
+    id: 'd3',
+    nombre: 'Paula Cifuentes',
+    correo: 'paula.cifuentes@uniautonoma.edu.co',
+    modulos: ['aplicaciones'],
+    estado: 'activo',
+    acceso: 'hace 4 días',
+  },
+  {
+    id: 'd4',
+    nombre: 'Hernán Muñoz',
+    correo: 'hernan.munoz@uniautonoma.edu.co',
+    modulos: ['derivadas'],
+    estado: 'pendiente',
+    acceso: 'sin ingreso',
   },
 ];
 
-export const LECCIONES = [
-  { id: 'l1', num: '1.1', titulo: 'Introducción – Definición de límite', unidad: 'Límites', estado: 'publicada', actualizado: 'hace 25 min' },
-  { id: 'l2', num: '1.2', titulo: 'Límites laterales', unidad: 'Límites', estado: 'publicada', actualizado: 'hace 3 horas' },
-  { id: 'l3', num: '1.5', titulo: 'Asíntotas verticales, horizontales y oblicuas', unidad: 'Límites', estado: 'publicada', actualizado: 'ayer' },
-  { id: 'l4', num: '1.8', titulo: 'Discontinuidad removible y esencial', unidad: 'Límites', estado: 'borrador', actualizado: 'hace 2 días' },
-  { id: 'l5', num: '2.4', titulo: 'Regla de la cadena', unidad: 'Derivadas', estado: 'publicada', actualizado: 'hace 4 días' },
-  { id: 'l6', num: '3.6', titulo: 'Optimización', unidad: 'Aplicaciones', estado: 'oculta', actualizado: 'hace 9 días' },
+/** Todo lo que crearon los docentes, del más reciente al más antiguo. */
+export const CREACIONES = [
+  { id: 'c01', tipo: 'Quiz', titulo: 'Regla de la cadena en funciones compuestas', modulo: 'derivadas', tema: '2.4', docente: 'd1', estado: 'publicada', creado: '29 oct', preguntas: 6, entregas: 11, total: 24, promedio: 3.6 },
+  { id: 'c02', tipo: 'Lección', titulo: 'Razones de cambio con ejemplos de ingeniería', modulo: 'aplicaciones', tema: '3.1', docente: 'd3', estado: 'borrador', creado: '27 oct', preguntas: null, entregas: null, total: null, promedio: null },
+  { id: 'c03', tipo: 'Examen', titulo: 'Parcial de derivadas', modulo: 'derivadas', tema: '2.3', docente: 'd1', estado: 'borrador', creado: '26 oct', preguntas: 12, entregas: 0, total: 24, promedio: null },
+  { id: 'c04', tipo: 'Quiz', titulo: 'Máximos y mínimos relativos', modulo: 'aplicaciones', tema: '3.3', docente: 'd3', estado: 'publicada', creado: '22 oct', preguntas: 5, entregas: 17, total: 21, promedio: 3.9 },
+  { id: 'c05', tipo: 'Lección', titulo: 'Continuidad explicada con gráficas', modulo: 'limites', tema: '1.7', docente: 'd2', estado: 'publicada', creado: '19 oct', preguntas: null, entregas: null, total: null, promedio: null },
+  { id: 'c06', tipo: 'Quiz', titulo: 'Límites al infinito', modulo: 'limites', tema: '1.4', docente: 'd2', estado: 'publicada', creado: '14 oct', preguntas: 5, entregas: 22, total: 24, promedio: 4.1 },
+  { id: 'c07', tipo: 'Lección', titulo: 'Derivación implícita paso a paso', modulo: 'derivadas', tema: '2.8', docente: 'd1', estado: 'publicada', creado: '9 oct', preguntas: null, entregas: null, total: null, promedio: null },
+  { id: 'c08', tipo: 'Examen', titulo: 'Parcial de límites y continuidad', modulo: 'limites', tema: '1.8', docente: 'd2', estado: 'publicada', creado: '2 oct', preguntas: 10, entregas: 24, total: 24, promedio: 3.7 },
+  { id: 'c09', tipo: 'Lección', titulo: 'Asíntotas en funciones racionales', modulo: 'limites', tema: '1.5', docente: 'd1', estado: 'publicada', creado: '25 sep', preguntas: null, entregas: null, total: null, promedio: null },
+  { id: 'c10', tipo: 'Quiz', titulo: 'Límites laterales', modulo: 'limites', tema: '1.2', docente: 'd1', estado: 'publicada', creado: '18 sep', preguntas: 4, entregas: 23, total: 24, promedio: 4.3 },
+  { id: 'c11', tipo: 'Lección', titulo: 'Interpretación geométrica de la derivada', modulo: 'derivadas', tema: '2.2', docente: 'd1', estado: 'publicada', creado: '11 sep', preguntas: null, entregas: null, total: null, promedio: null },
+  { id: 'c12', tipo: 'Lección', titulo: 'Qué significa acercarse a un punto', modulo: 'limites', tema: '1.1', docente: 'd2', estado: 'publicada', creado: '4 sep', preguntas: null, entregas: null, total: null, promedio: null },
+  { id: 'c13', tipo: 'Examen', titulo: 'Diagnóstico de conceptos previos', modulo: 'limites', tema: '1.1', docente: 'd2', estado: 'oculta', creado: '1 sep', preguntas: 15, entregas: 21, total: 24, promedio: 3.2 },
 ];
 
 export const RECURSOS = [
@@ -48,29 +64,11 @@ export const RECURSOS = [
   { id: 'r6', nombre: 'Conceptos previos', descripcion: 'Temas que conviene repasar antes de empezar.', piezas: 6, visible: false },
 ];
 
-export const USUARIOS = [
-  { id: 'u1', nombre: 'Camila Torres', correo: 'camila.torres@uni.edu', rol: 'Estudiante', progreso: 82, activo: true },
-  { id: 'u2', nombre: 'Andrés Ríos', correo: 'andres.rios@uni.edu', rol: 'Estudiante', progreso: 64, activo: true },
-  { id: 'u3', nombre: 'Valentina Mora', correo: 'valentina.mora@uni.edu', rol: 'Estudiante', progreso: 47, activo: true },
-  { id: 'u4', nombre: 'Sebastián Gil', correo: 'sebastian.gil@uni.edu', rol: 'Estudiante', progreso: 100, activo: true },
-  { id: 'u5', nombre: 'Laura Pineda', correo: 'laura.pineda@uni.edu', rol: 'Estudiante', progreso: 23, activo: false },
-  { id: 'u6', nombre: 'Andrés Ruiz', correo: 'andres.ruiz@uni.edu', rol: 'Maestro', progreso: null, activo: true },
-  { id: 'u7', nombre: 'Marta Rojas', correo: 'marta.rojas@uni.edu', rol: 'Maestro', progreso: null, activo: true },
-  { id: 'u8', nombre: 'Administrador', correo: 'admin@educalc.xe', rol: 'Administrador', progreso: null, activo: true },
-];
-
-export const RECIENTES = [
-  { tipo: 'Lección', titulo: '1.1 Introducción – Definición de límite', cuando: 'hace 25 min', estado: 'publicada' },
-  { tipo: 'Recurso', titulo: 'Videos de la unidad de límites', cuando: 'hace 4 horas', estado: 'publicada' },
-  { tipo: 'Lección', titulo: '1.9 Discontinuidad removible y esencial', cuando: 'hace 2 días', estado: 'borrador' },
-  { tipo: 'Módulo', titulo: 'Cálculo I', cuando: 'hace 2 días', estado: 'publicada' },
-  { tipo: 'Recurso', titulo: 'Conceptos previos', cuando: 'hace 4 días', estado: 'oculta' },
-];
-
 export const PASTILLA_ESTADO = {
   publicada: ['pastilla-ok', 'Publicada'],
   borrador: ['pastilla-borrador', 'Borrador'],
   oculta: ['pastilla-off', 'Oculta'],
   activo: ['pastilla-ok', 'Activo'],
   inactivo: ['pastilla-off', 'Inactivo'],
+  pendiente: ['pastilla-borrador', 'Invitación pendiente'],
 };

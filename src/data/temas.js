@@ -132,7 +132,7 @@ Cuando estés listo, pulsa **Resolver** para verificar tu respuesta paso a paso:
 
 ## Resumen
 
-Para que exista el límite en un punto hacen falta **dos condiciones**:
+Para que exista el límite en un punto hacen falta **tres condiciones**:
 1. Que exista el límite por la izquierda.
 2. Que exista el límite por la derecha.
 3. **Y** que ambos valgan **exactamente lo mismo**.
@@ -490,8 +490,9 @@ Dicho de otro modo, el límite no existe como número; lo que decimos al escribi
 ## Definición
 
 Sea $f$ una función. Se dice que $f$ tiene **asíntotas** si se cumple alguna de estas tres
-situaciones. Una asíntota es una recta a la que la curva se acerca tanto como queramos sin
-llegar a tocarla.
+situaciones. Una asíntota es una recta a la que la curva se acerca tanto como queramos. Una asíntota
+vertical no se cruza, pero una horizontal u oblicua sí puede cruzarse en algún punto: lo que
+cuenta es lo que pasa lejos.
 
 ## 1. Asíntota horizontal
 
@@ -605,7 +606,7 @@ Pulsa **Resolver** para verlo dibujado:
       {
         id: '1.6',
         titulo: 'Teoremas básicos sobre límites',
-        descripcion: 'Los diez teoremas que permiten calcular límites y afirmar continuidad sin volver a la definición: composición, operaciones, potencias inversas, raíces, intercalación, polinomios y valor intermedio.',
+        descripcion: 'Los doce teoremas que permiten calcular límites y afirmar continuidad sin volver a la definición: composición, operaciones, potencias inversas, raíces, intercalación, polinomios y valor intermedio.',
         contenido: `
 ## De qué trata este tema
 
@@ -622,6 +623,19 @@ Estos son los teoremas que permiten calcular límites y afirmar continuidad sin 
 Sea $g(x) = x^2$ y $f(x) = \\cos(x)$. Queremos evaluar en $x = \\pi$.
 
 Sabemos que $g$ es continua en $\\pi$ y da como resultado $\\pi^2$. Como $f(x)$ también es continua en $\\pi^2$, concluimos que la función compuesta $f(g(x)) = \\cos(x^2)$ es continua en $x = \\pi$.
+:::
+
+:::desplegable Ejemplo: ¿dónde es continua $h(x) = \\sqrt{4 - x^2}$?
+
+Se plantea como una composición: $f(x) = \\sqrt{x}$ por fuera y $g(x) = 4 - x^2$ por dentro.
+
+Como $g$ es un polinomio, es continua en todo $\\mathbb{R}$. La de afuera, la raíz, necesita que lo de dentro sea positivo, así que $h$ será continua donde
+
+$$4 - x^2 > 0 \\quad \\Rightarrow \\quad x^2 < 4$$
+
+Esa desigualdad se cumple en
+
+$$\\boxed{(-2, 2)}$$
 :::
 
 ## 2. Teorema del límite de una función compuesta
@@ -649,7 +663,7 @@ $$\\lim_{x \\to 0} e^{2x + 1} = e^1 = \\boxed{e}$$
 
 - Suma o resta: $f \\pm g$
 - Multiplicación: $f \\cdot g$
-- División: $f / g$
+- División: $f / g$, siempre que $g(a) \\neq 0$
 
 **Explicación.** Al combinar funciones continuas con aritmética, la nueva función hereda esa continuidad en el mismo punto, sin romperse. En la división hay que añadir la condición de que el denominador no se anule en ese punto.
 
@@ -778,6 +792,21 @@ $$f(1) = 1^2 - 3 = -2 \\quad (\\text{negativo}) \\qquad f(2) = 2^2 - 3 = 1 \\qua
 Como hay cambio de signo y la función es continua, el teorema garantiza que se hace cero en algún punto $c$ entre 1 y 2. Esa raíz es $\\sqrt{3} \\approx 1{,}732$.
 :::
 
+:::desplegable Ejemplo: tres ceros de $f(x) = 2x^3 - 2x^2 - 4x + 1$ en $[-2, 2]$
+
+El polinomio es continuo, así que basta buscar cambios de signo evaluando en varios puntos:
+
+$$f(-2) = -15 \\qquad f(-1) = 1 \\qquad f(0) = 1 \\qquad f(1) = -3 \\qquad f(2) = 1$$
+
+Hay tres cambios de signo, y el teorema garantiza un cero dentro de cada tramo:
+
+- Entre $-2$ y $-1$: de $-15$ a $1$, así que hay un cero en $(-2, -1)$.
+- Entre $0$ y $1$: de $1$ a $-3$, así que hay un cero en $(0, 1)$.
+- Entre $1$ y $2$: de $-3$ a $1$, así que hay un cero en $(1, 2)$.
+
+Tres ceros en $[-2, 2]$, sin haber resuelto la ecuación.
+:::
+
 ## 10. Teorema del valor intermedio
 
 **Enunciado.** Si $f$ es continua en el intervalo cerrado $[a, b]$ y $f(a) \\neq f(b)$, entonces para cada valor $k$ entre $f(a)$ y $f(b)$ existe un número $c$ entre $a$ y $b$ tal que
@@ -792,6 +821,54 @@ Supongamos que una persona nace pesando 3 kg y a los 20 años pesa 70 kg. El cre
 
 Entonces, sin importar qué peso elijamos dentro de ese rango (por ejemplo $k = 45$ kg), el teorema garantiza que en algún instante exacto de su vida esa persona pesó exactamente 45 kg.
 :::
+
+## 11. Teorema sobre polinomios y funciones racionales
+
+**Enunciado.** Toda función polinomial es continua en todo número real, y toda función racional es continua en todo número de su dominio.
+
+**Explicación.** Es el atajo que más se usa en la práctica. Con un polinomio nunca hay que comprobar nada: es continuo en todo $\\mathbb{R}$. Con una racional tampoco, salvo en los puntos que su dominio deja fuera, que son justo los que anulan el denominador.
+
+:::desplegable Ejemplo: un polinomio y una racional
+
+La función polinomial
+
+$$f(x) = 3x^5 - x^4 + 4$$
+
+es continua en todos los números reales, $\\mathbb{R}$, sin más comprobaciones.
+
+La función racional
+
+$$g(x) = \\frac{3x}{x - 4}$$
+
+tiene como dominio $\\mathbb{R} - \\{4\\}$, porque en $x = 4$ se anula el denominador. Por el teorema, $g$ es continua en todo su dominio: en cada punto salvo en el $4$, donde ni siquiera está definida.
+:::
+
+## 12. Teorema del límite exponencial (el número $e$)
+
+**Enunciado.**
+
+$$\\lim_{x \\to \\infty} \\left( 1 + \\frac{1}{x} \\right)^x = e$$
+
+y de forma generalizada, si $g(x) \\to \\pm\\infty$:
+
+$$\\lim_{x \\to \\infty} \\left( 1 + \\frac{1}{g(x)} \\right)^{g(x)} = e$$
+
+**Explicación.** Es la definición misma del número $e$ escrita como límite. La base tiende a $1$ y el exponente a infinito: esa pelea entre los dos es una indeterminación $1^{\\infty}$, y el teorema dice en qué queda. Lo importante es reconocer la forma: hace falta que lo que se suma al $1$ sea exactamente el inverso de lo que está en el exponente.
+
+:::desplegable Ejemplo resuelto: $\\lim_{x \\to \\infty} \\left( 1 + \\frac{1}{x} \\right)^{x+2}$
+
+El exponente no es $x$ sino $x + 2$, así que todavía no se puede aplicar el teorema. Se separa usando las propiedades de los exponentes:
+
+$$\\left( 1 + \\frac{1}{x} \\right)^{x+2} = \\left( 1 + \\frac{1}{x} \\right)^{x} \\cdot \\left( 1 + \\frac{1}{x} \\right)^{2}$$
+
+Ahora el límite se reparte entre los dos factores. El primero es exactamente el del teorema y el segundo tiende a $1$, porque $\\frac{1}{x} \\to 0$:
+
+$$\\lim_{x \\to \\infty} \\left( 1 + \\frac{1}{x} \\right)^{x} = e \\qquad \\lim_{x \\to \\infty} \\left( 1 + \\frac{1}{x} \\right)^{2} = 1^2 = 1$$
+
+Multiplicando:
+
+$$e \\cdot 1 = \\boxed{e}$$
+:::
         `
       },
       {
@@ -801,7 +878,7 @@ Entonces, sin importar qué peso elijamos dentro de ese rango (por ejemplo $k = 
         contenido: `
 ## Definición
 
-Una [función](/conceptos-previos#funciones) $f$ es continua en un número $a$ si se satisfacen las tres condiciones siguientes:
+Una [función](/conceptos-previos) $f$ es continua en un número $a$ si se satisfacen las tres condiciones siguientes:
 
 - **i)** $f$ está definida en un intervalo abierto que contiene a $a$, es decir, $f(a)$ existe.
 - **ii)** $\\lim_{x \\to a} f(x)$ existe.
@@ -821,27 +898,9 @@ Falla la primera condición, así que no hay que seguir. En la gráfica se ve co
 
 [[asintotas expr=1/(x-2)]]
 
-## Tipos de discontinuidad
+## Clasificación de discontinuidades
 
-Cuando una función falla alguna de las tres condiciones, la discontinuidad puede ser de dos familias, según si el límite existe o no.
-
-### Discontinuidad esencial (no removible)
-
-Tanto en la discontinuidad **de salto** como en la **infinita**, el $\\lim_{x \\to a} f(x)$ **no existe**. Por eso a este tipo se le conoce como discontinuidad esencial: no hay manera de arreglarla redefiniendo un punto.
-
-[[grafica tipo=salto]]
-
-[[grafica tipo=infinita]]
-
-### Discontinuidad removible (evitable)
-
-Aquí $f$ es discontinua en $a$ **pero el $\\lim_{x \\to a} f(x)$ sí existe**. Lo que ocurre es que $f(a)$ no existe, o bien $f(a) \\neq \\lim_{x \\to a} f(x)$.
-
-[[grafica tipo=evitable]]
-
-Como el límite existe, basta redefinir la función en ese único punto para taparle el hueco. De ahí el nombre.
-
-El estudio completo de los dos tipos, con más ejemplos, está en [Discontinuidad esencial y evitable](/calculo1/limites/1.8).
+Cuando una función falla alguna de las tres condiciones, la discontinuidad es **evitable** (removible) si el límite existe, o **esencial** (no removible) si no existe, ya sea por un salto o porque la función se dispara al infinito. El estudio completo está en [Discontinuidad esencial y discontinuidad evitable](/calculo1/limites/1.8).
 
 ## Ejemplo con función por partes
 
@@ -936,84 +995,159 @@ Al combinar funciones continuas con sumas, restas, productos, cocientes o compos
       {
         id: '1.8',
         titulo: 'Discontinuidad esencial y discontinuidad evitable (removible)',
-        descripcion: 'No todas las discontinuidades son iguales: unas se pueden "reparar" rellenando un punto y otras no. Clasificación completa con ejercicios resueltos de tus notas de clase.',
+        descripcion: 'Clasificación de las discontinuidades según si el límite existe: evitable (hueco) y esencial (salto e infinita).',
         contenido: `
 ## Introducción
 
 En [Continuidad](/calculo1/limites/1.7) vimos que $f$ es continua en $a$ si se cumplen a la vez tres condiciones: $f(a)$ existe, el [límite](/calculo1/limites/1.1) existe, y ambos coinciden. Si al menos una de esas tres falla, la función es discontinua en $a$.
 
-Pero no todas las discontinuidades se comportan igual. La pregunta que las separa en dos grandes familias es siempre la misma:
+Las discontinuidades se clasifican en dos grandes categorías según si el límite existe o no:
 
 > **¿Existe el límite en ese punto o no existe?**
 
-## Familia 1: Discontinuidad esencial (no removible)
-
-Aquí el límite $\\lim_{x \\to a} f(x)$ **no existe**. Como la función no se acerca a un único valor, no hay ningún número que le podamos asignar a $f(a)$ para "arreglar" la gráfica. Por eso a esta familia se le llama **esencial** (o **no removible**): el problema no tiene solución posible.
-
-Existen dos formas de que el límite no exista, y corresponden a sus dos subtipos:
-
-### a) Discontinuidad de salto
-Los dos [límites laterales](/calculo1/limites/1.2) existen (son números finitos), pero son **distintos** entre sí:
-
-$$\\lim_{x \\to a^{-}} f(x) \\neq \\lim_{x \\to a^{+}} f(x)$$
-
-**Cómo se ve en la gráfica:** una rama de la curva llega hasta cierta altura y se detiene en un círculo hueco; la otra rama arranca desde una altura distinta, también con un círculo hueco. Entre ambas queda un "escalón" vertical justo en $x = a$. Ya trabajamos un ejemplo completo de este caso en [Límites laterales](/calculo1/limites/1.2).
-
-[[grafica tipo=salto]]
-
-### b) Discontinuidad infinita
-Al menos uno de los límites laterales se dispara a $+\\infty$ o a $-\\infty$:
-
-$$\\lim_{x \\to a^{-}} f(x) = \\pm\\infty \\quad \\text{o bien} \\quad \\lim_{x \\to a^{+}} f(x) = \\pm\\infty$$
-
-**Cómo se ve en la gráfica:** aparece una línea punteada vertical en $x = a$ (la [asíntota vertical](/calculo1/limites/1.5)), y las dos ramas de la curva se acercan cada vez más a esa línea sin tocarla jamás, disparándose hacia arriba o hacia abajo.
-
-[[grafica tipo=infinita]]
-
-**Ejemplo:** $f(x) = \\dfrac{1}{x - 1}$ tiene una discontinuidad infinita en $x = 1$, porque $\\lim_{x \\to 1^{-}} f(x) = -\\infty$ y $\\lim_{x \\to 1^{+}} f(x) = +\\infty$.
-
-## Familia 2: Discontinuidad evitable (removible)
-
-Aquí el límite $\\lim_{x \\to a} f(x)$ **sí existe**, pero pasa una de estas dos cosas:
-
-- $f(a)$ no está definida, **o**
-- $f(a)$ sí está definida, pero **no coincide** con el límite: $f(a) \\neq \\lim_{x \\to a} f(x)$
-
-**Cómo se ve en la gráfica:** la curva se comporta perfectamente bien alrededor de $a$, acercándose a una sola altura por ambos lados. Justo en esa altura hay un "hueco" (un círculo vacío), porque ahí la función no está definida; o, en su lugar, hay un punto suelto dibujado en otra altura, que muestra que $f(a)$ existe pero está "mal puesto".
-
-[[grafica tipo=evitable]]
-
-¿Por qué se llama **evitable**? Porque basta con definir (o redefinir) $f(a)$ igual al valor del límite para que la función se vuelva continua en ese punto. De las tres discontinuidades, esta es la única que se repara con un solo retoque.
-
-## Resumen: ¿cómo distinguirlas?
-
-| Tipo | ¿Existe el límite? | ¿Se puede reparar? |
-|---|---|---|
-| De salto | No — los laterales existen pero son distintos | No |
-| Infinita | No — algún lateral es $\\pm\\infty$ | No |
-| Evitable (removible) | Sí | Sí, redefiniendo $f(a) = \\lim_{x \\to a} f(x)$ |
-
-Las dos primeras son subtipos de la **discontinuidad esencial**; la tercera es la **discontinuidad evitable**.
+Si existe, la discontinuidad es **evitable**. Si no existe, es **esencial**, y puede ser de salto o infinita.
 
 ---
 
-## Ejercicios Resueltos
+## 1. Discontinuidad evitable (removible)
 
-### Ejercicio 1: Estudiar la continuidad de $f(x) = \\begin{cases} 2x + 3 & \\text{si } x \\neq 1 \\\\ 2 & \\text{si } x = 1 \\end{cases}$ en $x = 1$
-1. **Evaluar en el punto:** $f(1) = 2$.
-2. **Calcular el límite:** 
-   $$\\lim_{x \\to 1} (2x + 3) = 2(1) + 3 = 5$$
-3. **Comparar:** Como $\\lim_{x \\to 1} f(x) \\neq f(1)$ ($5 \\neq 2$), la función **no es continua** en $x = 1$.
-4. **Clasificar:** El límite sí existe ($5$), así que es una **discontinuidad evitable (removible)**. Se repara redefiniendo:
-   $$f(x) = \\begin{cases} 2x + 3 & \\text{si } x \\neq 1 \\\\ 5 & \\text{si } x = 1 \\end{cases}$$
+### ¿Qué es?
 
-### Ejercicio 2: Estudiar la continuidad de $f(x) = \\frac{x^{1/2} - 2}{x - 4}$ en $x = 4$
-1. **Evaluar en el punto:** $f(4)$ no existe (el denominador se anula y $x = 4$ queda fuera del dominio).
-2. **Calcular el límite (racionalizando):**
-   $$\\lim_{x \\to 4} \\frac{(x^{1/2} - 2)(x^{1/2} + 2)}{(x - 4)(x^{1/2} + 2)} = \\lim_{x \\to 4} \\frac{x - 4}{(x - 4)(x^{1/2} + 2)}$$
-3. **Simplificar y evaluar:**
-   $$\\lim_{x \\to 4} \\frac{1}{x^{1/2} + 2} = \\frac{1}{4^{1/2} + 2} = \\frac{1}{4}$$
-4. **Clasificar:** El límite existe y vale $\\frac{1}{4}$, pero $f(4)$ no está definida $\\implies$ **discontinuidad evitable** en $x = 4$.
+Una discontinuidad es **evitable** cuando el límite $\\lim_{x \\to a} f(x)$ **sí existe**, pero la función no es continua en $a$ porque:
+- $f(a)$ no está definida, **o**
+- $f(a)$ está definida pero no coincide con el límite: $f(a) \\neq \\lim_{x \\to a} f(x)$
+
+### ¿Cuándo ocurre?
+
+Ocurre cuando la función se acerca al mismo valor por ambos lados, pero hay un "hueco" en ese punto o el valor de la función está "mal puesto".
+
+### ¿Cómo se ve en la gráfica?
+
+La curva se comporta perfectamente bien alrededor de $a$, acercándose a una sola altura por ambos lados. Justo en esa altura hay un "hueco" (un círculo vacío), porque ahí la función no está definida; o, en su lugar, hay un punto suelto dibujado en otra altura, que muestra que $f(a)$ existe pero está "mal puesto".
+
+[[grafica tipo=evitable]]
+
+### ¿Se puede reparar?
+
+**Sí.** Basta con definir (o redefinir) $f(a)$ igual al valor del límite para que la función se vuelva continua en ese punto. De ahí el nombre "evitable": el problema se puede evitar con un solo retoque.
+
+### Ejemplo: hueco
+
+$$f(x) = \\frac{x^2 - 4}{x - 2}$$
+
+El límite cuando $x \\to 2$ existe y vale 4, pero $f(2)$ no está definida (el denominador se anula). Hay un hueco en $(2, 4)$.
+
+:::desplegable Ver la gráfica y la solución
+
+[[grafica-limite expr=(x^2-4)/(x-2) punto=2]]
+
+**Solución:** Redefinimos la función:
+
+$$F(x) = \\begin{cases} \\frac{x^2 - 4}{x - 2} & \\text{si } x \\neq 2 \\\\ 4 & \\text{si } x = 2 \\end{cases}$$
+
+Ahora $F$ es continua en $x = 2$.
+:::
+
+---
+
+## 2. Discontinuidad de salto (no removible)
+
+### ¿Qué es?
+
+Una discontinuidad es **de salto** cuando los dos [límites laterales](/calculo1/limites/1.2) existen (son números finitos), pero son **distintos** entre sí:
+
+$$\\lim_{x \\to a^{-}} f(x) \\neq \\lim_{x \\to a^{+}} f(x)$$
+
+### ¿Cuándo ocurre?
+
+Ocurre cuando la función "salta" de un valor a otro al pasar por $a$. Típicamente aparece en funciones definidas por partes.
+
+### ¿Cómo se ve en la gráfica?
+
+Una rama de la curva llega hasta cierta altura y se detiene en un círculo hueco; la otra rama arranca desde una altura distinta, con un punto relleno que marca el valor de $f(a)$. Entre ambas queda un "escalón" vertical justo en $x = a$.
+
+[[grafica tipo=salto]]
+
+### ¿Se puede reparar?
+
+**No.** Por más que cambiemos $f(a)$, los dos laterales siguen siendo distintos, así que el límite sigue sin existir y falla la segunda condición de continuidad. Por eso el salto es una discontinuidad **no removible** (esencial): ningún valor puede unir las dos ramas.
+
+### Ejemplo: función por partes
+
+$$h(x) = \\begin{cases} 3 + x & \\text{si } x \\leq 1 \\\\ 3 - x & \\text{si } x > 1 \\end{cases}$$
+
+Veamos si $h$ es continua en $x = 1$:
+
+**i)** $h(1) = 3 + 1 = 4$. La función sí está definida en el punto.
+
+**ii)** Hay que mirar los dos lados por separado, porque la fórmula cambia justo ahí:
+
+$$\\lim_{x \\to 1^-} (3 + x) = 4 \\qquad \\lim_{x \\to 1^+} (3 - x) = 2$$
+
+Los laterales no coinciden, luego $\\lim_{x \\to 1} h(x)$ **no existe**.
+
+Por tanto $h$ no es continua en $x = 1$. Como los laterales existen pero son distintos, la discontinuidad es **de salto**, es decir, esencial.
+
+[[tabla-limite expr=x <= 1 ? 3 + x : 3 - x punto=1 modo=laterales visual=estatico relleno=izquierda]]
+
+---
+
+## 3. Discontinuidad infinita (no removible)
+
+### ¿Qué es?
+
+Una discontinuidad es **infinita** cuando al menos uno de los límites laterales se dispara a $+\\infty$ o a $-\\infty$:
+
+$$\\lim_{x \\to a^{-}} f(x) = \\pm\\infty \\quad \\text{o bien} \\quad \\lim_{x \\to a^{+}} f(x) = \\pm\\infty$$
+
+### ¿Cuándo ocurre?
+
+Ocurre cuando la función tiene una [asíntota vertical](/calculo1/limites/1.5) en $x = a$. Típicamente aparece en funciones racionales donde el denominador se anula.
+
+### ¿Cómo se ve en la gráfica?
+
+Aparece una línea punteada vertical en $x = a$ (la asíntota vertical), y las dos ramas de la curva se acercan cada vez más a esa línea sin tocarla jamás, disparándose hacia arriba o hacia abajo.
+
+[[grafica tipo=infinita]]
+
+### ¿Se puede reparar?
+
+**No.** Como la función se dispara al infinito, no hay ningún valor finito que le podamos asignar a $f(a)$ para "arreglar" la gráfica. Por eso a este tipo se le llama **no removible** o **esencial**: el problema no tiene solución posible.
+
+### Ejemplo: función racional
+
+$$f(x) = \\frac{1}{x - 1}$$
+
+Tiene una discontinuidad infinita en $x = 1$, porque $\\lim_{x \\to 1^{-}} f(x) = -\\infty$ y $\\lim_{x \\to 1^{+}} f(x) = +\\infty$.
+
+:::desplegable Ver la gráfica
+
+[[asintotas expr=1/(x-1)]]
+
+La asíntota vertical es $x = 1$. La curva se dispara a $-\\infty$ por la izquierda y a $+\\infty$ por la derecha.
+:::
+
+---
+
+## Resumen: ¿cómo distinguirlas?
+
+| Tipo | ¿Existe el límite? | ¿Se puede reparar? | Ejemplo típico |
+|---|---|---|---|
+| Evitable (hueco) | Sí | Sí, redefiniendo $f(a)$ | $\\frac{x^2-4}{x-2}$ en $x=2$ |
+| De salto | No (laterales distintos) | No, los laterales siguen siendo distintos | Funciones por partes |
+| Infinita | No (se dispara a $\\pm\\infty$) | No | $\\frac{1}{x-1}$ en $x=1$ |
+
+La primera es **evitable** (removible); las otras dos son **esenciales** (no removibles).
+
+---
+
+## Teoremas sobre continuidad
+
+Los teoremas que permiten estudiar la continuidad de funciones más complejas, con sus ejemplos, están en [Teoremas básicos sobre límites](/calculo1/limites/1.6).
+
+## Ejercicios
+
+Los ejercicios resueltos, que aplican las tres condiciones de continuidad y clasifican cada discontinuidad, están en [Continuidad](/calculo1/limites/1.7).
         `
       },
       {
@@ -1023,7 +1157,7 @@ Las dos primeras son subtipos de la **discontinuidad esencial**; la tercera es l
         contenido: `
 ## Introducción
 
-Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/conceptos-previos#exponenciales) y [funciones logarítmicas](/conceptos-previos#logaritmos).
+Estudiamos el comportamiento de los [límites](/calculo1/limites/1.1) cuando participan [funciones exponenciales](/conceptos-previos) y [funciones logarítmicas](/conceptos-previos).
 
 ## Funciones exponenciales
 
@@ -1039,7 +1173,7 @@ $$\\lim_{x \\to \\infty} a^x = 0 \\quad (\\text{si } 0 < a < 1)$$
 
 ### Definición
 
-Sea $a > 0$, la expresión $y = \\log_{a}(x)$ se llama **logaritmo en base $a$ de $x$**.
+Sea $a > 0$ con $a \\neq 1$, la expresión $y = \\log_{a}(x)$ se llama **logaritmo en base $a$ de $x$**.
 
 $$y = \\log_{a}(x) \\iff x = a^{y}$$
 
@@ -1114,7 +1248,7 @@ El logaritmo de un número negativo **no existe en los reales**, así que aquí 
 $$\\lim_{x \\to \\infty} \\log(x^2 - 9) = \\infty$$
 :::
 
-:::desplegable Ejemplo 2: Límites con indeterminación
+:::desplegable Ejemplo 2: Denominador que tiende a cero
 
 Sea $g(x) = \\frac{4x + 1}{\\ln(2x + 3)}$ y se pide el límite en $x = -1$.
 
@@ -1122,7 +1256,7 @@ Sea $g(x) = \\frac{4x + 1}{\\ln(2x + 3)}$ y se pide el límite en $x = -1$.
 
 $$\\lim_{x \\to -1} \\frac{4x + 1}{\\ln(2x + 3)} = \\frac{4(-1) + 1}{\\ln(2(-1) + 3)} = \\frac{-3}{\\ln(1)} = \\frac{-3}{0}$$
 
-El cociente $\\frac{-3}{0}$ es una **indeterminación**: con solo el resultado no se puede decidir el signo.
+El cociente $\\frac{-3}{0}$ **no es una indeterminación**: un número distinto de cero dividido entre algo que tiende a cero crece sin límite. Lo que falta saber es el signo, y para eso hay que mirar cada lado.
 
 **ii)** Lateral derecho, $x \\to -1^{+}$:
 
@@ -1132,16 +1266,16 @@ $$\\lim_{x \\to -1^{+}} \\frac{4x + 1}{\\ln(2x + 3)} = \\frac{-3}{0^{+}} = -\\in
 
 $$\\lim_{x \\to -1^{-}} \\frac{4x + 1}{\\ln(2x + 3)} = \\frac{-3}{0^{-}} = +\\infty$$
 
-> **Conclusión:** los dos laterales dan resultados distintos, así que el límite no existe. La indeterminación $\\frac{-3}{0}$ solo se resuelve mirando cada lado por separado.
+> **Conclusión:** los dos laterales dan resultados distintos, así que el límite no existe. El signo de $\\frac{-3}{0}$ solo se decide mirando cada lado por separado.
 :::
 
 :::desplegable Ejemplo 3: Aplicando órdenes de infinito
 
 $$\\lim_{x \\to \\infty} \\frac{e^x}{x^{25} - 25}$$
 
-**i)** El numerador es una [exponencial](/conceptos-previos#exponenciales) y el denominador un polinomio de grado $25$.
+**i)** El numerador es una [exponencial](/conceptos-previos) y el denominador un polinomio de grado $25$.
 
-**ii)** Por [órdenes de infinito](/calculo1/limites/1.4), la exponencial le gana a cualquier polinomio: $e^x > x^{25}$ para $x$ suficientemente grande.
+**ii)** Por órdenes de infinito, la exponencial le gana a cualquier polinomio: $e^x > x^{25}$ para $x$ suficientemente grande.
 
 **iii)** El cociente crece sin límite:
 
@@ -1154,7 +1288,7 @@ $$\\lim_{x \\to \\infty} \\frac{\\log(x^{30} - 56)}{2x^2}$$
 
 **i)** El numerador es un logaritmo, que crece **muy lento**, y el denominador es un polinomio de grado $2$.
 
-**ii)** El denominador domina porque $x^2 > \\log(x^{30})$: la exponencial de base $a$ crece mucho más rápido que cualquier potencia de $x$.
+**ii)** El denominador domina porque cualquier potencia de $x$ crece más rápido que un logaritmo. Además, $\\log(x^{30}) \\approx 30\\log(x)$, que sigue siendo un logaritmo.
 
 **iii)** El cociente se achica sin parar:
 
@@ -1174,7 +1308,7 @@ $$\\lim_{x \\to \\infty} \\frac{e^x}{2x} = \\lim_{x \\to \\infty} \\frac{e^x}{2}
 
 $$\\lim_{x \\to \\infty} \\frac{\\ln(x)}{x} = 0$$
 
-El [logaritmo](/conceptos-previos#logaritmos) crece más lento que cualquier [polinomio](/conceptos-previos#polinomios).
+El [logaritmo](/conceptos-previos) crece más lento que cualquier [polinomio](/conceptos-previos).
 
 ## Aplicación
 - Crecimiento poblacional
@@ -1206,7 +1340,7 @@ Al entrar en $x = 0$ por cualquiera de los dos lados, la curva se acerca a $1$. 
 
 [[tabla-limite expr=(1-cos(x))/x punto=0 visual=estatico]]
 
-Aquí la curva se acerca a $0\) por los dos lados, así que el límite es $0$.
+Aquí la curva se acerca a $0$ por los dos lados, así que el límite es $0$.
 
 ---
 
@@ -1264,8 +1398,8 @@ Aquí el teorema 4 entra como una pieza más: no hace falta resolver la indeterm
 
 ## Aplicación en derivadas
 Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórmulas de derivación](/calculo1/derivadas/2.6):
-- $\\frac{d}{dx}\\sin(x) = \\cos(x)$
-- $\\frac{d}{dx}\\cos(x) = -\\sin(x)$
+- $\\frac{d}{dx}\\operatorname{sen}(x) = \\cos(x)$
+- $\\frac{d}{dx}\\cos(x) = -\\operatorname{sen}(x)$
         `
       }
     ]
@@ -1284,14 +1418,14 @@ Estos [límites](/calculo1/limites/1.1) son esenciales para demostrar las [fórm
         contenido: `
 ## Introducción
 
-La [derivada](/calculo1/derivadas/2.1) es uno de los conceptos más importantes del cálculo diferencial, ya que mide cómo cambia una [función](/conceptos-previos#funciones) en un instante específico. Representa la razón de cambio instantánea.
+La [derivada](/calculo1/derivadas/2.1) es uno de los conceptos más importantes del cálculo diferencial, ya que mide cómo cambia una [función](/conceptos-previos) en un instante específico. Representa la razón de cambio instantánea.
 
 ## Definición formal
 
 $$f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}$$
 
 Donde:
-- $f(x+h) - f(x)$ representa el cambio en la [función](/conceptos-previos#funciones).
+- $f(x+h) - f(x)$ representa el cambio en la [función](/conceptos-previos).
 - $h$ representa un cambio muy pequeño en $x$.
 
 ## Interpretación práctica
@@ -1315,10 +1449,10 @@ En $t = 3$: $v = 2(3) = 6$ unidades/segundo.
         contenido: `
 ## Interpretación geométrica
 
-Geométricamente, la [derivada](/calculo1/derivadas/2.1) representa la pendiente de la [recta tangente](/conceptos-previos#recta-tangente) a una curva en un punto.
+Geométricamente, la [derivada](/calculo1/derivadas/2.1) representa la pendiente de la [recta tangente](/conceptos-previos) a una curva en un punto.
 
-- Pendiente positiva → la [función](/conceptos-previos#funciones) crece.
-- Pendiente negativa → la [función](/conceptos-previos#funciones) decrece.
+- Pendiente positiva → la [función](/conceptos-previos) crece.
+- Pendiente negativa → la [función](/conceptos-previos) decrece.
 - Pendiente cero → punto [máximo o mínimo](/calculo1/aplicaciones/3.3).
 
 **Ejemplo:** $f(x) = x^2 \\implies f'(x) = 2x$
@@ -1348,7 +1482,7 @@ $$a(t) = v'(t)$$
         contenido: `
 ## Introducción
 
-Permiten derivar [funciones](/conceptos-previos#funciones) sin usar siempre la [definición por límite](/calculo1/derivadas/2.1).
+Permiten derivar [funciones](/conceptos-previos) sin usar siempre la [definición por límite](/calculo1/derivadas/2.1).
 
 ## Reglas fundamentales
 
@@ -1381,7 +1515,7 @@ $$f(x) = x^2 + 3x \\implies f'(x) = 2x + 3$$
         contenido: `
 ## Introducción
 
-Se utiliza cuando una [función](/conceptos-previos#funciones) está dentro de otra [función](/conceptos-previos#funciones) (funciones compuestas).
+Se utiliza cuando una [función](/conceptos-previos) está dentro de otra [función](/conceptos-previos) (funciones compuestas).
 
 ## Fórmula
 
@@ -1411,7 +1545,7 @@ $$y' = 4(3x + 2)^3 \\cdot (3) = 12(3x + 2)^3$$
         contenido: `
 ## Introducción
 
-Incluye [funciones polinomiales](/conceptos-previos#polinomios), [racionales](/conceptos-previos#racionales) y [radicales](/conceptos-previos#radicales).
+Incluye [funciones polinomiales](/conceptos-previos), [racionales](/conceptos-previos) y [radicales](/conceptos-previos).
 
 ## Funciones polinomiales
 
@@ -1438,7 +1572,7 @@ Diseño estructural, áreas, volúmenes.
         contenido: `
 ## Introducción
 
-[Derivadas](/calculo1/derivadas/2.1) de [funciones trigonométricas](/conceptos-previos#trigonometria) básicas y sus inversas.
+[Derivadas](/calculo1/derivadas/2.1) de [funciones trigonométricas](/conceptos-previos) básicas y sus inversas.
 
 ## Principales
 
@@ -1470,7 +1604,7 @@ $$f(x) = \\sin x + x^2 \\implies f'(x) = \\cos x + 2x$$
         contenido: `
 ## Introducción
 
-Incluye la [función](/conceptos-previos#funciones) especial $e^x$ cuya [derivada](/calculo1/derivadas/2.1) es ella misma.
+Incluye la [función](/conceptos-previos) especial $e^x$ cuya [derivada](/calculo1/derivadas/2.1) es ella misma.
 
 ## Exponencial natural
 
@@ -1524,7 +1658,7 @@ Circunferencias, elipses, geometría analítica.
         contenido: `
 ## Introducción
 
-Son [derivadas](/calculo1/derivadas/2.1) sucesivas que dan información sobre el comportamiento de la [función](/conceptos-previos#funciones).
+Son [derivadas](/calculo1/derivadas/2.1) sucesivas que dan información sobre el comportamiento de la [función](/conceptos-previos).
 
 ## Jerarquía
 
@@ -1557,7 +1691,7 @@ $$f'''(x) = 24x$$
         contenido: `
 ## Introducción
 
-El diferencial permite aproximar pequeños cambios en una [función](/conceptos-previos#funciones) usando su [derivada](/calculo1/derivadas/2.1).
+El diferencial permite aproximar pequeños cambios en una [función](/conceptos-previos) usando su [derivada](/calculo1/derivadas/2.1).
 
 ## Fórmula
 
@@ -1594,12 +1728,12 @@ $$dy = 2(4)(0.1) = 0.8$$
         contenido: `
 ## Introducción
 
-Las razones de cambio relacionadas estudian situaciones donde dos o más [variables](/conceptos-previos#variables) cambian con respecto al tiempo y están conectadas por una [ecuación](/conceptos-previos#ecuaciones).
+Las razones de cambio relacionadas estudian situaciones donde dos o más [variables](/conceptos-previos) cambian con respecto al tiempo y están conectadas por una [ecuación](/conceptos-previos).
 
 ## Procedimiento general
 
-1. Identificar [variables](/conceptos-previos#variables).
-2. Relacionarlas mediante una [ecuación](/conceptos-previos#ecuaciones).
+1. Identificar [variables](/conceptos-previos).
+2. Relacionarlas mediante una [ecuación](/conceptos-previos).
 3. [Derivar](/calculo1/derivadas/2.1) implícitamente respecto al tiempo.
 4. Sustituir valores.
 
@@ -1627,12 +1761,12 @@ Si aumenta el volumen, también cambia el radio.
         contenido: `
 ## Introducción
 
-La primera [derivada](/calculo1/derivadas/2.1) permite determinar si una [función](/conceptos-previos#funciones) aumenta o disminuye.
+La primera [derivada](/calculo1/derivadas/2.1) permite determinar si una [función](/conceptos-previos) aumenta o disminuye.
 
 ## Criterios
 
-- Si $f'(x) > 0$ → La [función](/conceptos-previos#funciones) **crece**.
-- Si $f'(x) < 0$ → La [función](/conceptos-previos#funciones) **decrece**.
+- Si $f'(x) > 0$ → La [función](/conceptos-previos) **crece**.
+- Si $f'(x) < 0$ → La [función](/conceptos-previos) **decrece**.
 
 ## Ejemplo
 
@@ -1658,7 +1792,7 @@ $$f'(x) = 2x - 4$$
         contenido: `
 ## Introducción
 
-Son puntos donde la [función](/conceptos-previos#funciones) alcanza valores mayores o menores respecto a puntos cercanos.
+Son puntos donde la [función](/conceptos-previos) alcanza valores mayores o menores respecto a puntos cercanos.
 
 ## Criterio de la primera [derivada](/calculo1/derivadas/2.1)
 
@@ -1688,7 +1822,7 @@ $$f'(x) = 2x - 6 \\implies x = 3$$
         contenido: `
 ## Introducción
 
-La segunda [derivada](/calculo1/derivadas/2.1) indica cómo se curva la gráfica de una [función](/conceptos-previos#funciones).
+La segunda [derivada](/calculo1/derivadas/2.1) indica cómo se curva la gráfica de una [función](/conceptos-previos).
 
 ## Criterios
 
@@ -1752,7 +1886,7 @@ Busca el mejor valor posible:
 
 ## Pasos
 
-1. Definir [función](/conceptos-previos#funciones) objetivo.
+1. Definir [función](/conceptos-previos) objetivo.
 2. [Derivar](/calculo1/derivadas/2.1).
 3. Igualar a cero.
 4. Evaluar.
@@ -1780,11 +1914,11 @@ Arquitectura, economía, logística.
         contenido: `
 ## Introducción
 
-Si una [función](/conceptos-previos#funciones) continua en $[a,b]$ cumple $f(a) = f(b)$, existe un punto con [tangente](/calculo1/derivadas/2.2) horizontal.
+Si una [función](/conceptos-previos) continua en $[a,b]$ cumple $f(a) = f(b)$, existe un punto con [tangente](/calculo1/derivadas/2.2) horizontal.
 
 ## Condiciones
 
-Si una [función](/conceptos-previos#funciones):
+Si una [función](/conceptos-previos):
 1. Es continua en $[a,b]$
 2. Es [derivable](/calculo1/derivadas/2.1) en $(a,b)$
 3. $f(a) = f(b)$
@@ -1877,8 +2011,8 @@ Cálculos rápidos.
         contenido: `
 ## Introducción
 
-Estudio integral de una [función](/conceptos-previos#funciones):
-- [Dominio](/conceptos-previos#dominio)
+Estudio integral de una [función](/conceptos-previos):
+- [Dominio](/conceptos-previos)
 - Intersecciones
 - [Límites](/calculo1/limites/1.1)
 - [Continuidad](/calculo1/limites/1.7)

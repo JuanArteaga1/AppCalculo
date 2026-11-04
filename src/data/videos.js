@@ -51,6 +51,28 @@ export const youtubeThumb = (id) =>
 
 export const youtubeEmbed = (id) =>
   id ? `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` : '';
+/**
+ * Videos con los que arranca un tema: el suyo y uno relacionado de la unidad.
+ * Después los administra el panel; esto solo alimenta la migración y el respaldo.
+ */
+export function videosDeTema(unidadId, temaId) {
+  const principal = getVideoByTema(unidadId, temaId);
+  if (!principal) return [];
+
+  const relacionado = videosBase.find((v) => v.unidad === unidadId && v.id !== principal.id);
+
+  return [principal, relacionado]
+    .filter(Boolean)
+    .map((v) => ({ video: v, id: extraerYoutubeId(v.youtubeId) }))
+    .filter(({ id }) => id)
+    .map(({ video, id }) => ({
+      id: video.id,
+      url: `https://www.youtube.com/watch?v=${id}`,
+      titulo: video.titulo,
+      descripcion: video.descripcion,
+    }));
+}
+
 export function getVideoByTema(unidadId, temaId) {
   return videosBase.find(
     (v) => v.unidad === unidadId && v.tema === temaId

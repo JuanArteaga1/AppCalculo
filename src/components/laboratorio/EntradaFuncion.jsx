@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { aTex, normalizarExpresion } from './mathUtils';
 import MathKeyboard from './MathKeyboard';
 import Tex from './Tex';
+import useCursorTeclado from './useCursorTeclado';
 
 /**
  * Campo de entrada de funciones con vista previa en notación matemática
@@ -16,57 +17,13 @@ export default function EntradaFuncion({
   editando = false,
   onCancelarEdicion,
 }) {
-  const inputRef = useRef(null);
-  const cursorPendiente = useRef(null);
-
-  // El valor lo controla la página: hay que recolocar el cursor DESPUÉS de que
-  // React haya pintado el nuevo texto, si no el cursor salta al final.
-  useEffect(() => {
-    const posicion = cursorPendiente.current;
-    if (posicion === null || !inputRef.current) return;
-    cursorPendiente.current = null;
-    inputRef.current.focus();
-    inputRef.current.setSelectionRange(posicion, posicion);
-  });
+  const { inputRef, insertar, borrar, mover } = useCursorTeclado(valor, onValor);
 
   const vistaPrevia = useMemo(() => {
     const expr = normalizarExpresion(valor);
     if (!expr) return null;
     return aTex(expr);
   }, [valor]);
-
-  const insertar = (texto, retroceder = 0) => {
-    const input = inputRef.current;
-    const inicio = input?.selectionStart ?? valor.length;
-    const fin = input?.selectionEnd ?? valor.length;
-    const nuevo = valor.slice(0, inicio) + texto + valor.slice(fin);
-    cursorPendiente.current = inicio + texto.length - retroceder;
-    onValor(nuevo);
-  };
-
-  const borrar = () => {
-    const input = inputRef.current;
-    const inicio = input?.selectionStart ?? valor.length;
-    const fin = input?.selectionEnd ?? valor.length;
-    if (inicio !== fin) {
-      cursorPendiente.current = inicio;
-      onValor(valor.slice(0, inicio) + valor.slice(fin));
-      return;
-    }
-    if (inicio === 0) return;
-    cursorPendiente.current = inicio - 1;
-    onValor(valor.slice(0, inicio - 1) + valor.slice(inicio));
-  };
-
-  /** Mueve el cursor un carácter a izquierda (-1) o derecha (+1). */
-  const mover = (direccion) => {
-    const input = inputRef.current;
-    if (!input) return;
-    const actual = input.selectionStart ?? valor.length;
-    const destino = Math.min(Math.max(actual + direccion, 0), valor.length);
-    input.focus();
-    input.setSelectionRange(destino, destino);
-  };
 
   const enviar = () => onEnviar(valor);
 

@@ -11,6 +11,8 @@
  *
  * Todos los destinos se comprobaron con una petición real y devuelven 200.
  */
+import { MARCA_ALINEACION } from '../lib/bloques.js';
+
 const W = 'https://es.wikipedia.org/wiki/';
 
 export const GLOSARIO = [
@@ -90,7 +92,7 @@ export const GLOSARIO = [
     clave: 'discontinuidad',
     variantes: ['discontinuidades', 'discontinuidad', 'discontinua'],
     url: W + 'Clasificaci%C3%B3n_de_discontinuidades',
-    definicion: 'Punto donde la función se "rompe": puede ser removible (hueco), de salto o infinita.',
+    definicion: 'Punto donde la función se "rompe": puede ser removible (hueco) o esencial (de salto o infinita).',
   },
   {
     clave: 'indeterminación',
@@ -203,7 +205,7 @@ const INTOCABLE = /(\$\$[\s\S]*?\$\$|\$[^$\n]*\$|\[[^\]]*\]\([^)]*\)(?:\{data-de
 
 /** Líneas sin enlaces: títulos, tablas, marcadores y bloques de fórmula. */
 function esLineaExcluida(linea) {
-  const t = linea.trim();
+  const t = linea.trim().replace(MARCA_ALINEACION, '');
   return t.startsWith('#') || t.startsWith('|') || t.startsWith('[[') || t.startsWith('$$');
 }
 
