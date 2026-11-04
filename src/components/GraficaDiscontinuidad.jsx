@@ -1,5 +1,5 @@
 /**
- * Gráfica estática de los tres tipos de discontinuidad del tema 1.9.
+ * Gráfica estática de los tres tipos de discontinuidad del tema 1.8.
  * Son dibujos conceptuales: lo que importa es qué le pasa a la curva en x = a,
  * no la función exacta.
  *

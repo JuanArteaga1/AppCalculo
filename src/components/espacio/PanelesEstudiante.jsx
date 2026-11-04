@@ -126,7 +126,7 @@ function DetalleEstudiante({ evaluacion, onVolver }) {
 
   const cabeza = (
     <>
-      <button type="button" className="volver" onClick={onVolver}>← Volver a Evalúate</button>
+      <button type="button" className="boton-volver" onClick={onVolver}>← Volver a Evalúate</button>
       <div className="panel-cabeza">
         <h1>{evaluacion.titulo}</h1>
         <p>{evaluacion.tipo} · {evaluacion.unidad} · entrega {evaluacion.vence} · 3 preguntas</p>
@@ -276,7 +276,7 @@ function DetalleMaestro({ evaluacion, onVolver }) {
 
   return (
     <section className="panel">
-      <button type="button" className="volver" onClick={onVolver}>← Volver a mis evaluaciones</button>
+      <button type="button" className="boton-volver" onClick={onVolver}>← Volver a mis evaluaciones</button>
       <div className="panel-cabeza">
         <h1>{evaluacion.titulo}</h1>
         <p>{evaluacion.tipo} · {evaluacion.unidad} · cierra {evaluacion.vence}</p>

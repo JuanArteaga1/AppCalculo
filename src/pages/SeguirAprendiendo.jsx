@@ -91,7 +91,7 @@ function Ejercicio({ tarea, onSalir }) {
   const [respuestas, setRespuestas] = useState([]);
 
   const volver = (
-    <button type="button" className="volver" onClick={onSalir}>← Volver a Evalúate</button>
+    <button type="button" className="boton-volver" onClick={onSalir}>← Volver a Evalúate</button>
   );
 
   if (paso === 'intro') {

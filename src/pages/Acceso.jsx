@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { FiSettings, FiUser, FiUsers } from 'react-icons/fi';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { FiUser, FiUsers } from 'react-icons/fi';
+import { destinoAlIngresar, MODO_DEMO, useSesion } from '../context/sesion';
+import { alertaError } from '../services/alertas';
+import { api } from '../services/api';
 
 /**
  * Pantalla de acceso: ingresar, recuperar contraseña y crear cuenta.
- * Maqueta estática: los formularios no envían nada todavía, solo cambian de
- * vista para poder revisar el flujo completo con el cliente.
+ * Ingresar funciona contra el backend; recuperar y crear cuenta siguen siendo
+ * maqueta y solo cambian de vista.
  */
 export default function Acceso() {
 
 
-  const navigate = useNavigate();
+  const { usuario, entrar } = useSesion();
 
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
-  const [errorLogin, setErrorLogin] = useState('');
   const [cargando, setCargando] = useState(false);
 
 
@@ -31,50 +33,25 @@ export default function Acceso() {
   const iniciarSesion = async (e) => {
     e.preventDefault();
 
-    setErrorLogin('');
     setCargando(true);
 
     try {
-      const respuesta = await fetch(
-        'http://localhost:5100/usuarios/login',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            correo,
-            contrasena,
-          }),
-        }
-      );
+      const respuesta = await api('/usuarios/login', {
+        metodo: 'POST',
+        cuerpo: { correo, contrasena },
+      });
 
-      const data = await respuesta.json();
-
-      if (!respuesta.ok) {
-        setErrorLogin(
-          data.mensaje || 'No se pudo iniciar sesión.'
-        );
-        return;
-      }
-
-      if (data.usuario.rol === 'administrador') {
-        navigate('/admin/panel');
-      } else {
-        setErrorLogin(
-          'El acceso funciona, pero este ejemplo solo redirige al administrador.'
-        );
-      }
+      // Con la sesión puesta, el render de abajo lleva a su espacio.
+      entrar(respuesta.usuario);
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      setErrorLogin(
-        'No se pudo conectar con el servidor. Comprueba que el backend esté activo.'
-      );
+      alertaError('No se pudo ingresar', error);
     } finally {
       setCargando(false);
     }
   };
 
+  // Con sesión no hay nada que hacer aquí: a su espacio, o de vuelta si su rol puede ver esa página.
+  if (usuario) return <Navigate to={destinoAlIngresar(usuario.rol, params.get('volver'))} replace />;
 
   return (
     <div className="acceso">
@@ -103,7 +80,7 @@ export default function Acceso() {
               <input
                 id="correo"
                 type="email"
-                placeholder="nombre.apellido@uni.edu"
+                placeholder="nombre.apellido@uniautonoma.edu.co"
                 autoComplete="email"
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
@@ -132,12 +109,6 @@ export default function Acceso() {
               {cargando ? 'Ingresando...' : 'Entrar'}
             </button>
 
-            {errorLogin && (
-              <div className="aviso-caja" role="alert">
-                {errorLogin}
-              </div>
-            )}
-
             <div className="acceso-abajo">
               <span>¿Olvidaste tu contraseña?</span>
               <button type="button" onClick={() => cambiar('recuperar')}>Recuperar acceso</button>
@@ -147,23 +118,21 @@ export default function Acceso() {
               <button type="button" onClick={() => cambiar('registro')}>Crear cuenta</button>
             </div>
 
-            <div className="acceso-perfiles">
-              <span className="acceso-perfiles-rotulo">Demo sin sesión · entra directo como</span>
-              <div className="acceso-perfiles-botones">
-                <Link className="perfil-btn" to="/espacio/estudiante/progreso">
-                  <FiUser aria-hidden="true" />
-                  Estudiante
-                </Link>
-                <Link className="perfil-btn" to="/espacio/maestro/aprender">
-                  <FiUsers aria-hidden="true" />
-                  Maestro
-                </Link>
-                <Link className="perfil-btn" to="/admin/panel">
-                  <FiSettings aria-hidden="true" />
-                  Administrador
-                </Link>
+            {MODO_DEMO && (
+              <div className="acceso-perfiles">
+                <span className="acceso-perfiles-rotulo">Demo sin sesión · entra directo como</span>
+                <div className="acceso-perfiles-botones">
+                  <Link className="perfil-btn" to="/espacio/estudiante/progreso">
+                    <FiUser aria-hidden="true" />
+                    Estudiante
+                  </Link>
+                  <Link className="perfil-btn" to="/espacio/maestro/aprender">
+                    <FiUsers aria-hidden="true" />
+                    Maestro
+                  </Link>
+                </div>
               </div>
-            </div>
+            )}
           </form>
         )}
 
@@ -180,7 +149,7 @@ export default function Acceso() {
 
             <div className="campo">
               <label htmlFor="correo-rec">Correo institucional</label>
-              <input id="correo-rec" type="email" placeholder="nombre.apellido@uni.edu" autoComplete="email" />
+              <input id="correo-rec" type="email" placeholder="nombre.apellido@uniautonoma.edu.co" autoComplete="email" />
             </div>
 
             <button className="pnl-btn pnl-btn-primario" type="submit">Enviar enlace</button>
@@ -216,7 +185,7 @@ export default function Acceso() {
 
             <div className="campo">
               <label htmlFor="correo-reg">Correo institucional</label>
-              <input id="correo-reg" type="email" placeholder="nombre.apellido@uni.edu" autoComplete="email" />
+              <input id="correo-reg" type="email" placeholder="nombre.apellido@uniautonoma.edu.co" autoComplete="email" />
             </div>
 
             <div className="campo">

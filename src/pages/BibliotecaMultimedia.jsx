@@ -508,7 +508,7 @@ const styles = {
   },
 
   grid: {
-    display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px',
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(360px, 100%), 1fr))', gap: '24px',
   },
   card: {
     background: 'linear-gradient(145deg, #FFFFFF, #FFFFFF)',

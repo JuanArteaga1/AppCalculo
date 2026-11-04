@@ -30,6 +30,8 @@ export default function GraficaLimite({
   // Valor de f en el punto, o null si no esta definida. Decide si el marcador
   // es un circulo relleno (hay valor) o un hueco (no lo hay).
   valorEnPunto = null,
+  // En un salto, el extremo que pertenece a la función: 'izquierda' o 'derecha'.
+  relleno = '',
 }) {
   const contenedorRef = useRef(null);
   const grupoRef = useRef(null);
@@ -228,8 +230,8 @@ export default function GraficaLimite({
         {/* Extremos abiertos: el salto entre las dos ramas */}
         {visible && salto && (
           <>
-            <circle cx={xPunto} cy={escalas.py(limiteIzq)} r="5" fill="#FFFFFF" stroke={COLOR_IZQ} strokeWidth="2" />
-            <circle cx={xPunto} cy={escalas.py(limiteDer)} r="5" fill="#FFFFFF" stroke={COLOR_DER} strokeWidth="2" />
+            <circle cx={xPunto} cy={escalas.py(limiteIzq)} r="5" fill={relleno === 'izquierda' ? COLOR_IZQ : '#FFFFFF'} stroke={COLOR_IZQ} strokeWidth="2" />
+            <circle cx={xPunto} cy={escalas.py(limiteDer)} r="5" fill={relleno === 'derecha' ? COLOR_DER : '#FFFFFF'} stroke={COLOR_DER} strokeWidth="2" />
             <line x1={xPunto} y1={escalas.py(limiteIzq)} x2={xPunto} y2={escalas.py(limiteDer)}
               stroke="#64628A" strokeWidth="1.5" strokeDasharray="3 3" />
           </>
