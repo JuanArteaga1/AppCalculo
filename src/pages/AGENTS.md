@@ -1,0 +1,30 @@
+# vite-project/src/pages/ — una pantalla por ruta
+
+## Contiene
+| Archivo | Qué hace |
+| --- | --- |
+| `Home.jsx` | Portada |
+| `SaberesPrevios.jsx` | Conceptos previos |
+| `Calculo1.jsx` | Curso y temas de una unidad |
+| `TemaPage.jsx` | Tema publicado; registra la visita; cabecera animada en 1.1 y 1.2 |
+| `BibliotecaMultimedia.jsx` | Videoteca |
+| `Laboratorio.jsx` | Laboratorio de graficación, con su propio marco |
+| `SeguirAprendiendo.jsx` | Evalúate público; maqueta sin guardar |
+| `Acceso.jsx` | Ingreso real; recuperar y registro son maqueta |
+| `Espacio.jsx` | Marco de estudiante y maestro |
+| `Admin.jsx` | Panel completo: secciones, módulos y Evalúate |
+| `NoEncontrado.jsx` | 404 reutilizable con destino configurable |
+
+## Rutas y relaciones
+- Cada página se declara en `App.jsx`.
+- Las piezas de una zona van en `components/<zona>/`.
+
+## Estilo y convenciones
+- Un recurso inexistente muestra `NoEncontrado`, no redirige en silencio.
+- Pantallas de espacios, acceso y panel: clases de `styles/panel.css`.
+
+## No hacer
+- Renombrar `SaberesPrevios.jsx`, `SeguirAprendiendo.jsx` o `BibliotecaMultimedia.jsx` sin tarea.
+
+## Probar
+- `npx eslint src --max-warnings 0` y `npm run build`, desde `vite-project/`. Sin tests aún (EG-051).
