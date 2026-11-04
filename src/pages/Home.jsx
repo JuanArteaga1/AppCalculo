@@ -363,7 +363,7 @@ export default function Home() {
           .hero-btn { flex: 0 0 auto; padding: 14px 28px; font-size: 16px; }
           .carousel-image { object-fit: cover; object-position: center top; }
           .calculus-section { padding: 48px 0 64px; }
-          .calculus-grid { grid-template-columns: repeat(3, 1fr); }
+          .calculus-grid { grid-template-columns: repeat(3, 1fr); max-width: 1200px; }
         }
 
         /* Pantallas muy pequeñas: los botones ocupan todo el ancho */

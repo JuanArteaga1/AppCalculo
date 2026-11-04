@@ -1,4 +1,4 @@
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import {
   FiBarChart2,
   FiClipboard,
@@ -13,6 +13,7 @@ import { MENUS, PERFILES } from '../data/mockEspacio';
 import { PanelAprenderEstudiante, PanelAprenderMaestro, PanelProgreso } from '../components/espacio/PanelesEstudiante';
 import { PanelAjustes, PanelLaboratorio, PanelTutor, PanelVideos } from '../components/espacio/PanelesComunes';
 import PanelEstudiantes from '../components/espacio/PanelEstudiantes';
+import NoEncontrado from './NoEncontrado';
 
 const ICONOS = {
   progreso: FiTrendingUp,
@@ -31,12 +32,13 @@ const ICONOS = {
 export default function Espacio() {
   const { rol, seccion } = useParams();
 
-  if (rol !== 'estudiante' && rol !== 'maestro') {
-    return <Navigate to="/espacio/estudiante/progreso" replace />;
-  }
+  if (rol !== 'estudiante' && rol !== 'maestro') return <NoEncontrado />;
 
   const menu = MENUS[rol];
-  const activa = menu.some(([k]) => k === seccion) ? seccion : menu[0][0];
+
+  if (seccion && !menu.some(([k]) => k === seccion)) return <NoEncontrado />;
+
+  const activa = seccion ?? menu[0][0];
   const perfil = PERFILES[rol];
 
   const paneles = {

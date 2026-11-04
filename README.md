@@ -75,3 +75,37 @@ npm run build && npm run preview
 
 `vite preview` ya aplica el mismo *fallback* de SPA que Vercel, así que sirve
 para confirmar que las rutas profundas cargan antes de desplegar.
+
+---
+
+## Backend
+
+Vive en `backend/` y usa MongoDB. Toda la API cuelga de `/api`.
+
+```bash
+cd backend
+npm install
+npm start
+```
+
+La primera vez, copia `backend/.env.example` a `backend/.env`, llena los datos y carga los temas:
+
+```bash
+npm run migrar-temas
+```
+
+En desarrollo, Vite redirige `/api` a `http://localhost:5100`.
+
+### Producción en el servidor de la universidad
+
+1. Publica `backend/` en el servidor con `NODE_ENV=production` y `CONFIAR_PROXY=true`.
+2. Autoriza la IP del servidor en MongoDB Atlas.
+3. Agrega esta regla en `vercel.json`, **antes** de la regla de `index.html`:
+
+```json
+{ "source": "/api/:ruta*", "destination": "https://SERVIDOR/api/:ruta*" }
+```
+
+4. Respalda la carpeta de imágenes (`CARPETA_ARCHIVOS`): no se guarda en MongoDB.
+
+Si la API no responde, la página pública usa `src/data/temas.js`. Esa copia no incluye lo editado en el panel.

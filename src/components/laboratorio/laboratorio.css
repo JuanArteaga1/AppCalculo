@@ -35,26 +35,6 @@
   flex-shrink: 0;
 }
 
-.lab-btn-volver {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  border-radius: 10px;
-  border: 1px solid var(--lab-borde);
-  background: #F3F2FC;
-  color: var(--lab-texto);
-  font-size: 13.5px;
-  font-weight: 700;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.lab-btn-volver:hover {
-  border-color: var(--lab-acento);
-  color: var(--lab-acento-texto);
-}
-
 .lab-cabecera-tema {
   font-size: 13px;
   color: var(--lab-tenue);
@@ -869,3 +849,8 @@
   .lab-teclado-bloque.bloque-der { grid-template-columns: repeat(5, 34px); }
   .lab-tecla { height: 32px; font-size: 13px; }
 }
+
+/* Enunciado del ejercicio elegido en el tema */
+.lab-cabecera { flex-wrap: wrap; }
+.lab-cabecera-ejercicio { font-size: 14px; color: var(--color-text, #252350); min-width: 0; }
+.lab-cabecera-ejercicio b { color: var(--color-accent-strong, #B45309); }

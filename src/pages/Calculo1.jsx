@@ -1,22 +1,19 @@
 import { Link, useParams } from 'react-router-dom';
-import { unidades } from '../data/temas';
+import { useCurso } from '../hooks/useCurso';
 import ChatSection from '../components/ChatSection';
 import HeroAnimation from '../components/HeroAnimation';
 import AnimatedIcon from '../components/AnimatedIcon';
+import NoEncontrado from './NoEncontrado';
 
 export default function Calculo1() {
   const { unidadId } = useParams();
+  const { modulos: unidades } = useCurso();
 
   // Si hay unidadId, mostrar temas de esa unidad
   if (unidadId) {
     const unidad = unidades.find(u => u.id === unidadId);
     if (!unidad) {
-      return (
-        <div className="container" style={{ padding: '80px 0', textAlign: 'center' }}>
-          <h2>Unidad no encontrada</h2>
-          <Link to="/calculo1">Volver al Cálculo I</Link>
-        </div>
-      );
+      return <NoEncontrado titulo="Unidad no encontrada" mensaje="Esa unidad no existe en Cálculo I." destino="/calculo1" textoDestino="Volver a Cálculo I" />;
     }
 
     return (

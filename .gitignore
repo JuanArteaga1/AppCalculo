@@ -27,3 +27,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Imagenes subidas desde el editor de temas
+backend/uploads
+
+# Credenciales de las cuentas de prueba (scripts/crearUsuariosPrueba.js)
+backend/usuarios-prueba.json

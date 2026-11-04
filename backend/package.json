@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "migrar-temas": "node scripts/migrarTemas.js",
+    "crear-usuarios-prueba": "node scripts/crearUsuariosPrueba.js"
   },
   "keywords": [],
   "author": "",
@@ -14,10 +16,15 @@
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.3.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^18.0.7",
     "express": "^5.3.0",
+    "express-rate-limit": "^8.7.2",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.7.0",
-    "mongoose": "^9.11.2"
+    "mongoose": "^9.11.2",
+    "multer": "^2.5.0"
   }
 }

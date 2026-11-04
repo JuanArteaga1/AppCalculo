@@ -1,21 +1,22 @@
-import { useMemo, useState } from 'react';
-import { extraerYoutubeId, youtubeThumb, youtubeEmbed, getVideoByTema, videosBase } from '../data/videos';
+import { useState } from 'react';
+import { extraerYoutubeId, youtubeThumb, youtubeEmbed } from '../data/videos';
 
-export default function TemaVideo({ unidadId, temaId }) {
-  const principal = getVideoByTema(unidadId, temaId);
-  const relacionado = useMemo(() => {
-    if (!principal) return null;
-    return videosBase.find((video) => video.unidad === unidadId && video.id !== principal.id) || null;
-  }, [principal, unidadId]);
-
-  const videos = [
-    principal ? { ...principal, etiqueta: 'Video explicativo' } : null,
-    relacionado ? { ...relacionado, etiqueta: 'Video relacionado' } : null,
-  ].filter(Boolean);
+/** Videos del tema, en el orden que definió el administrador. */
+export default function TemaVideo({ videos: lista = [], sinAviso = false }) {
+  const videos = lista
+    .filter((video) => extraerYoutubeId(video.url))
+    .map((video, i) => ({
+      ...video,
+      youtubeId: video.url,
+      titulo: video.titulo || `Video ${i + 1}`,
+      etiqueta: i === 0 ? 'Video explicativo' : 'Video relacionado',
+    }));
 
   const [activeId, setActiveId] = useState(videos[0] ? extraerYoutubeId(videos[0].youtubeId) : null);
 
   if (!videos.length) {
+    if (sinAviso) return null;
+
     return (
       <section style={styles.placeholder}>
         <div style={styles.placeholderIcon}>🎬</div>
@@ -32,7 +33,7 @@ export default function TemaVideo({ unidadId, temaId }) {
       <div style={styles.header}>
         <div>
           <div style={styles.headerTitle}>Videos de apoyo</div>
-          <div style={styles.headerMeta}>Explicacion principal y recurso relacionado en un solo lugar</div>
+          <div style={styles.headerMeta}>Elige el video que quieras ver</div>
         </div>
       </div>
 
@@ -67,12 +68,11 @@ export default function TemaVideo({ unidadId, temaId }) {
                   onError={(e) => { e.currentTarget.src = '/Estudiantes(1).jpeg'; }}
                 />
                 <span style={styles.playBadge}>▶</span>
-                <span style={styles.duration}>{video.duracion}</span>
-              </div>
+                              </div>
               <div style={styles.videoInfo}>
                 <span style={styles.videoTag}>{video.etiqueta}</span>
                 <strong style={styles.videoTitle}>{video.titulo}</strong>
-                <span style={styles.videoDesc}>{video.descripcion}</span>
+                {video.descripcion && <span style={styles.videoDesc}>{video.descripcion}</span>}
               </div>
             </button>
           );

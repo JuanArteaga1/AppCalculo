@@ -12,7 +12,7 @@ const INTERVALO_MS = 1000;
  * Muestra los dos lados del punto en una sola tabla compacta y, al pulsar
  * "Resolver", va rellenando una fila por segundo hasta llegar a la conclusión.
  */
-export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', pasos = PASOS_DEFECTO, visual = 'interactivo' }) {
+export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', pasos = PASOS_DEFECTO, visual = 'interactivo', relleno = '' }) {
   const esEstatico = visual === 'estatico';
   const porLados = modo === 'laterales';
   const [reveladas, setReveladas] = useState(esEstatico ? pasos.length : 0);
@@ -74,6 +74,7 @@ export default function TablaLimiteInteractiva({ expr, punto, modo = 'limite', p
 
       <GraficaLimite
         expr={expr}
+        relleno={relleno}
         punto={punto}
         limite={limite}
         puntos={puntosGrafica}

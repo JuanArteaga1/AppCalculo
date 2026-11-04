@@ -175,16 +175,20 @@ export default function Laboratorio() {
     : COLORES[contador % COLORES.length];
 
   const temaTitulo = params.get('tema');
-  const temaRuta = params.get('volver');
+  const ejercicio = params.get('ejercicio');
+  // Solo rutas propias: el enlace de volver no debe poder sacar a nadie de la app.
+  const volver = params.get('volver');
+  const temaRuta = volver?.startsWith('/') && !volver.startsWith('//') ? volver : null;
 
   return (
     <div className="lab-pagina">
       <header className="lab-cabecera">
-        <Link to={temaRuta || '/calculo1'} className="lab-btn-volver">
+        <Link to={temaRuta || '/calculo1'} className="boton-volver">
           <span aria-hidden="true">←</span>
           {temaRuta ? 'Volver al tema' : 'Volver a Cálculo I'}
         </Link>
         {temaTitulo && <span className="lab-cabecera-tema">{temaTitulo}</span>}
+        {ejercicio && <span className="lab-cabecera-ejercicio"><b>Ejercicio:</b> {ejercicio}</span>}
       </header>
 
       <div className={`lab-cuerpo ${panelMovil ? '' : 'panel-cerrado'}`}>

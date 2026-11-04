@@ -191,9 +191,9 @@ const styles = {
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(min(480px, 100%), 1fr))',
     gap: '20px',
-    maxWidth: '960px',
+    width: '100%',
     margin: '0 auto',
   },
   card: {

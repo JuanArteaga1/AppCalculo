@@ -49,7 +49,8 @@ const BLOQUE_NUMERICO = [
   { et: '+', ins: '+', tipo: 'op' }, { et: '↵', accion: 'graficar', tipo: 'enter' },
 ];
 
-export default function MathKeyboard({ onInsertar, onBorrar, onLimpiar, onMover, onGraficar }) {
+/** gruposExtra añade pestañas al bloque izquierdo: { id, et, teclas }. */
+export default function MathKeyboard({ onInsertar, onBorrar, onLimpiar, onMover, onGraficar, gruposExtra = [] }) {
   const [grupo, setGrupo] = useState('basico');
   const [minimizado, setMinimizado] = useState(false);
   const [posicion, setPosicion] = useState(null);
@@ -70,7 +71,8 @@ export default function MathKeyboard({ onInsertar, onBorrar, onLimpiar, onMover,
   /* ---------- arrastre desde la cabecera ---------- */
   const alBajarPuntero = (evento) => {
     const caja = cajaRef.current;
-    if (!caja) return;
+    // Capturar el puntero sobre un botón le quitaría el clic: pestañas, C y minimizar.
+    if (!caja || evento.target.closest('button')) return;
     const recto = caja.getBoundingClientRect();
     arrastreRef.current = {
       dx: evento.clientX - recto.left,
@@ -118,7 +120,8 @@ export default function MathKeyboard({ onInsertar, onBorrar, onLimpiar, onMover,
     );
   }
 
-  const bloqueIzquierdo = grupo === 'basico' ? BLOQUE_SIMBOLOS : BLOQUE_FUNCIONES;
+  const extra = gruposExtra.find((g) => g.id === grupo);
+  const bloqueIzquierdo = extra?.teclas ?? (grupo === 'basico' ? BLOQUE_SIMBOLOS : BLOQUE_FUNCIONES);
 
   return (
     <div className="lab-teclado" ref={cajaRef} style={estilo}>
@@ -144,6 +147,16 @@ export default function MathKeyboard({ onInsertar, onBorrar, onLimpiar, onMover,
           >
             f(x)
           </button>
+          {gruposExtra.map((g) => (
+            <button
+              key={g.id}
+              type="button"
+              className={grupo === g.id ? 'activo' : ''}
+              onClick={() => setGrupo(g.id)}
+            >
+              {g.et}
+            </button>
+          ))}
         </div>
 
         <span className="lab-teclado-agarre" aria-hidden="true">⠿</span>

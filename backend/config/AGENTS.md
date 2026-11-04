@@ -1,0 +1,16 @@
+# vite-project/backend/config/ — conexión a MongoDB
+
+## Contiene
+| Archivo | Qué hace |
+| --- | --- |
+| `dbClient.js` | Conecta y cierra con Mongoose; base `PlataformaEducativa` |
+
+## Rutas y relaciones
+- Lo usa: `app.js`.
+- Credenciales por `USER_DB`, `PASS_DB` y `SERVER_DB`.
+
+## No hacer
+- Dejar credenciales en el código o en los logs.
+
+## Probar
+- `node --check` del archivo y `npm start` desde `backend/`. Sin tests aún (EG-051).

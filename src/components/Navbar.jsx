@@ -1,6 +1,7 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { MdMenu, MdClose } from 'react-icons/md';
+import { INICIO_POR_ROL, useSesion } from '../context/sesion';
 import { PERFILES } from '../data/mockEspacio';
 
 const ENLACES = [
@@ -22,10 +23,17 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuUsuario, setMenuUsuario] = useState(false);
 
-  // El rol sale de la ruta: la maqueta todavía no tiene sesión de verdad.
-  const enEspacio = location.pathname.startsWith('/espacio/');
-  const rol = location.pathname.startsWith('/espacio/maestro') ? 'maestro' : 'estudiante';
-  const perfil = PERFILES[rol];
+  const navigate = useNavigate();
+  const { usuario, salir } = useSesion();
+
+  // Sin sesión, el perfil de ejemplo solo aparece en el modo demo de los espacios.
+  const enDemo = !usuario && location.pathname.startsWith('/espacio/');
+  const rolDemo = location.pathname.startsWith('/espacio/maestro') ? 'maestro' : 'estudiante';
+  const ETIQUETA_ROL = { administrador: 'Administrador', docente: 'Docente', estudiante: 'Estudiante' };
+  const nombre = usuario?.nombre ?? usuario?.correo ?? PERFILES[rolDemo].nombre;
+  const iniciales = nombre.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
+  const etiqueta = usuario ? ETIQUETA_ROL[usuario.rol] : (rolDemo === 'maestro' ? 'Maestro' : 'Estudiante');
+  const inicio = usuario ? INICIO_POR_ROL[usuario.rol] : `/espacio/${rolDemo}/${rolDemo === 'maestro' ? 'aprender' : 'progreso'}`;
 
   // Se cierra al navegar desde el propio enlace: el compilador de React no
   // permite hacerlo en un efecto.
@@ -66,7 +74,7 @@ export default function Navbar() {
           ))}
 
           <div className="nav-acciones">
-            {enEspacio ? (
+            {(usuario || enDemo) ? (
               <div className="nav-usuario">
                 <button
                   type="button"
@@ -74,18 +82,26 @@ export default function Navbar() {
                   onClick={() => setMenuUsuario(!menuUsuario)}
                   aria-expanded={menuUsuario}
                 >
-                  <span className="usuario-avatar">{perfil.iniciales}</span>
+                  <span className="usuario-avatar">{iniciales}</span>
                   <span className="usuario-txt">
-                    <b>{perfil.nombre.split(' ')[0]}</b>
-                    <span>{rol === 'maestro' ? 'Maestro' : 'Estudiante'}</span>
+                    <b>{nombre.split(' ')[0]}</b>
+                    <span>{etiqueta}</span>
                   </span>
                 </button>
 
                 {menuUsuario && (
                   <div className="menu-usuario">
-                    <Link to={`/espacio/${rol}/${rol === 'maestro' ? 'aprender' : 'progreso'}`} onClick={cerrar}>Mi espacio</Link>
-                    <Link to={`/espacio/${rol}/ajustes`} onClick={cerrar}>Ajustes</Link>
-                    <Link to="/" onClick={cerrar}>Cerrar sesión</Link>
+                    <Link to={inicio} onClick={cerrar}>{usuario?.rol === 'administrador' ? 'Panel de administración' : 'Mi espacio'}</Link>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        cerrar();
+                        await salir();
+                        navigate('/');
+                      }}
+                    >
+                      Cerrar sesión
+                    </button>
                   </div>
                 )}
               </div>
@@ -113,11 +129,11 @@ if (typeof document !== 'undefined' && !document.getElementById('css-navbar')) {
       position: sticky;
       top: 0;
       z-index: 1000;
-      padding: 14px 16px 0;
+      padding: 14px var(--margen-app) 0;
     }
     .nav-fila {
       position: relative;
-      max-width: 1180px;
+      max-width: calc(var(--ancho-app) - 2 * var(--margen-app));
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -253,13 +269,14 @@ if (typeof document !== 'undefined' && !document.getElementById('css-navbar')) {
       box-shadow: 0 8px 28px rgba(37,35,80,0.12); padding: 6px;
       display: flex; flex-direction: column;
     }
-    .menu-usuario a {
+    .menu-usuario a, .menu-usuario button {
+      width: 100%; background: none; border: 0; cursor: pointer; font-family: inherit;
       display: flex; align-items: center; gap: 10px;
       text-align: left; font-size: 13.5px; color: #252350;
       padding: 10px 12px; border-radius: 9px; text-decoration: none; font-weight: 500;
     }
     .menu-usuario a svg { width: 16px; height: 16px; color: #4F46E5; flex-shrink: 0; }
-    .menu-usuario a:hover { background: #F3F2FC; color: #3730A3; }
+    .menu-usuario a:hover, .menu-usuario button:hover { background: #F3F2FC; color: #3730A3; }
     .menu-usuario-rotulo {
       font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
       color: #64628A; padding: 8px 12px 4px;

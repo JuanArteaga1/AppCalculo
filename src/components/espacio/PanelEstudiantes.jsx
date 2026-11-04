@@ -138,7 +138,7 @@ function PerfilEstudiante({ estudiante, onVolver }) {
 
   return (
     <section className="panel">
-      <button type="button" className="volver" onClick={onVolver}>← Volver a Estudiantes</button>
+      <button type="button" className="boton-volver" onClick={onVolver}>← Volver a Estudiantes</button>
 
       <div className="tarjeta ficha-estudiante">
         <span className="lat-avatar ficha-avatar">{estudiante.iniciales}</span>
