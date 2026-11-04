@@ -10,7 +10,7 @@ class dbClient {
 
      async conectarBaseDatos() {
         try {
-            const queryString = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@${process.env.SERVER_DB}/PlataformaEducativa?retryWrites=true&w=majority`;
+            const queryString = `mongodb+srv://${encodeURIComponent(process.env.USER_DB)}:${encodeURIComponent(process.env.PASS_DB)}@${process.env.SERVER_DB}/PlataformaEducativa?retryWrites=true&w=majority`;
 
             await mongoose.connect(queryString);
 

@@ -1,5 +1,22 @@
 import usuariosModelo from "../models/usuarios.js";
 import bcrypt from "bcryptjs";
+import { errorCliente, errorSistema } from "../lib/respuestas.js";
+import { abrirSesion, cerrarSesion } from "../middlewares/sesion.js";
+
+const usuarioNoExiste = (res) => errorCliente(res, 404, "USUARIO_NO_ENCONTRADO", "Ese usuario no existe.");
+
+/** Un id mal formado es un error de quien pide, no del sistema. */
+function responderError(res, error, contexto) {
+    if (error.name === "CastError" || error.name === "BSONError") {
+        return errorCliente(res, 400, "ID_INVALIDO", "El identificador no es válido.");
+    }
+
+    if (error.name === "ValidationError") {
+        return errorCliente(res, 400, "DATOS_INVALIDOS", "Revisa los datos. El correo debe ser institucional.");
+    }
+
+    return errorSistema(res, contexto, error);
+}
 
 class usuarioController {
     constructor() {
@@ -15,102 +32,79 @@ class usuarioController {
                 e.message ===
                 "Solo se pueden invitar estudiantes o docentes."
             ) {
-                return res.status(400).json({
-                    mensaje: e.message
-                });
+                return errorCliente(res, 400, "DATOS_INVALIDOS", e.message);
             }
 
             if (e.code === 11000) {
-                return res.status(409).json({
-                    mensaje: "Ese correo ya está registrado."
-                });
+                return errorCliente(res, 409, "CORREO_DUPLICADO", "Ese correo ya está registrado.");
             }
 
-            console.error(e);
-            return res.status(500).json({
-                mensaje: "Error al crear la invitación."
-            });
+            return responderError(res, e, "Crear invitación");
         }
     }
 
     async update(req, res) {
         try {
-            const { id } = req.params;
-            const data = await usuariosModelo.update(id, req.body);
-            res.status(201).json(data);
+            const data = await usuariosModelo.update(req.params.id, req.body);
+            return data ? res.status(200).json(data) : usuarioNoExiste(res);
         } catch (e) {
-            console.log(e);
-            res.status(500).send(e);
+            return responderError(res, e, "Actualizar usuario");
         }
     }
 
     async delete(req, res) {
         try {
-            const { id } = req.params;
-            const data = await usuariosModelo.delete(id);
-            res.status(206).json(data);
+            const data = await usuariosModelo.delete(req.params.id);
+            return data ? res.status(204).end() : usuarioNoExiste(res);
         } catch (e) {
-            res.status(500).send(e);
+            return responderError(res, e, "Eliminar usuario");
         }
     }
 
     async getAll(req, res) {
         try {
-            const data = await usuariosModelo.getAll();
-            res.status(201).json(data);
+            return res.status(200).json(await usuariosModelo.getAll());
         } catch (e) {
-            res.status(500).send(e);
+            return responderError(res, e, "Listar usuarios");
         }
     }
 
     async getOne(req, res) {
         try {
-            const { id } = req.params;
-            const data = await usuariosModelo.getOne(id);
-            res.status(201).json(data);
+            const data = await usuariosModelo.getOne(req.params.id);
+            return data ? res.status(200).json(data) : usuarioNoExiste(res);
         } catch (e) {
-            res.status(500).send(e);
+            return responderError(res, e, "Consultar usuario");
         }
     }
 
-
     async login(req, res) {
         try {
-            const { correo, contrasena } = req.body;
+            const { correo, contrasena } = req.body ?? {};
 
-            if (!correo || !contrasena) {
-                return res.status(400).json({
-                    mensaje: "Ingresa tu correo y contraseña."
-                });
+            if (typeof correo !== "string" || typeof contrasena !== "string" || !correo || !contrasena) {
+                return errorCliente(res, 400, "DATOS_INCOMPLETOS", "Ingresa tu correo y contraseña.");
             }
 
             const usuario = await usuariosModelo.getByCorreo(correo);
 
             if (!usuario || !usuario.contrasena) {
-                return res.status(401).json({
-                    mensaje: "Correo o contraseña incorrectos."
-                });
+                return errorCliente(res, 401, "CREDENCIALES_INVALIDAS", "Correo o contraseña incorrectos.");
             }
 
             if (usuario.estado !== "activo") {
-                return res.status(403).json({
-                    mensaje: "Tu cuenta todavía no está activa."
-                });
+                return errorCliente(res, 403, "CUENTA_INACTIVA", "Tu cuenta todavía no está activa.");
             }
 
-            const claveValida = await bcrypt.compare(
-                contrasena,
-                usuario.contrasena
-            );
+            const claveValida = await bcrypt.compare(contrasena, usuario.contrasena);
 
             if (!claveValida) {
-                return res.status(401).json({
-                    mensaje: "Correo o contraseña incorrectos."
-                });
+                return errorCliente(res, 401, "CREDENCIALES_INVALIDAS", "Correo o contraseña incorrectos.");
             }
 
+            abrirSesion(res, usuario);
+
             return res.status(200).json({
-                mensaje: "Usuario autenticado.",
                 usuario: {
                     id: usuario._id,
                     nombre: usuario.nombre,
@@ -119,12 +113,18 @@ class usuarioController {
                 }
             });
         } catch (error) {
-            console.error("Error en login:", error);
-
-            return res.status(500).json({
-                mensaje: "Error interno del servidor."
-            });
+            return errorSistema(res, "Iniciar sesión", error);
         }
+    }
+
+    logout(req, res) {
+        cerrarSesion(res);
+        return res.status(204).end();
+    }
+
+    me(req, res) {
+        const { _id, nombre, correo, rol } = req.usuario;
+        return res.status(200).json({ usuario: { id: _id, nombre, correo, rol } });
     }
 
 }
