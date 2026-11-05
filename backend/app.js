@@ -13,6 +13,7 @@ import { errorCliente, errorSistema } from "./lib/respuestas.js";
 import bodyParser from "body-parser";
 import dbClient from "./config/dbClient.js";
 import cors from 'cors';
+import routesEvaluaciones from "./routes/evaluaciones.js";
 
 comprobarSecreto();
 registrarMongo();
@@ -45,6 +46,7 @@ const limiteVisitas = rateLimit({
 app.use('/api/usuarios', routesUsuarios);
 app.use('/api/temas', routesTemas);
 app.use('/api/admin', routesAdmin);
+app.use("/api/evaluaciones", routesEvaluaciones);
 app.post('/api/visitas', limiteVisitas, visitaController.registrar);
 app.use('/api/archivos', express.static(CARPETA_ARCHIVOS, {
     dotfiles: "deny",
