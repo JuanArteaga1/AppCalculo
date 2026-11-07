@@ -82,98 +82,98 @@ class usuarioController {
     }
 
     async asignarModulos(req, res) {
-    try {
-        const { id } = req.params;
-        const { modulos } = req.body;
+        try {
+            const { id } = req.params;
+            const { modulos } = req.body;
 
-        // Validar el ID del docente
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return errorCliente(
-                res,
-                400,
-                "ID_INVALIDO",
-                "El identificador del docente no es válido."
-            );
-        }
-
-        // Validar que se haya enviado un arreglo
-        if (!Array.isArray(modulos)) {
-            return errorCliente(
-                res,
-                400,
-                "MODULOS_INVALIDOS",
-                "Debes enviar una lista de módulos."
-            );
-        }
-
-        // Validar que todos los elementos sean claves de módulo válidas
-        if (modulos.some((modulo) => typeof modulo !== "string" || !modulo.trim())) {
-            return errorCliente(
-                res,
-                400,
-                "MODULOS_INVALIDOS",
-                "La lista contiene claves de módulos inválidas."
-            );
-        }
-
-        // Limpiar y evitar módulos repetidos
-        const claves = [...new Set(modulos.map((modulo) => modulo.trim()))];
-
-        // Buscar al usuario
-        const docente = await Usuario.findById(id);
-
-        if (!docente) {
-            return errorCliente(
-                res,
-                404,
-                "DOCENTE_NO_ENCONTRADO",
-                "No se encontró el usuario solicitado."
-            );
-        }
-
-        // Comprobar que realmente sea docente
-        if (docente.rol !== "docente") {
-            return errorCliente(
-                res,
-                400,
-                "USUARIO_NO_ES_DOCENTE",
-                "Solo se pueden asignar módulos a docentes."
-            );
-        }
-
-        // Comprobar que todos los módulos existan
-        const modulosExistentes = await Modulo.find({
-            clave: { $in: claves }
-        }).select("clave");
-
-        if (modulosExistentes.length !== claves.length) {
-            return errorCliente(
-                res,
-                400,
-                "MODULO_NO_ENCONTRADO",
-                "Uno o más módulos no existen."
-            );
-        }
-
-        // Guardar las asignaciones
-        docente.modulosAsignados = claves;
-        await docente.save();
-
-        return res.status(200).json({
-            mensaje: "Módulos asignados correctamente.",
-            docente: {
-                id: docente._id,
-                nombre: docente.nombre,
-                correo: docente.correo,
-                estado: docente.estado,
-                modulosAsignados: docente.modulosAsignados
+            // Validar el ID del docente
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                return errorCliente(
+                    res,
+                    400,
+                    "ID_INVALIDO",
+                    "El identificador del docente no es válido."
+                );
             }
-        });
 
-    } catch (error) {
-        return errorSistema(res, "Asignar módulos al docente", error);
+            // Validar que se haya enviado un arreglo
+            if (!Array.isArray(modulos)) {
+                return errorCliente(
+                    res,
+                    400,
+                    "MODULOS_INVALIDOS",
+                    "Debes enviar una lista de módulos."
+                );
+            }
+
+            // Validar que todos los elementos sean claves de módulo válidas
+            if (modulos.some((modulo) => typeof modulo !== "string" || !modulo.trim())) {
+                return errorCliente(
+                    res,
+                    400,
+                    "MODULOS_INVALIDOS",
+                    "La lista contiene claves de módulos inválidas."
+                );
+            }
+
+            // Limpiar y evitar módulos repetidos
+            const claves = [...new Set(modulos.map((modulo) => modulo.trim()))];
+
+            // Buscar al usuario
+            const docente = await Usuario.findById(id);
+
+            if (!docente) {
+                return errorCliente(
+                    res,
+                    404,
+                    "DOCENTE_NO_ENCONTRADO",
+                    "No se encontró el usuario solicitado."
+                );
+            }
+
+            // Comprobar que realmente sea docente
+            if (docente.rol !== "docente") {
+                return errorCliente(
+                    res,
+                    400,
+                    "USUARIO_NO_ES_DOCENTE",
+                    "Solo se pueden asignar módulos a docentes."
+                );
+            }
+
+            // Comprobar que todos los módulos existan
+            const modulosExistentes = await Modulo.find({
+                clave: { $in: claves }
+            }).select("clave");
+
+            if (modulosExistentes.length !== claves.length) {
+                return errorCliente(
+                    res,
+                    400,
+                    "MODULO_NO_ENCONTRADO",
+                    "Uno o más módulos no existen."
+                );
+            }
+
+            // Guardar las asignaciones
+            docente.modulosAsignados = claves;
+            await docente.save();
+
+            return res.status(200).json({
+                mensaje: "Módulos asignados correctamente.",
+                docente: {
+                    id: docente._id,
+                    nombre: docente.nombre,
+                    correo: docente.correo,
+                    estado: docente.estado,
+                    modulosAsignados: docente.modulosAsignados
+                }
+            });
+
+        } catch (error) {
+            return errorSistema(res, "Asignar módulos al docente", error);
+        }
     }
-}
 
     async login(req, res) {
         try {
@@ -220,8 +220,25 @@ class usuarioController {
     }
 
     me(req, res) {
-        const { _id, nombre, correo, rol } = req.usuario;
-        return res.status(200).json({ usuario: { id: _id, nombre, correo, rol } });
+        const {
+            _id,
+            nombre,
+            correo,
+            rol,
+            modulosAsignados
+        } = req.usuario;
+
+        return res.status(200).json({
+            usuario: {
+                id: _id,
+                nombre,
+                correo,
+                rol,
+                modulosAsignados: rol === "docente"
+                    ? modulosAsignados ?? []
+                    : []
+            }
+        });
     }
 
 }

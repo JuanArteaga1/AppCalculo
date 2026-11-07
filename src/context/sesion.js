@@ -16,6 +16,7 @@ const ZONAS = [
   ['/admin', 'administrador'],
   ['/espacio/estudiante', 'estudiante'],
   ['/espacio/maestro', 'docente'],
+  ['/quiz', 'estudiante'],
 ];
 
 /**
