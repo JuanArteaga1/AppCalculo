@@ -266,18 +266,27 @@ async function comprobarModuloDocente(req, res, modulo) {
     return true;
 }
 
-async function buscarTemaDelModulo(temaId, modulo) {
-    if (!temaId) {
+async function buscarTemaDelModulo(temaIdentificador, modulo) {
+    if (!temaIdentificador) {
         return { tema: null, valido: true };
     }
 
-    if (!esIdValido(String(temaId))) {
-        return { tema: null, valido: false };
+    const valor = String(temaIdentificador).trim();
+    let tema = null;
+
+    // Si recibimos un ObjectId, buscamos el tema por su ID.
+    if (/^[a-fA-F0-9]{24}$/.test(valor)) {
+        tema = await Tema.findById(valor);
+    } else {
+        // Si recibimos un código como "1.1", buscamos por número y módulo.
+        tema = await Tema.findOne({
+            numero: valor,
+            modulo: modulo.clave
+        });
     }
 
-    const tema = await Tema.findById(temaId);
-
-    if (!tema || tema.modulo !== modulo.clave) {
+    // Comprobamos que el tema realmente pertenezca al módulo seleccionado.
+    if (!tema || String(tema.modulo) !== String(modulo.clave)) {
         return { tema: null, valido: false };
     }
 
@@ -341,7 +350,13 @@ class evaluacionController {
     /** Crear un quiz en estado borrador. */
     async crear(req, res) {
         try {
-            const { titulo, modulo: moduloValor, tema, preguntas } = req.body;
+            const {
+                titulo,
+                modulo: moduloValor,
+                tema,
+                preguntas,
+                fechaLimite
+            } = req.body;
 
             if (typeof titulo !== "string" || !titulo.trim()) {
                 return errorCliente(
@@ -386,12 +401,30 @@ class evaluacionController {
                 return errorCliente(res, 400, "PREGUNTAS_INVALIDAS", error.message);
             }
 
+            let fechaLimitePreparada = null;
+
+            if (fechaLimite) {
+                const resultadoFecha = validarFechaLimite(fechaLimite);
+
+                if (!resultadoFecha.valida) {
+                    return errorCliente(
+                        res,
+                        400,
+                        "FECHA_LIMITE_INVALIDA",
+                        resultadoFecha.mensaje
+                    );
+                }
+
+                fechaLimitePreparada = resultadoFecha.fecha;
+            }
+
             const quiz = await Evaluacion.create({
                 titulo: titulo.trim(),
                 docente: req.usuario._id,
                 modulo: modulo._id,
                 tema: resultadoTema.tema?._id ?? null,
                 preguntas: preguntasPreparadas,
+                fechaLimite: fechaLimitePreparada,
                 estado: "borrador"
             });
 
@@ -438,21 +471,36 @@ class evaluacionController {
 
     /** Consultar un quiz propio, incluyendo sus respuestas correctas. */
     async detalle(req, res) {
-        try {
-            const quiz = await buscarQuizDocente(
-                req.params.id,
-                req.usuario._id
-            );
+    try {
+        const quiz = await buscarQuizDocente(
+            req.params.id,
+            req.usuario._id
+        );
 
-            if (!quiz) {
-                return errorNoEncontrado(res);
-            }
-
-            return res.json({ evaluacion: datosQuizDocente(quiz) });
-        } catch (error) {
-            return responderError(res, error, "Consultar quiz");
+        if (!quiz) {
+            return errorNoEncontrado(res);
         }
+
+        const tema = quiz.tema
+            ? await Tema.findById(quiz.tema).select("numero titulo").lean()
+            : null;
+
+        return res.json({
+            evaluacion: {
+                ...datosQuizDocente(quiz),
+                tema: tema
+                    ? {
+                        id: tema.numero,
+                        numero: tema.numero,
+                        titulo: tema.titulo
+                    }
+                    : null
+            }
+        });
+    } catch (error) {
+        return responderError(res, error, "Consultar quiz");
     }
+}
 
     /**
      * Editar un borrador.
@@ -604,6 +652,25 @@ class evaluacionController {
                         "PREGUNTAS_INVALIDAS",
                         error.message
                     );
+                }
+            }
+
+            if (req.body.fechaLimite !== undefined) {
+                if (req.body.fechaLimite === null || req.body.fechaLimite === "") {
+                    quiz.fechaLimite = null;
+                } else {
+                    const resultadoFecha = validarFechaLimite(req.body.fechaLimite);
+
+                    if (!resultadoFecha.valida) {
+                        return errorCliente(
+                            res,
+                            400,
+                            "FECHA_LIMITE_INVALIDA",
+                            resultadoFecha.mensaje
+                        );
+                    }
+
+                    quiz.fechaLimite = resultadoFecha.fecha;
                 }
             }
 

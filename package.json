@@ -13,6 +13,7 @@
     "function-plot": "^1.25.4",
     "katex": "^0.16.47",
     "mathjs": "^15.2.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-icons": "^5.7.0",
