@@ -431,24 +431,148 @@ function VistaModulo({ id, curso, visitas }) {
 
 function VistaEvaluate() {
   const [params] = useSearchParams();
-  const [tipo, setTipo] = useState('Todos');
+  const [evaluaciones, setEvaluaciones] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const [mensaje, setMensaje] = useState('');
+
+  const [estado, setEstado] = useState('todos');
   const [modulo, setModulo] = useState('todos');
   const [docente, setDocente] = useState(params.get('docente') ?? 'todos');
   const [busqueda, setBusqueda] = useState('');
+  const [actualizando, setActualizando] = useState('');
+
+  useEffect(() => {
+    const cargarEvaluaciones = async () => {
+      try {
+        setCargando(true);
+        setError('');
+
+        const datos = await api('/evaluaciones/administrador');
+        setEvaluaciones(datos.evaluaciones ?? []);
+      } catch (err) {
+        setError(err.message || 'No se pudieron cargar los quices.');
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarEvaluaciones();
+  }, []);
+
+  useEffect(() => {
+    if (!mensaje) return;
+
+    const temporizador = setTimeout(() => {
+      setMensaje('');
+    }, 3500);
+
+    return () => clearTimeout(temporizador);
+  }, [mensaje]);
+
+  const obtenerEstado = (quiz) => {
+    if (quiz.estado === 'borrador') return 'borrador';
+    if (quiz.vencido) return 'vencida';
+    if (!quiz.habilitado) return 'oculta';
+    return 'publicada';
+  };
+
+  const estados = [
+    ['todos', 'Todos'],
+    ['borrador', 'Borradores'],
+    ['publicada', 'Publicadas'],
+    ['oculta', 'Ocultas'],
+    ['vencida', 'Vencidas'],
+  ];
 
   const texto = sinAcentos(busqueda.trim());
-  const filas = CREACIONES.filter((c) => (
-    (tipo === 'Todos' || c.tipo === tipo)
-    && (modulo === 'todos' || c.modulo === modulo)
-    && (docente === 'todos' || c.docente === docente)
-    && sinAcentos(c.titulo).includes(texto)
+
+  const filas = evaluaciones.filter((quiz) => (
+    (estado === 'todos' || obtenerEstado(quiz) === estado)
+    && (modulo === 'todos' || quiz.modulo?.clave === modulo)
+    && (docente === 'todos' || String(quiz.docente?._id) === docente)
+    && sinAcentos(quiz.titulo || '').includes(texto)
   ));
 
+  const docentesDisponibles = [
+    ...new Map(
+      evaluaciones
+        .filter((quiz) => quiz.docente?._id)
+        .map((quiz) => [
+          String(quiz.docente._id),
+          quiz.docente,
+        ])
+    ).values(),
+  ];
+
+  const contarEstado = (valor) => (
+    evaluaciones.filter((quiz) => (
+      valor === 'todos' || obtenerEstado(quiz) === valor
+    )).length
+  );
+
   const limpiar = () => {
-    setTipo('Todos');
+    setEstado('todos');
     setModulo('todos');
     setDocente('todos');
     setBusqueda('');
+  };
+
+  const cambiarHabilitado = async (quiz) => {
+    const nuevoEstado = !quiz.habilitado;
+
+    try {
+      setError('');
+      setMensaje('');
+      setActualizando(quiz.id);
+
+      await api(`/evaluaciones/administrador/${quiz.id}/habilitado`, {
+        metodo: 'PATCH',
+        cuerpo: { habilitado: nuevoEstado },
+      });
+
+      setEvaluaciones((actuales) => (
+        actuales.map((item) => (
+          item.id === quiz.id
+            ? { ...item, habilitado: nuevoEstado }
+            : item
+        ))
+      ));
+
+      setMensaje(
+        nuevoEstado
+          ? 'Quiz habilitado correctamente.'
+          : 'Quiz deshabilitado correctamente.'
+      );
+    } catch (err) {
+      setError(err.message || 'No se pudo actualizar el estado del quiz.');
+    } finally {
+      setActualizando('');
+    }
+  };
+
+  const fechaFormato = (fecha) => {
+    if (!fecha) return '—';
+
+    return new Intl.DateTimeFormat('es-CO', {
+      dateStyle: 'short',
+      timeZone: 'America/Bogota',
+    }).format(new Date(fecha));
+  };
+
+  const mostrarEstado = (quiz) => {
+    const valor = obtenerEstado(quiz);
+
+    const apariencia = {
+      publicada: ['pastilla-ok', 'Publicada'],
+      borrador: ['pastilla-borrador', 'Borrador'],
+      oculta: ['pastilla-off', 'Oculta'],
+      vencida: ['pastilla-off', 'Vencida'],
+    };
+
+    const [clase, nombre] = apariencia[valor];
+
+    return <span className={`pastilla ${clase}`}>{nombre}</span>;
   };
 
   return (
@@ -456,21 +580,21 @@ function VistaEvaluate() {
       <div className="admin-cabeza">
         <div>
           <h1>Evalúate</h1>
-          <p>Todas las lecciones, quices y exámenes que crearon los docentes en sus módulos.</p>
+          <p>Todos los quices creados por los docentes en sus módulos.</p>
         </div>
       </div>
 
       <div className="tarjeta">
         <div className="admin-filtros">
-          {TIPOS.map(([valor, nombre]) => (
+          {estados.map(([valor, nombre]) => (
             <button
               key={valor}
               type="button"
               className="pildora"
-              aria-pressed={tipo === valor}
-              onClick={() => setTipo(valor)}
+              aria-pressed={estado === valor}
+              onClick={() => setEstado(valor)}
             >
-              {nombre} ({valor === 'Todos' ? CREACIONES.length : cuantos(CREACIONES, valor)})
+              {nombre} ({contarEstado(valor)})
             </button>
           ))}
         </div>
@@ -486,97 +610,359 @@ function VistaEvaluate() {
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </label>
-          <select className="admin-select" aria-label="Filtrar por módulo" value={modulo} onChange={(e) => setModulo(e.target.value)}>
+
+          <select
+            className="admin-select"
+            aria-label="Filtrar por módulo"
+            value={modulo}
+            onChange={(e) => setModulo(e.target.value)}
+          >
             <option value="todos">Todos los módulos</option>
-            {MODULOS.map((m) => <option key={m.id} value={m.id}>{m.titulo}</option>)}
+            {MODULOS.map((m) => (
+              <option key={m.id} value={m.id}>{m.titulo}</option>
+            ))}
           </select>
-          <select className="admin-select" aria-label="Filtrar por docente" value={docente} onChange={(e) => setDocente(e.target.value)}>
+
+          <select
+            className="admin-select"
+            aria-label="Filtrar por docente"
+            value={docente}
+            onChange={(e) => setDocente(e.target.value)}
+          >
             <option value="todos">Todos los docentes</option>
-            {DOCENTES.map((d) => <option key={d.id} value={d.id}>{d.nombre}</option>)}
+            {docentesDisponibles.map((d) => (
+              <option key={d._id} value={String(d._id)}>
+                {d.nombre}
+              </option>
+            ))}
           </select>
         </div>
 
-        {filas.length === 0 ? (
+        {error && (
           <div className="admin-vacio">
-            <b>No hay contenido con estos filtros</b>
-            <p className="suave-txt">Prueba con otro tipo, módulo o docente.</p>
-            <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={limpiar}>Limpiar filtros</button>
+            <p>{error}</p>
           </div>
-        ) : (
+        )}
+
+        {mensaje && (
+          <div
+            role="status"
+            style={{
+              position: 'fixed',
+              top: '24px',
+              right: '24px',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              padding: '14px 18px',
+              background: '#e8f5e9',
+              color: '#246b35',
+              border: '1px solid #b7dfbd',
+              borderRadius: '10px',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
+              maxWidth: '360px',
+            }}
+          >
+            <span>{mensaje}</span>
+
+            <button
+              type="button"
+              onClick={() => setMensaje('')}
+              aria-label="Cerrar notificación"
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: 'inherit',
+                fontSize: '20px',
+                cursor: 'pointer',
+                padding: '0 4px',
+              }}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {cargando ? (
+          <div className="admin-vacio">
+            <p>Cargando quices...</p>
+          </div>
+        ) : !error && filas.length === 0 ? (
+          <div className="admin-vacio">
+            <b>No hay quices con estos filtros</b>
+            <p className="suave-txt">
+              Prueba con otro estado, módulo o docente.
+            </p>
+            <button
+              type="button"
+              className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+              onClick={limpiar}
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        ) : !error ? (
           <div className="tabla-caja">
             <table className="tabla-panel">
               <thead>
                 <tr>
                   <th>Título</th>
-                  <th>Tipo</th>
                   <th>Módulo</th>
                   <th>Docente</th>
                   <th>Estado</th>
+                  <th>Fecha límite</th>
                   <th>Creado</th>
-                  <th aria-label="Acciones" />
+                  <th>Acciones</th>
                 </tr>
               </thead>
+
               <tbody>
-                {filas.map((c) => (
-                  <tr key={c.id}>
-                    <td><b>{c.titulo}</b></td>
-                    <td>{c.tipo}</td>
-                    <td>{moduloPorId(c.modulo).titulo}</td>
-                    <td>{docentePorId(c.docente).nombre}</td>
-                    <td><Pastilla estado={c.estado} /></td>
-                    <td className="suave-txt num-celda">{c.creado}</td>
+                {filas.map((quiz) => (
+                  <tr key={quiz.id}>
+                    <td><b>{quiz.titulo}</b></td>
+
+                    <td>{quiz.modulo?.titulo || '—'}</td>
+
+                    <td>{quiz.docente?.nombre || '—'}</td>
+
+                    <td>{mostrarEstado(quiz)}</td>
+
+                    <td className="suave-txt num-celda">
+                      {fechaFormato(quiz.fechaLimite)}
+                    </td>
+
+                    <td className="suave-txt num-celda">
+                      {fechaFormato(quiz.createdAt)}
+                    </td>
+
                     <td style={{ textAlign: 'right' }}>
-                      <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to={`/admin/evaluate/${c.id}`}>Ver</Link>
+                      <div className="admin-filtros">
+                        <Link
+                          className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                          to={`/admin/evaluate/${quiz.id}`}
+                        >
+                          Ver
+                        </Link>
+
+                        {quiz.estado === 'publicado' && (
+                          <button
+                            type="button"
+                            className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                            disabled={actualizando === quiz.id}
+                            onClick={() => cambiarHabilitado(quiz)}
+                          >
+                            {actualizando === quiz.id
+                              ? 'Actualizando...'
+                              : quiz.habilitado
+                                ? 'Deshabilitar'
+                                : 'Habilitar'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
+        ) : null}
       </div>
     </>
   );
 }
 
 function VistaCreacion({ id }) {
-  const creacion = CREACIONES.find((c) => c.id === id);
+  const [quiz, setQuiz] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
 
-  if (!creacion) return <NoEncontrado titulo="Evaluación no encontrada" mensaje="Esa evaluación no existe." destino="/admin/evaluate" textoDestino="Volver a Evalúate" />;
+  useEffect(() => {
+    const cargarQuiz = async () => {
+      try {
+        setCargando(true);
+        setError('');
 
-  const modulo = moduloPorId(creacion.modulo);
-  const tema = modulo.temas.find((t) => t.id === creacion.tema);
-  const docente = docentePorId(creacion.docente);
-  const esLeccion = creacion.preguntas == null;
+        const datos = await api('/evaluaciones/administrador');
+
+        const encontrado = (datos.evaluaciones ?? []).find(
+          (evaluacion) => evaluacion.id === id
+        );
+
+        setQuiz(encontrado ?? null);
+      } catch (err) {
+        setError(err.message || 'No se pudo cargar el quiz.');
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarQuiz();
+  }, [id]);
+
+  const fechaFormato = (fecha) => {
+    if (!fecha) return 'Sin fecha definida';
+
+    return new Intl.DateTimeFormat('es-CO', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'America/Bogota',
+    }).format(new Date(fecha));
+  };
+
+  if (cargando) {
+    return (
+      <div className="sesion-espera" role="status">
+        Cargando evaluación...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="admin-vacio">
+        <b>No se pudo cargar la evaluación</b>
+        <p className="suave-txt">{error}</p>
+        <Link
+          className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+          to="/admin/evaluate"
+        >
+          Volver a Evalúate
+        </Link>
+      </div>
+    );
+  }
+
+  if (!quiz) {
+    return (
+      <NoEncontrado
+        titulo="Evaluación no encontrada"
+        mensaje="Ese quiz no existe o ya no está disponible."
+        destino="/admin/evaluate"
+        textoDestino="Volver a Evalúate"
+      />
+    );
+  }
+
+  const estadoVisual = quiz.estado === 'borrador'
+    ? 'borrador'
+    : quiz.vencido
+      ? 'vencida'
+      : !quiz.habilitado
+        ? 'oculta'
+        : 'publicada';
 
   return (
     <>
-      <Link className="boton-volver" to="/admin/evaluate"><FiArrowLeft />Evalúate</Link>
+      <Link className="boton-volver" to="/admin/evaluate">
+        <FiArrowLeft />
+        Evalúate
+      </Link>
 
       <div className="admin-cabeza">
         <div>
-          <h1>{creacion.titulo}</h1>
-          <p>{creacion.tipo} de {docente.nombre} · {creacion.creado}</p>
+          <h1>{quiz.titulo}</h1>
+          <p>
+            Quiz de {quiz.docente?.nombre || 'Docente no disponible'}
+            {' · '}
+            Creado el {fechaFormato(quiz.createdAt)}
+          </p>
         </div>
-        <Pastilla estado={creacion.estado} />
+
+        {estadoVisual === 'vencida' ? (
+          <span className="pastilla pastilla-off">Vencida</span>
+        ) : (
+          <Pastilla estado={estadoVisual} />
+        )}
       </div>
 
       <div className="tarjeta">
+        <h2>Información del quiz</h2>
+
         <dl className="ficha">
-          <div><dt>Módulo</dt><dd>{modulo.titulo}</dd></div>
-          <div><dt>Tema</dt><dd>{creacion.tema} {tema.titulo}</dd></div>
-          <div><dt>Docente</dt><dd>{docente.nombre}</dd></div>
-          {!esLeccion && (
-            <>
-              <div><dt>Preguntas</dt><dd>{creacion.preguntas}</dd></div>
-              <div><dt>Entregas</dt><dd>{creacion.entregas} de {creacion.total}</dd></div>
-              <div><dt>Promedio</dt><dd>{creacion.promedio == null ? 'Sin calificar' : decimal(creacion.promedio)}</dd></div>
-            </>
-          )}
+          <div>
+            <dt>Módulo</dt>
+            <dd>{quiz.modulo?.titulo || 'No disponible'}</dd>
+          </div>
+
+          <div>
+            <dt>Tema</dt>
+            <dd>
+              {quiz.tema
+                ? `${quiz.tema.numero} ${quiz.tema.titulo}`
+                : 'Sin tema específico'}
+            </dd>
+          </div>
+
+          <div>
+            <dt>Docente</dt>
+            <dd>{quiz.docente?.nombre || 'No disponible'}</dd>
+          </div>
+
+          <div>
+            <dt>Preguntas</dt>
+            <dd>{quiz.preguntas?.length ?? 0}</dd>
+          </div>
+
+          <div>
+            <dt>Fecha límite</dt>
+            <dd>{fechaFormato(quiz.fechaLimite)}</dd>
+          </div>
+
+          <div>
+            <dt>Estado</dt>
+            <dd>
+              {estadoVisual === 'vencida'
+                ? 'Vencida'
+                : estadoVisual === 'borrador'
+                  ? 'Borrador'
+                  : estadoVisual === 'oculta'
+                    ? 'Deshabilitada'
+                    : 'Publicada'}
+            </dd>
+          </div>
         </dl>
-        <div>
-          <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to={`/calculo1/${modulo.id}/${creacion.tema}`}>Abrir el tema</Link>
-        </div>
+      </div>
+
+      <div className="tarjeta">
+        <h2>Preguntas del quiz</h2>
+
+        {!quiz.preguntas?.length ? (
+          <div className="admin-vacio">
+            <p>Este quiz todavía no tiene preguntas.</p>
+          </div>
+        ) : (
+          <ol className="lista">
+            {quiz.preguntas.map((pregunta, indice) => (
+              <li
+                key={pregunta._id || indice}
+                className="item"
+                style={{ display: 'block' }}
+              >
+                <b>
+                  Pregunta {indice + 1}
+                </b>
+
+                <p>{pregunta.enunciado}</p>
+
+                <ol type="A">
+                  {pregunta.opciones.map((opcion, opcionIndice) => (
+                    <li key={opcionIndice}>
+                      {opcion}
+
+                      {pregunta.respuestaCorrecta === opcionIndice && (
+                        <span className="pastilla pastilla-ok">
+                          Respuesta correcta
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
     </>
   );

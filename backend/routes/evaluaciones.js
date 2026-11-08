@@ -6,9 +6,16 @@ const route = express.Router();
 
 const docentes = express.Router();
 const estudiantes = express.Router();
+const administradores = express.Router();
 
 // Rutas exclusivas para docentes.
 docentes.use(requiereRol("docente"));
+
+// Rutas exclusivas para administradores.
+administradores.use(requiereRol("administrador"));
+
+administradores.get("/", evaluacionController.listarAdministrador);
+administradores.patch("/:id/habilitado", evaluacionController.cambiarHabilitado);
 
 docentes.get("/", evaluacionController.listar);
 docentes.post("/", evaluacionController.crear);
@@ -28,5 +35,6 @@ estudiantes.get("/:id/resultado", evaluacionController.resultadoEstudiante);
 
 route.use("/docente", docentes);
 route.use("/estudiante", estudiantes);
+route.use("/administrador", administradores);
 
 export default route;

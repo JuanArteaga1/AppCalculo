@@ -863,6 +863,95 @@ class evaluacionController {
         }
     }
 
+        /** Listar todos los quices para el panel del administrador. */
+    async listarAdministrador(req, res) {
+        try {
+            const quices = await Evaluacion.find()
+                .populate("docente", "nombre correo")
+                .populate("modulo", "clave titulo")
+                .populate("tema", "numero titulo")
+                .sort({ createdAt: -1 })
+                .lean();
+
+            return res.json({
+                evaluaciones: quices.map((quiz) => ({
+                    id: quiz._id,
+                    titulo: quiz.titulo,
+                    docente: quiz.docente,
+                    modulo: quiz.modulo,
+                    tema: quiz.tema,
+                    fechaLimite: quiz.fechaLimite,
+                    estado: quiz.estado,
+                    habilitado: quiz.habilitado,
+                    vencido: Boolean(
+                        quiz.fechaLimite &&
+                        new Date(quiz.fechaLimite).getTime() <= Date.now()
+                    ),
+                    preguntas: (quiz.preguntas ?? []).map((pregunta) => ({
+                        id: pregunta._id,
+                        enunciado: pregunta.enunciado,
+                        opciones: pregunta.opciones,
+                        respuestaCorrecta: pregunta.respuestaCorrecta
+                    })),
+                    creado: quiz.createdAt,
+                    actualizado: quiz.updatedAt
+                }))
+            });
+        } catch (error) {
+            return responderError(
+                res,
+                error,
+                "Listar quices del administrador"
+            );
+        }
+    }
+
+        /** Habilitar o deshabilitar un quiz sin eliminarlo. */
+    async cambiarHabilitado(req, res) {
+        try {
+            if (!esIdValido(req.params.id)) {
+                return errorNoEncontrado(res);
+            }
+
+            if (typeof req.body?.habilitado !== "boolean") {
+                return errorCliente(
+                    res,
+                    400,
+                    "ESTADO_INVALIDO",
+                    "Debes indicar si el quiz estará habilitado o deshabilitado."
+                );
+            }
+
+            const quiz = await Evaluacion.findById(req.params.id);
+
+            if (!quiz) {
+                return errorNoEncontrado(res);
+            }
+
+            quiz.habilitado = req.body.habilitado;
+            await quiz.save();
+
+            return res.json({
+                mensaje: quiz.habilitado
+                    ? "Quiz habilitado correctamente."
+                    : "Quiz deshabilitado correctamente.",
+                evaluacion: {
+                    id: quiz._id,
+                    titulo: quiz.titulo,
+                    estado: quiz.estado,
+                    habilitado: quiz.habilitado,
+                    vencido: quizVencido(quiz)
+                }
+            });
+        } catch (error) {
+            return responderError(
+                res,
+                error,
+                "Cambiar disponibilidad del quiz"
+            );
+        }
+    }
+
     /** Obtener un quiz publicado para que lo responda un estudiante. */
     async verParaEstudiante(req, res) {
         try {
