@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const usuarioSchema = new mongoose.Schema({
@@ -36,7 +35,22 @@ const usuarioSchema = new mongoose.Schema({
         required: true,
         enum: ["pendiente", "activo"],
         default: "pendiente"
+    },
+
+    modulosAsignados: {
+        type: [{
+            type: String,
+            trim: true
+        }],
+        default: [],
+        validate: {
+            validator: function (modulos) {
+                return this.rol === "docente" || modulos.length === 0;
+            },
+            message: "Solo los docentes pueden tener módulos asignados."
+        }
     }
+
 }, {
     timestamps: true
 });

@@ -7,6 +7,7 @@ import temaController from "../controllers/temaController.js";
 import visitaController from "../controllers/visitaController.js";
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
 import { requiereRol } from "../middlewares/sesion.js";
+import usuarioController from "../controllers/usuarioController.js";
 
 export const CARPETA_ARCHIVOS = path.resolve(process.env.CARPETA_ARCHIVOS || "uploads");
 
@@ -49,6 +50,7 @@ const route = express.Router();
 
 // Todo lo de este archivo es solo para el administrador.
 route.use(requiereRol("administrador"));
+route.put("/docentes/:id/modulos", usuarioController.asignarModulos);
 
 route.get("/visitas", visitaController.resumen);
 route.post("/archivos", subirImagen);

@@ -18,6 +18,7 @@ import NoEncontrado from './pages/NoEncontrado';
 import RutaProtegida, { RutaEspacio } from './components/RutaProtegida';
 import SesionProvider from './context/SesionProvider';
 import './styles/panel.css';
+import QuizCompartido from './pages/QuizCompartido';
 
 /**
  * Rutas que ocupan toda la pantalla, sin barra de navegación ni pie de página:
@@ -57,6 +58,14 @@ function Contenido() {
           <Route path="/admin/:seccion" element={<ZonaAdmin />} />
           <Route path="/admin/:seccion/:detalle" element={<ZonaAdmin />} />
           <Route path="/admin/:seccion/:detalle/:tema" element={<ZonaAdmin />} />
+          <Route
+            path="/quiz/:id"
+            element={
+              <RutaProtegida roles={['estudiante']}>
+                <QuizCompartido />
+              </RutaProtegida>
+            }
+          />
           {/* Dentro de la zona protegida, para no mostrar nada del panel sin sesión. */}
           <Route path="/admin/*" element={<ZonaAdmin />} />
 
