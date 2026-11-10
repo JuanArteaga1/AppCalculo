@@ -1,15 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
 import { chatbotMensaje } from '../services/chatbotService';
+import { guardarChat } from '../services/progresoService';
+import { useSesion } from '../context/sesion';
 import renderMathInElement from 'katex/dist/contrib/auto-render';
 import 'katex/dist/katex.min.css';
 
-export default function ChatSection({ tema = 'limites', unidadTitulo = '', lateral = false }) {
-  const [messages, setMessages] = useState(() => [
-    {
-      from: 'bot',
-      text: getMensajeBienvenida(tema, unidadTitulo),
-    }
-  ]);
+export default function ChatSection({
+  tema = 'limites',
+  unidadTitulo = '',
+  lateral = false,
+  mensajesIniciales = null,
+  onMensajes,
+}) {
+  const [messages, setMessages] = useState(() => (
+    mensajesIniciales?.length
+      ? mensajesIniciales.map((m) => ({
+        from: m.from === 'user' ? 'user' : 'bot',
+        text: String(m.text || ''),
+      })).filter((m) => m.text)
+      : [{ from: 'bot', text: getMensajeBienvenida(tema, unidadTitulo) }]
+  ));
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const mathRef = useRef(null);
@@ -48,35 +58,22 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '', later
     if (!input.trim() || loading) return;
 
     const userMsg = input.trim();
-    setMessages((prev) => [...prev, { from: 'user', text: userMsg }]);
+    const conUsuario = [...messages, { from: 'user', text: userMsg }];
+    setMessages(conUsuario);
     setInput('');
     setLoading(true);
 
     const res = await chatbotMensaje(tema, userMsg);
+    const texto = !res.ok
+      ? (res.error === 'NO_API_KEY'
+        ? '⚠️ El tutor no está configurado en el servidor. Avisa a quien administra la plataforma.'
+        : `❌ Error: ${res.error}\n\nPor favor intenta de nuevo en un momento.`)
+      : res.respuesta;
+    const siguientes = [...conUsuario, { from: 'bot', text: texto }];
 
-    if (!res.ok) {
-      if (res.error === 'NO_API_KEY') {
-        setMessages((prev) => [
-          ...prev,
-          {
-            from: 'bot',
-            text: '⚠️ Para usar el chatbot, configura tu API key de OpenAI. Crea un archivo `.env` en la raíz con:\n\n`VITE_OPENAI_API_KEY=sk-tu-clave-aqui`\n\nLuego reinicia el servidor.',
-          },
-        ]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            from: 'bot',
-            text: `❌ Error: ${res.error}\n\nPor favor intenta de nuevo en un momento.`,
-          },
-        ]);
-      }
-    } else {
-      setMessages((prev) => [...prev, { from: 'bot', text: res.respuesta }]);
-    }
-
+    setMessages(siguientes);
     setLoading(false);
+    if (res.ok) onMensajes?.(siguientes);
   };
 
   const getNombreTema = () => {
@@ -166,6 +163,49 @@ export default function ChatSection({ tema = 'limites', unidadTitulo = '', later
         <strong style={styles.tipsStrong}>💡 Tips:</strong> Puedes preguntar ejercicios específicos, pedir explicaciones de conceptos, o solicitar ejemplos adicionales. ¡Sé específico para mejores respuestas!
       </div>
     </div>
+  );
+}
+
+/** Chat del tema o del tutor: con sesión de estudiante, la conversación queda en la cuenta. */
+export function ChatEstudiante({
+  tema = 'limites',
+  unidadTitulo = '',
+  lateral = false,
+  mensajesIniciales = null,
+  chatIdInicial = null,
+  onGuardado,
+}) {
+  const { usuario } = useSesion();
+  const idRef = useRef(chatIdInicial);
+
+  useEffect(() => {
+    idRef.current = chatIdInicial;
+  }, [chatIdInicial]);
+
+  const persistir = async (mensajes) => {
+    if (usuario?.rol !== 'estudiante') return;
+
+    try {
+      const { chat } = await guardarChat({
+        id: idRef.current,
+        tema,
+        mensajes,
+      });
+      idRef.current = chat._id;
+      onGuardado?.(chat);
+    } catch {
+      // El mensaje sigue en pantalla; el próximo envío vuelve a intentar guardarlo.
+    }
+  };
+
+  return (
+    <ChatSection
+      tema={tema}
+      unidadTitulo={unidadTitulo}
+      lateral={lateral}
+      mensajesIniciales={mensajesIniciales}
+      onMensajes={usuario?.rol === 'estudiante' ? persistir : undefined}
+    />
   );
 }
 

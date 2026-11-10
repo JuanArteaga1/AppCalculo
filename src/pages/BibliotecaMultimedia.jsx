@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { FaPlay, FaCheck, FaTrash, FaYoutube } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
@@ -10,6 +10,8 @@ import {
   youtubeThumb,
   youtubeEmbed,
 } from '../data/videos';
+import { useSesion } from '../context/sesion';
+import { registrarVideoVisto } from '../services/progresoService';
 
 const STORAGE_KEY = 'limitshub_videos';
 
@@ -27,6 +29,7 @@ function saveCustomVideos(list) {
 }
 
 export default function BibliotecaMultimedia() {
+  const { usuario } = useSesion();
   const [customVideos, setCustomVideos] = useState(loadCustomVideos);
   const [search, setSearch] = useState('');
   const [categoriaActiva, setCategoriaActiva] = useState('todos');
@@ -116,6 +119,18 @@ export default function BibliotecaMultimedia() {
   };
 
   const videoActual = allVideos.find((v) => v.id === reproduciendo);
+
+  useEffect(() => {
+    if (usuario?.rol !== 'estudiante' || !videoActual) return;
+    const youtubeId = extraerYoutubeId(videoActual.youtubeId);
+    if (!youtubeId) return;
+    registrarVideoVisto({
+      videoId: videoActual.id,
+      youtubeId,
+      titulo: videoActual.titulo,
+      unidad: videoActual.unidad,
+    });
+  }, [usuario, videoActual]);
 
   return (
     <div style={styles.page}>

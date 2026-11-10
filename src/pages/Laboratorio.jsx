@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import EntradaFuncion from '../components/laboratorio/EntradaFuncion';
 import ListaFunciones from '../components/laboratorio/ListaFunciones';
 import PanelHerramientas from '../components/laboratorio/PanelHerramientas';
@@ -12,6 +12,9 @@ import {
   vistaInicial,
 } from '../components/laboratorio/mathUtils';
 import { resolverConIA } from '../services/openaiService';
+import { useSesion } from '../context/sesion';
+import { alerta, alertaError } from '../services/alertas';
+import { guardarEjercicio, obtenerEjercicio } from '../services/progresoService';
 import '../components/laboratorio/laboratorio.css';
 
 /** Ancho aproximado del plano al abrir, para elegir la escala inicial. */
@@ -46,7 +49,10 @@ function estadoInicial(params) {
 
 export default function Laboratorio() {
   const [params] = useSearchParams();
+  const location = useLocation();
+  const { usuario } = useSesion();
   const [inicial] = useState(() => estadoInicial(params));
+  const ejercicioId = params.get('ejercicioId');
 
   const [funciones, setFunciones] = useState(inicial.funciones);
   const [activaId, setActivaId] = useState(inicial.activaId);

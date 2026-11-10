@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { extraerYoutubeId, youtubeThumb, youtubeEmbed } from '../data/videos';
+import { useSesion } from '../context/sesion';
+import { registrarVideoVisto } from '../services/progresoService';
 
 /** Videos del tema, en el orden que definió el administrador. */
-export default function TemaVideo({ videos: lista = [], sinAviso = false }) {
+export default function TemaVideo({ videos: lista = [], sinAviso = false, unidad = '' }) {
   const videos = lista
     .filter((video) => extraerYoutubeId(video.url))
     .map((video, i) => ({
@@ -13,6 +15,19 @@ export default function TemaVideo({ videos: lista = [], sinAviso = false }) {
     }));
 
   const [activeId, setActiveId] = useState(videos[0] ? extraerYoutubeId(videos[0].youtubeId) : null);
+  const activeVideo = videos.find((video) => extraerYoutubeId(video.youtubeId) === activeId) || videos[0];
+  const activeYoutubeId = activeVideo ? extraerYoutubeId(activeVideo.youtubeId) : null;
+  const { usuario } = useSesion();
+
+  useEffect(() => {
+    if (usuario?.rol !== 'estudiante' || !activeYoutubeId) return;
+    registrarVideoVisto({
+      videoId: activeVideo?.id || '',
+      youtubeId: activeYoutubeId,
+      titulo: activeVideo?.titulo || 'Video',
+      unidad,
+    });
+  }, [usuario, activeYoutubeId, activeVideo?.id, activeVideo?.titulo, unidad]);
 
   if (!videos.length) {
     if (sinAviso) return null;
@@ -24,9 +39,6 @@ export default function TemaVideo({ videos: lista = [], sinAviso = false }) {
       </section>
     );
   }
-
-  const activeVideo = videos.find((video) => extraerYoutubeId(video.youtubeId) === activeId) || videos[0];
-  const activeYoutubeId = extraerYoutubeId(activeVideo.youtubeId);
 
   return (
     <section style={styles.container}>

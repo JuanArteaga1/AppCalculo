@@ -54,25 +54,32 @@ class dbClient {
         this.conectarBaseDatos();
     }
 
-    async conectarBaseDatos() {
+    async conectarBaseDatos(intento = 1) {
         try {
             prepararDns();
-            await mongoose.connect(uriMongo(), { serverSelectionTimeoutMS: 15000 });
+
+            if (mongoose.connection.readyState === 1) return;
+
+            if (mongoose.connection.readyState !== 0) {
+                await mongoose.disconnect();
+            }
+
+            await mongoose.connect(uriMongo(), {
+                serverSelectionTimeoutMS: 15000,
+                family: 4,
+            });
             console.log("Conexión a la base de datos establecida");
         } catch (e) {
-            if (/querySrv|ECONNREFUSED|ENOTFOUND/i.test(e.message ?? "")) {
-                try {
-                    dns.setServers(DNS_PUBLICO);
-                    await mongoose.connect(uriMongo(), { serverSelectionTimeoutMS: 15000 });
-                    console.log("Conexión a la base de datos establecida");
-                    return;
-                } catch (segundo) {
-                    console.error("Error al conectar con MongoDB:", explicarError(segundo));
-                    return;
-                }
+            const esDns = /querySrv|ECONNREFUSED|ENOTFOUND|ETIMEOUT|queryTxt/i.test(e?.message ?? "");
+
+            if (esDns && intento === 1) {
+                dns.setServers(DNS_PUBLICO);
+                return this.conectarBaseDatos(2);
             }
 
             console.error("Error al conectar con MongoDB:", explicarError(e));
+            const espera = Math.min(30000, 4000 * intento);
+            setTimeout(() => this.conectarBaseDatos(Math.min(intento + 1, 8)), espera);
         }
     }
 

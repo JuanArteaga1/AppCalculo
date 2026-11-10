@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPlay } from 'react-icons/fi';
-import ChatSection from '../ChatSection';
-import { youtubeEmbed } from '../../data/videos';
+import { ChatEstudiante } from '../ChatSection';
+import { extraerYoutubeId, youtubeEmbed } from '../../data/videos';
 import { alerta, alertaError } from '../../services/alertas';
 import {
   borrarEjercicio,
-  guardarChat,
   listarChats,
   listarEjercicios,
   listarVideosVistos,
@@ -118,6 +117,7 @@ export function PanelVideos({ rol }) {
   }
 
   const reproduciendo = videos.find((v) => v.youtubeId === activo);
+  const idReproduciendo = extraerYoutubeId(reproduciendo?.youtubeId);
 
   return (
     <section className="panel">
@@ -131,7 +131,7 @@ export function PanelVideos({ rol }) {
           <h2>{reproduciendo.titulo}</h2>
           <iframe
             title={reproduciendo.titulo}
-            src={youtubeEmbed(reproduciendo.youtubeId)}
+            src={youtubeEmbed(idReproduciendo)}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             style={{ width: '100%', aspectRatio: '16 / 9', border: 0, borderRadius: 12 }}
@@ -174,6 +174,7 @@ export function PanelTutor({ rol }) {
   const [chatId, setChatId] = useState(null);
   const [tema, setTema] = useState('limites');
   const [iniciales, setIniciales] = useState(null);
+  const [clave, setClave] = useState('nuevo');
 
   useEffect(() => {
     if (rol !== 'estudiante') return undefined;
@@ -186,29 +187,22 @@ export function PanelTutor({ rol }) {
     };
   }, [rol]);
 
-  const persistir = async (mensajes) => {
-    if (rol !== 'estudiante' || !mensajes?.length) return;
-    try {
-      const { chat } = await guardarChat({ id: chatId, tema, mensajes });
-      setChatId(chat._id);
-      setChats((prev) => {
-        const resto = prev.filter((c) => c._id !== chat._id);
-        return [chat, ...resto];
-      });
-    } catch {
-      // El chat en pantalla sigue; el guardado se reintenta en el próximo mensaje.
-    }
+  const alGuardar = (chat) => {
+    setChatId(chat._id);
+    setChats((prev) => [chat, ...prev.filter((c) => c._id !== chat._id)]);
   };
 
   const abrir = (chat) => {
     setChatId(chat._id);
     setTema(chat.tema || 'limites');
     setIniciales(chat.mensajes ?? []);
+    setClave(chat._id);
   };
 
   const nuevo = () => {
     setChatId(null);
     setIniciales(null);
+    setClave(`nuevo-${Date.now()}`);
   };
 
   return (
@@ -244,12 +238,13 @@ export function PanelTutor({ rol }) {
         </div>
       )}
 
-      <ChatSection
-        key={chatId || 'nuevo'}
+      <ChatEstudiante
+        key={clave}
         tema={tema}
         unidadTitulo="Cálculo I"
         mensajesIniciales={iniciales}
-        onMensajes={rol === 'estudiante' ? persistir : undefined}
+        chatIdInicial={chatId}
+        onGuardado={rol === 'estudiante' ? alGuardar : undefined}
       />
     </section>
   );
