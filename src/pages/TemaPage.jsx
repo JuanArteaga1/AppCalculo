@@ -4,10 +4,12 @@ import AnimacionLimite from '../components/tema/AnimacionLimite';
 import ContenidoTema from '../components/tema/ContenidoTema';
 import PracticaLaboratorio from '../components/tema/PracticaLaboratorio';
 import { useTema } from '../hooks/useCurso';
+import { useSesion } from '../context/sesion';
 import { registrarVisita } from '../services/temasService';
+import { registrarTemaAbierto } from '../services/progresoService';
 import TemaVideo from '../components/TemaVideo';
 import SaberesRelacionados from '../components/SaberesRelacionados';
-import ChatSection from '../components/ChatSection';
+import { ChatEstudiante } from '../components/ChatSection';
 import AnimatedIcon from '../components/AnimatedIcon';
 import { FiBookOpen, FiVideo, FiBarChart2, FiMessageCircle } from 'react-icons/fi';
 import { HiOutlineLightBulb } from 'react-icons/hi';
@@ -18,11 +20,16 @@ const TEMAS_CON_ANIMACION = ['limites/1.1', 'limites/1.2'];
 export default function TemaPage() {
   const { unidadId, temaId } = useParams();
   const { tema, cargando } = useTema(unidadId, temaId);
+  const { usuario } = useSesion();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (tema) registrarVisita(unidadId, temaId);
-  }, [tema, unidadId, temaId]);
+    if (!tema) return;
+    registrarVisita(unidadId, temaId);
+    if (usuario?.rol === 'estudiante') {
+      registrarTemaAbierto({ modulo: unidadId, tema: temaId, titulo: tema.titulo });
+    }
+  }, [tema, unidadId, temaId, usuario]);
 
   // El contenido llega como HTML, así que sus enlaces internos no son <Link>:
   // se atrapan aquí para cambiar de tema sin recargar la página.
@@ -113,7 +120,7 @@ export default function TemaPage() {
             </div>
 
             <div id="seccion-videos">
-              <TemaVideo key={temaId} videos={tema.videos} sinAviso={tema.bloques.some((b) => b.tipo === 'video')} />
+              <TemaVideo key={temaId} videos={tema.videos} unidad={unidadId} sinAviso={tema.bloques.some((b) => b.tipo === 'video')} />
             </div>
 
             <div id="seccion-laboratorio" style={styles.graphWrap}>
@@ -134,7 +141,7 @@ export default function TemaPage() {
                   Resuelve dudas de este tema al instante, paso a paso y con la notación matemática bien escrita.
                 </p>
               </div>
-              <ChatSection tema={unidadId} unidadTitulo={tema.titulo} />
+              <ChatEstudiante tema={unidadId} unidadTitulo={tema.titulo} />
             </div>
           </div>
 

@@ -29,13 +29,6 @@ import NoEncontrado from './NoEncontrado';
 /** Nombres de los módulos para Evalúate y Usuarios, que aún usan datos de ejemplo. */
 const MODULOS = unidades.map(({ id, titulo, temas }) => ({ id, titulo, temas }));
 
-const TIPOS = [
-  ['Todos', 'Todo'],
-  ['Lección', 'Lecciones'],
-  ['Quiz', 'Quices'],
-  ['Examen', 'Exámenes'],
-];
-
 const SECCIONES = [
   ['panel', 'Panel', FiGrid, null],
   ['modulos', 'Módulos', FiFolder, MODULOS.length],
