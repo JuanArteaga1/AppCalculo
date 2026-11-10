@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ALUMNOS,
   ETIQUETA_ESTADO,
   EVALUACIONES,
   PREGUNTAS,
-  UNIDADES_PROGRESO,
 } from '../../data/mockEspacio';
+import { cursoLocal } from '../../services/temasService';
+import { obtenerProgreso } from '../../services/progresoService';
 
 /** Anillo de progreso: el trazo se calcula sobre la circunferencia r=37. */
 export function Anillo({ pct }) {
@@ -28,7 +29,46 @@ export function Anillo({ pct }) {
   );
 }
 
+function unidadesVacias() {
+  return cursoLocal().modulos.map((m) => ({
+    id: m.id,
+    nombre: m.titulo,
+    pct: 0,
+    temas: `0 de ${m.temas.length} temas`,
+    sigue: m.temas[0] ? `${m.temas[0].id} ${m.temas[0].titulo}` : 'Sin temas aún',
+  }));
+}
+
 export function PanelProgreso() {
+  const [datos, setDatos] = useState(() => ({
+    porModulo: unidadesVacias(),
+    ultimo: null,
+    notas: [],
+    promedio: 0,
+    pctGeneral: 0,
+    temasVisitados: 0,
+    totalTemas: 0,
+  }));
+
+  useEffect(() => {
+    let vigente = true;
+    obtenerProgreso().then((resumen) => {
+      if (!vigente) return;
+      setDatos({
+        ...resumen,
+        porModulo: resumen.porModulo?.length ? resumen.porModulo : unidadesVacias(),
+        notas: resumen.notas ?? [],
+        promedio: resumen.promedio ?? 0,
+        pctGeneral: resumen.pctGeneral ?? 0,
+      });
+    });
+    return () => {
+      vigente = false;
+    };
+  }, []);
+
+  const ultimo = datos.ultimo;
+
   return (
     <section className="panel">
       <div className="panel-cabeza">
@@ -36,24 +76,45 @@ export function PanelProgreso() {
         <p>Así vas en Cálculo I. Cada unidad avanza a tu ritmo.</p>
       </div>
 
+      <div className="fila-3">
+        <div className="tarjeta">
+          <span className="mini-label">Avance general</span>
+          <span className="mini-num">{datos.pctGeneral ?? 0} <small>%</small></span>
+        </div>
+        <div className="tarjeta">
+          <span className="mini-label">Temas abiertos</span>
+          <span className="mini-num">{datos.temasVisitados ?? 0} <small>/ {datos.totalTemas ?? 0}</small></span>
+        </div>
+        <div className="tarjeta">
+          <span className="mini-label">Promedio</span>
+          <span className="mini-num">{Number(datos.promedio || 0).toFixed(1)} <small>/ 5.0</small></span>
+        </div>
+      </div>
+
       <div className="tarjeta continuar">
         <div className="continuar-txt">
           <span className="mini-label">Continuar donde lo dejaste</span>
-          <b>1.7 · Límites al infinito</b>
-          <div className="pasos">
-            <i className="on" /><i className="on" /><i className="on" /><i />
-            <span>Paso 3 de 4</span>
-          </div>
+          {ultimo ? (
+            <>
+              <b>{ultimo.tema} · {ultimo.titulo}</b>
+              <span className="suave-txt">Primera visita y última visita quedan registradas con tu sesión.</span>
+            </>
+          ) : (
+            <>
+              <b>Todavía no abriste un tema</b>
+              <span className="suave-txt">Empieza por el primer tema de Límites. Tu avance se guarda al entrar.</span>
+            </>
+          )}
         </div>
-        <Link className="pnl-btn pnl-btn-primario" to="/calculo1/limites/1.4">
-          Continuar lección <span aria-hidden="true">→</span>
+        <Link className="pnl-btn pnl-btn-primario" to={ultimo?.ruta || '/calculo1/limites/1.1'}>
+          {ultimo ? 'Continuar lección' : 'Empezar'} <span aria-hidden="true">→</span>
         </Link>
       </div>
 
       <div className="fila-3">
-        {UNIDADES_PROGRESO.map((u) => (
-          <div key={u.nombre} className="tarjeta unidad-prog">
-            <Anillo pct={u.pct} />
+        {(datos.porModulo ?? []).map((u) => (
+          <div key={u.id || u.nombre} className="tarjeta unidad-prog">
+            <Anillo pct={u.pct ?? 0} />
             <span className="unidad-nombre">{u.nombre}</span>
             <span className="suave-txt">{u.temas}</span>
             <div className="unidad-sig">
@@ -63,23 +124,30 @@ export function PanelProgreso() {
           </div>
         ))}
       </div>
+
+      <div className="tarjeta">
+        <h2>Notas</h2>
+        {(datos.notas ?? []).length === 0 ? (
+          <p className="suave-txt">Aún no tienes notas. El promedio es 0.0 hasta que se califiquen evaluaciones.</p>
+        ) : (
+          <ul className="lista">
+            {datos.notas.map((n) => (
+              <li key={n.evaluacionId} className="item">
+                <span className="item-txt"><b>{n.titulo}</b></span>
+                <span className="nota-grande">{Number(n.nota).toFixed(1)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }
 
 /** Lista de talleres y quices del estudiante, con el detalle de cada uno. */
 export function PanelAprenderEstudiante() {
-  const [detalle, setDetalle] = useState(null);
-
-  if (detalle) {
-    const evaluacion = EVALUACIONES.find((e) => e.id === detalle);
-    return <DetalleEstudiante evaluacion={evaluacion} onVolver={() => setDetalle(null)} />;
-  }
-
   const porHacer = EVALUACIONES.filter((e) => e.alumno.estado === 'pendiente').length;
   const esperando = EVALUACIONES.filter((e) => e.alumno.estado === 'entregado').length;
-  const notas = EVALUACIONES.filter((e) => e.alumno.nota).map((e) => e.alumno.nota);
-  const promedio = notas.length ? (notas.reduce((a, b) => a + b, 0) / notas.length).toFixed(1) : '—';
 
   return (
     <section className="panel">
@@ -88,12 +156,17 @@ export function PanelAprenderEstudiante() {
         <p>Los talleres, quices y evaluaciones que tu maestro publicó para el curso.</p>
       </div>
 
+      <div className="aviso-caja">
+        Responder quices con nota está pausado hasta que esté el modelo de evaluaciones.
+        Mientras tanto puedes <Link to="/evaluate">practicar sin nota</Link>.
+      </div>
+
       <div className="fila-3">
         <div className="tarjeta"><span className="mini-label">Por hacer</span><span className="mini-num">{porHacer}</span></div>
         <div className="tarjeta"><span className="mini-label">Esperando nota</span><span className="mini-num">{esperando}</span></div>
         <div className="tarjeta">
           <span className="mini-label">Promedio</span>
-          <span className="mini-num">{promedio} <small>/ 5.0</small></span>
+          <span className="mini-num">0.0 <small>/ 5.0</small></span>
         </div>
       </div>
 
@@ -106,14 +179,10 @@ export function PanelAprenderEstudiante() {
               <span>{e.tipo} · {e.unidad} · entrega {e.vence}</span>
             </span>
             {e.alumno.nota && <span className="nota-grande">{e.alumno.nota.toFixed(1)}</span>}
-            <span className="estado" data-e={e.alumno.estado}>{ETIQUETA_ESTADO[e.alumno.estado]}</span>
-            <button
-              type="button"
-              className={`pnl-btn pnl-btn-chico ${e.alumno.estado === 'pendiente' ? 'pnl-btn-primario' : 'pnl-btn-secundario'}`}
-              onClick={() => setDetalle(e.id)}
-            >
-              {e.alumno.estado === 'pendiente' ? 'Hacer' : 'Ver'}
-            </button>
+            <span className="estado" data-e="pendiente">En pausa</span>
+            <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to="/evaluate">
+              Practicar
+            </Link>
           </li>
         ))}
       </ul>

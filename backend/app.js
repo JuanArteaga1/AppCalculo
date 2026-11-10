@@ -1,12 +1,14 @@
+import "./config/entorno.js";
 import express from "express";
-import 'dotenv/config.js';
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import routesUsuarios from "./routes/usuarios.js";
 import routesTemas from "./routes/temas.js";
+import routesProgreso from "./routes/progreso.js";
 import routesAdmin, { CARPETA_ARCHIVOS } from "./routes/admin.js";
 import visitaController from "./controllers/visitaController.js";
+import tutorController from "./controllers/tutorController.js";
 import { comprobarSecreto } from "./middlewares/sesion.js";
 import { registrarMongo, registrarPeticiones } from "./middlewares/registro.js";
 import { errorCliente, errorSistema } from "./lib/respuestas.js";
@@ -44,8 +46,10 @@ const limiteVisitas = rateLimit({
 
 app.use('/api/usuarios', routesUsuarios);
 app.use('/api/temas', routesTemas);
+app.use('/api/progreso', routesProgreso);
 app.use('/api/admin', routesAdmin);
 app.post('/api/visitas', limiteVisitas, visitaController.registrar);
+app.post('/api/tutor', limiteVisitas, tutorController.preguntar);
 app.use('/api/archivos', express.static(CARPETA_ARCHIVOS, {
     dotfiles: "deny",
     index: false,

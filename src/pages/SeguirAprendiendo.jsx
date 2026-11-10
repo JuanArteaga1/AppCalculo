@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FILTROS_TAREA, TAREAS } from '../data/mockTareas';
+import { useSesion } from '../context/sesion';
 
 /**
  * Página pública de práctica: la lista de talleres, quices y evaluaciones y,
@@ -7,6 +9,7 @@ import { FILTROS_TAREA, TAREAS } from '../data/mockTareas';
  * Maqueta estática: la nota se calcula en el navegador y no se guarda.
  */
 export default function SeguirAprendiendo() {
+  const { usuario } = useSesion();
   const [filtro, setFiltro] = useState('Todos');
   const [tareaId, setTareaId] = useState(null);
 
@@ -16,14 +19,33 @@ export default function SeguirAprendiendo() {
   }
 
   const lista = TAREAS.filter((t) => filtro === 'Todos' || t.tipo === filtro);
+  const volverEspacio = '/espacio/estudiante/progreso';
 
   return (
     <div className="pagina-publica">
       <div className="pagina-cabeza">
         <span className="eyebrow">Práctica</span>
         <h1>Evalúate</h1>
-        <p>Los talleres, quices y evaluaciones que dejaron los profesores. Entra a uno y resuélvelo paso a paso.</p>
+        <p>
+          Practica talleres, quices y evaluaciones paso a paso. Aquí no se guarda nota:
+          es para ensayar sin que cuente en el curso.
+        </p>
       </div>
+
+      {!usuario && (
+        <div className="aviso-caja" style={{ marginBottom: 22 }}>
+          ¿Quieres más?{' '}
+          <Link to={`/acceso?volver=${encodeURIComponent(volverEspacio)}`}>Inicia sesión</Link>
+          {' '}para ver tu progreso, guardar ejercicios y continuar en tu espacio de estudiante.
+        </div>
+      )}
+
+      {usuario?.rol === 'estudiante' && (
+        <div className="aviso-caja" style={{ marginBottom: 22 }}>
+          Esta práctica no cambia tu promedio.{' '}
+          <Link to={volverEspacio}>Ir a mi espacio</Link>
+        </div>
+      )}
 
       <div className="filtros">
         {FILTROS_TAREA.map(([valor, texto]) => (
@@ -131,7 +153,7 @@ function Ejercicio({ tarea, onSalir }) {
               {pct >= 60 ? '¡Buen trabajo!' : 'Casi. Vale la pena repasar'}
             </h1>
             <p className="suave-txt">
-              Acertaste {aciertos} de {tarea.preguntas.length} · nota {nota} / 5.0
+              Acertaste {aciertos} de {tarea.preguntas.length} · resultado de práctica {nota} / 5.0 (no se guarda)
             </p>
           </div>
           <span className="nota-grande" style={{ fontSize: '30px', marginLeft: 'auto' }}>{nota}</span>
