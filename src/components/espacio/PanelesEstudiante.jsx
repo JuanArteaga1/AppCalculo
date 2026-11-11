@@ -4,7 +4,6 @@ import {
   EVALUACIONES,
 } from '../../data/mockEspacio';
 import { api } from '../../services/api';
-import { useSesion } from '../../context/sesion';
 import QRCode from 'qrcode';
 import { cursoLocal } from '../../services/temasService';
 import { obtenerProgreso } from '../../services/progresoService';
@@ -326,7 +325,7 @@ export function PanelAprenderMaestro() {
         <div>
           <h2>Mis quices</h2>
           <p className="suave-txt">
-            Quices asociados a los módulos que tienes asignados.
+            Quices que has creado para el curso.
           </p>
         </div>
 
@@ -455,7 +454,6 @@ export function PanelAprenderMaestro() {
 
 function FormularioQuizMaestro({ evaluacion, onVolver }) {
   const moduloInicial = evaluacion?.modulo?.clave ?? '';
-  const { usuario } = useSesion();
 
   const [modulos, setModulos] = useState([]);
   const [modulo, setModulo] = useState(
@@ -499,22 +497,12 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
 
         const curso = await api('/temas');
 
-        const asignados = usuario?.modulosAsignados ?? [];
-        console.log('Usuario docente:', usuario);
-        console.log('Módulos recibidos:', curso.modulos);
-        console.log('Módulos asignados:', usuario?.modulosAsignados);
-
-        const disponibles = (curso.modulos ?? []).filter(
-          (m) => asignados.includes(String(m.id).trim())
-        );
-
-        console.log('Módulos disponibles:', disponibles);
-        console.log('Módulo inicial:', moduloInicial);
+        const todos = curso.modulos ?? [];
         if (!vigente) return;
 
-        setModulos(disponibles);
+        setModulos(todos);
 
-        setModulo(moduloInicial || disponibles[0]?.id || '');
+        setModulo(moduloInicial || todos[0]?.id || '');
 
         if (evaluacion?.id) {
           const datos = await api(
@@ -578,7 +566,7 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
     return () => {
       vigente = false;
     };
-  }, [usuario, evaluacion?.id, moduloInicial]);
+  }, [evaluacion?.id, moduloInicial]);
 
   useEffect(() => {
     if (!publicado || !evaluacionId) return undefined;
@@ -939,7 +927,7 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
 
         {modulos.length === 0 && (
           <p className="suave-txt">
-            No tienes módulos asignados. Solicita al administrador que te asigne uno.
+            No se pudieron cargar los módulos del curso. Intenta recargar la página.
           </p>
         )}
       </div>

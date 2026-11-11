@@ -504,7 +504,7 @@ class usuarioController {
                 "El enlace de invitación ya se usó o venció. Pídele otra al administrador."
             );
 
-            const { token } = req.params ?? {};
+            const { token } = req.body ?? {};
 
             if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) {
                 return enlaceInvalido();
