@@ -16,6 +16,7 @@ import bodyParser from "body-parser";
 import dbClient from "./config/dbClient.js";
 import cors from 'cors';
 import routesEvaluaciones from "./routes/evaluaciones.js";
+import routesEjerciciosGuardados from "./routes/ejerciciosGuardados.js";
 
 comprobarSecreto();
 registrarMongo();
@@ -48,6 +49,7 @@ const limiteVisitas = rateLimit({
 app.use('/api/usuarios', routesUsuarios);
 app.use('/api/temas', routesTemas);
 app.use('/api/progreso', routesProgreso);
+app.use('/api/ejercicios-guardados', routesEjerciciosGuardados);
 app.use('/api/admin', routesAdmin);
 app.use("/api/evaluaciones", routesEvaluaciones);
 app.post('/api/visitas', limiteVisitas, visitaController.registrar);
