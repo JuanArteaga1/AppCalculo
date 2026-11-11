@@ -219,78 +219,91 @@ async function buscarModulo(valor) {
     return Modulo.findOne({ clave: String(valor).trim() });
 }
 
+const MAXIMO_TEMAS = 50;
+
+const moduloInvalido = (res) => errorCliente(
+    res,
+    400,
+    "MODULO_NO_ENCONTRADO",
+    "Selecciona uno de los módulos del curso."
+);
+
+const temasRequeridos = (res) => errorCliente(
+    res,
+    400,
+    "TEMAS_REQUERIDOS",
+    "Selecciona al menos un tema del módulo."
+);
+
+const temaInvalido = (res) => errorCliente(
+    res,
+    400,
+    "TEMA_INVALIDO",
+    "Uno de los temas no existe o no pertenece al módulo seleccionado."
+);
+
 /**
- * IMPORTANTE: punto de integración con la asignación de módulos.
- *
- * El modelo usuarios.js que tenemos actualmente no contiene un campo de
- * asignaciones. Esta función espera que, cuando se implemente esa parte,
- * el usuario tenga un arreglo `modulosAsignados`.
- *
- * Cada elemento puede ser el ID del módulo, su clave o un objeto que tenga
- * `modulo`, `_id` o `clave`.
- *
- * Mientras esa asignación no exista, el acceso se deniega de forma segura.
+ * Busca los temas por número ("1.1") o por id, todos del módulo indicado.
+ * Devuelve sus ids, o null si alguno no existe o es de otro módulo.
+ * Todos los temas guardados están publicados: el borrador del administrador
+ * vive dentro de cada tema y nunca se lista aparte (BR-05).
  */
-function docenteTieneModulo(usuario, modulo) {
-    const asignaciones = usuario?.modulosAsignados;
+async function buscarTemasDelModulo(valores, modulo) {
+    const unicos = [...new Set(valores.map((valor) => String(valor).trim()))];
+    const ids = unicos.filter((valor) => /^[a-fA-F0-9]{24}$/.test(valor));
+    const numeros = unicos.filter((valor) => !ids.includes(valor));
 
-    if (!Array.isArray(asignaciones)) {
-        return false;
+    const encontrados = await Tema.find({
+        modulo: modulo.clave,
+        $or: [{ _id: { $in: ids } }, { numero: { $in: numeros } }]
+    }).select("_id numero orden").sort({ orden: 1 }).lean();
+
+    const reconocidos = new Set(
+        encontrados.flatMap((tema) => [String(tema._id), tema.numero])
+    );
+
+    if (unicos.some((valor) => !reconocidos.has(valor))) {
+        return null;
     }
 
-    return asignaciones.some((asignacion) => {
-        const valor = asignacion?.modulo
-            ?? asignacion?._id
-            ?? asignacion?.clave
-            ?? asignacion;
-
-        return (
-            String(valor) === String(modulo._id) ||
-            String(valor) === String(modulo.clave)
-        );
-    });
+    return encontrados.map((tema) => tema._id);
 }
 
-async function comprobarModuloDocente(req, res, modulo) {
-    if (!docenteTieneModulo(req.usuario, modulo)) {
-        errorCliente(
-            res,
-            403,
-            "MODULO_NO_ASIGNADO",
-            "No tienes asignado este módulo."
-        );
-
-        return false;
-    }
-
-    return true;
+/** La lista de temas recibida: un arreglo no vacío de textos (BR-04). */
+function temasRecibidosValidos(valores) {
+    return Array.isArray(valores)
+        && valores.length > 0
+        && valores.length <= MAXIMO_TEMAS
+        && valores.every((valor) => typeof valor === "string" && valor.trim());
 }
 
-async function buscarTemaDelModulo(temaIdentificador, modulo) {
-    if (!temaIdentificador) {
-        return { tema: null, valido: true };
+/** Temas listos para responder: número y título, en el orden del curso. */
+function temasParaMostrar(temas) {
+    return (temas ?? [])
+        .filter((tema) => tema && tema.numero)
+        .map((tema) => ({ id: tema.numero, numero: tema.numero, titulo: tema.titulo }));
+}
+
+/**
+ * Quiz de otro docente: 403 (CA-10). Inexistente: 404.
+ * Lo usan las rutas que guardan; las de consulta siguen con buscarQuizDocente.
+ */
+async function buscarQuizParaGuardar(req, res) {
+    const quiz = esIdValido(req.params.id)
+        ? await Evaluacion.findById(req.params.id)
+        : null;
+
+    if (!quiz) {
+        errorNoEncontrado(res);
+        return null;
     }
 
-    const valor = String(temaIdentificador).trim();
-    let tema = null;
-
-    // Si recibimos un ObjectId, buscamos el tema por su ID.
-    if (/^[a-fA-F0-9]{24}$/.test(valor)) {
-        tema = await Tema.findById(valor);
-    } else {
-        // Si recibimos un código como "1.1", buscamos por número y módulo.
-        tema = await Tema.findOne({
-            numero: valor,
-            modulo: modulo.clave
-        });
+    if (String(quiz.docente) !== String(req.usuario._id)) {
+        errorCliente(res, 403, "QUIZ_AJENO", "Este quiz es de otro docente.");
+        return null;
     }
 
-    // Comprobamos que el tema realmente pertenezca al módulo seleccionado.
-    if (!tema || String(tema.modulo) !== String(modulo.clave)) {
-        return { tema: null, valido: false };
-    }
-
-    return { tema, valido: true };
+    return quiz;
 }
 
 async function buscarQuizDocente(id, docenteId) {
@@ -316,7 +329,7 @@ function datosQuizDocente(quiz) {
         id: quiz._id,
         titulo: quiz.titulo,
         modulo: quiz.modulo,
-        tema: quiz.tema,
+        temas: quiz.temas ?? [],
         fechaLimite: quiz.fechaLimite,
         preguntas: quiz.preguntas,
         estado: quiz.estado,
@@ -336,7 +349,7 @@ function datosQuizEstudiante(quiz) {
         id: quiz._id,
         titulo: quiz.titulo,
         modulo: quiz.modulo,
-        tema: quiz.tema,
+        temas: temasParaMostrar(quiz.temas),
         fechaLimite: quiz.fechaLimite,
         preguntas: quiz.preguntas.map((pregunta) => ({
             id: pregunta._id,
@@ -353,7 +366,7 @@ class evaluacionController {
             const {
                 titulo,
                 modulo: moduloValor,
-                tema,
+                temas,
                 preguntas,
                 fechaLimite
             } = req.body;
@@ -370,27 +383,17 @@ class evaluacionController {
             const modulo = await buscarModulo(moduloValor);
 
             if (!modulo) {
-                return errorCliente(
-                    res,
-                    404,
-                    "MODULO_NO_ENCONTRADO",
-                    "El módulo indicado no existe."
-                );
+                return moduloInvalido(res);
             }
 
-            if (!(await comprobarModuloDocente(req, res, modulo))) {
-                return;
+            if (!temasRecibidosValidos(temas)) {
+                return temasRequeridos(res);
             }
 
-            const resultadoTema = await buscarTemaDelModulo(tema, modulo);
+            const temasDelModulo = await buscarTemasDelModulo(temas, modulo);
 
-            if (!resultadoTema.valido) {
-                return errorCliente(
-                    res,
-                    400,
-                    "TEMA_INVALIDO",
-                    "El tema no existe o no pertenece al módulo seleccionado."
-                );
+            if (!temasDelModulo) {
+                return temaInvalido(res);
             }
 
             let preguntasPreparadas;
@@ -422,7 +425,7 @@ class evaluacionController {
                 titulo: titulo.trim(),
                 docente: req.usuario._id,
                 modulo: modulo._id,
-                tema: resultadoTema.tema?._id ?? null,
+                temas: temasDelModulo,
                 preguntas: preguntasPreparadas,
                 fechaLimite: fechaLimitePreparada,
                 estado: "borrador"
@@ -444,7 +447,7 @@ class evaluacionController {
                 docente: req.usuario._id
             })
                 .populate("modulo", "clave titulo")
-                .populate("tema", "numero titulo")
+                .populate("temas", "numero titulo")
                 .sort({ createdAt: -1 })
                 .lean();
 
@@ -453,7 +456,7 @@ class evaluacionController {
                     id: quiz._id,
                     titulo: quiz.titulo,
                     modulo: quiz.modulo,
-                    tema: quiz.tema,
+                    temas: temasParaMostrar(quiz.temas),
                     fechaLimite: quiz.fechaLimite,
                     estado: quiz.estado,
                     habilitado: quiz.habilitado,
@@ -481,20 +484,12 @@ class evaluacionController {
             return errorNoEncontrado(res);
         }
 
-        const tema = quiz.tema
-            ? await Tema.findById(quiz.tema).select("numero titulo").lean()
-            : null;
+        await quiz.populate("temas", "numero titulo");
 
         return res.json({
             evaluacion: {
                 ...datosQuizDocente(quiz),
-                tema: tema
-                    ? {
-                        id: tema.numero,
-                        numero: tema.numero,
-                        titulo: tema.titulo
-                    }
-                    : null
+                temas: temasParaMostrar(quiz.temas)
             }
         });
     } catch (error) {
@@ -508,13 +503,10 @@ class evaluacionController {
      */
     async actualizar(req, res) {
         try {
-            const quiz = await buscarQuizDocente(
-                req.params.id,
-                req.usuario._id
-            );
+            const quiz = await buscarQuizParaGuardar(req, res);
 
             if (!quiz) {
-                return errorNoEncontrado(res);
+                return;
             }
 
             const campos = Object.keys(req.body ?? {});
@@ -593,53 +585,46 @@ class evaluacionController {
                 const modulo = await buscarModulo(req.body.modulo);
 
                 if (!modulo) {
-                    return errorCliente(
-                        res,
-                        404,
-                        "MODULO_NO_ENCONTRADO",
-                        "El módulo indicado no existe."
-                    );
+                    return moduloInvalido(res);
                 }
 
-                if (!(await comprobarModuloDocente(req, res, modulo))) {
-                    return;
+                // Al cambiar de módulo, los temas anteriores dejan de valer.
+                if (
+                    String(modulo._id) !== String(quiz.modulo) &&
+                    req.body.temas === undefined
+                ) {
+                    return temasRequeridos(res);
                 }
 
                 quiz.modulo = modulo._id;
-
-                // Si se cambia de módulo, el tema anterior deja de ser válido.
-                if (req.body.tema === undefined) {
-                    quiz.tema = null;
-                }
             }
 
             const moduloActual = await Modulo.findById(quiz.modulo);
 
             if (!moduloActual) {
-                return errorCliente(
-                    res,
-                    404,
-                    "MODULO_NO_ENCONTRADO",
-                    "El módulo del quiz ya no existe."
-                );
+                return moduloInvalido(res);
             }
 
-            if (req.body.tema !== undefined) {
-                const resultadoTema = await buscarTemaDelModulo(
-                    req.body.tema,
+            if (req.body.temas !== undefined) {
+                if (!temasRecibidosValidos(req.body.temas)) {
+                    return temasRequeridos(res);
+                }
+
+                const temasDelModulo = await buscarTemasDelModulo(
+                    req.body.temas,
                     moduloActual
                 );
 
-                if (!resultadoTema.valido) {
-                    return errorCliente(
-                        res,
-                        400,
-                        "TEMA_INVALIDO",
-                        "El tema no existe o no pertenece al módulo seleccionado."
-                    );
+                if (!temasDelModulo) {
+                    return temaInvalido(res);
                 }
 
-                quiz.tema = resultadoTema.tema?._id ?? null;
+                quiz.temas = temasDelModulo;
+            }
+
+            // Un borrador viejo, sin temas, debe elegirlos para guardarse (CA-08).
+            if (!quiz.temas?.length) {
+                return temasRequeridos(res);
             }
 
             if (req.body.preguntas !== undefined) {
@@ -688,13 +673,10 @@ class evaluacionController {
     /** Publicar un borrador después de validar preguntas y fecha límite. */
     async publicar(req, res) {
         try {
-            const quiz = await buscarQuizDocente(
-                req.params.id,
-                req.usuario._id
-            );
+            const quiz = await buscarQuizParaGuardar(req, res);
 
             if (!quiz) {
-                return errorNoEncontrado(res);
+                return;
             }
 
             if (quiz.estado !== "borrador") {
@@ -709,32 +691,21 @@ class evaluacionController {
             const modulo = await Modulo.findById(quiz.modulo);
 
             if (!modulo) {
-                return errorCliente(
-                    res,
-                    404,
-                    "MODULO_NO_ENCONTRADO",
-                    "El módulo del quiz ya no existe."
-                );
+                return moduloInvalido(res);
             }
 
-            if (!(await comprobarModuloDocente(req, res, modulo))) {
-                return;
+            if (!quiz.temas?.length) {
+                return temasRequeridos(res);
             }
 
-            if (quiz.tema) {
-                const resultadoTema = await buscarTemaDelModulo(
-                    quiz.tema,
-                    modulo
-                );
+            // Los temas guardados deben seguir siendo del módulo.
+            const vigentes = await buscarTemasDelModulo(
+                quiz.temas.map(String),
+                modulo
+            );
 
-                if (!resultadoTema.valido) {
-                    return errorCliente(
-                        res,
-                        400,
-                        "TEMA_INVALIDO",
-                        "El tema asociado ya no pertenece al módulo del quiz."
-                    );
-                }
+            if (!vigentes || vigentes.length !== quiz.temas.length) {
+                return temaInvalido(res);
             }
 
             try {
@@ -869,7 +840,7 @@ class evaluacionController {
             const quices = await Evaluacion.find()
                 .populate("docente", "nombre correo")
                 .populate("modulo", "clave titulo")
-                .populate("tema", "numero titulo")
+                .populate("temas", "numero titulo")
                 .sort({ createdAt: -1 })
                 .lean();
 
@@ -879,7 +850,7 @@ class evaluacionController {
                     titulo: quiz.titulo,
                     docente: quiz.docente,
                     modulo: quiz.modulo,
-                    tema: quiz.tema,
+                    temas: temasParaMostrar(quiz.temas),
                     fechaLimite: quiz.fechaLimite,
                     estado: quiz.estado,
                     habilitado: quiz.habilitado,
@@ -964,7 +935,9 @@ class evaluacionController {
                 estado: "publicado",
                 habilitado: true,
                 fechaLimite: { $gt: new Date() }
-            });
+            })
+                .populate("modulo", "clave titulo")
+                .populate("temas", "numero titulo");
 
             if (!quiz) {
                 return errorNoEncontrado(res);

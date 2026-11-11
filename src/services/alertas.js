@@ -41,4 +41,20 @@ export const alertaDeshacer = (titulo, descripcion, deshacer) => {
   return id;
 };
 
+/** Error de carga con un botón para volver a intentarlo. */
+export const alertaReintentar = (titulo, error, reintentar) => {
+  const id = sileo.error({
+    ...opciones(titulo, error?.message, DURACION.error),
+    button: {
+      title: 'Reintentar',
+      onClick: () => {
+        sileo.dismiss(id);
+        reintentar();
+      },
+    },
+  });
+
+  return id;
+};
+
 export const cerrarAlerta = (id) => sileo.dismiss(id);

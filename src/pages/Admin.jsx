@@ -880,11 +880,11 @@ function VistaCreacion({ id }) {
           </div>
 
           <div>
-            <dt>Tema</dt>
+            <dt>Temas</dt>
             <dd>
-              {quiz.tema
-                ? `${quiz.tema.numero} ${quiz.tema.titulo}`
-                : 'Sin tema específico'}
+              {quiz.temas?.length
+                ? quiz.temas.map((t) => `${t.numero} ${t.titulo}`).join(', ')
+                : 'Sin tema'}
             </dd>
           </div>
 
@@ -992,9 +992,51 @@ function VistaRecursos() {
 
 function VistaUsuarios() {
   const [busqueda, setBusqueda] = useState('');
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [correo, setCorreo] = useState('');
+  const [invitando, setInvitando] = useState(false);
+  const [mensaje, setMensaje] = useState('');
+  const [error, setError] = useState('');
+  const [resultado, setResultado] = useState(null);
+
   const texto = sinAcentos(busqueda.trim());
   const filas = DOCENTES.filter((d) => sinAcentos(`${d.nombre} ${d.correo}`).includes(texto));
   const activos = DOCENTES.filter((d) => d.estado === 'activo').length;
+
+  const cerrarModal = () => {
+    setMostrarModal(false);
+    setCorreo('');
+    setMensaje('');
+    setError('');
+    setResultado(null);
+  };
+
+  const invitar = async () => {
+    setError('');
+    setMensaje('');
+    setResultado(null);
+
+    if (!correo.trim()) {
+      setError('Escribe el correo del docente.');
+      return;
+    }
+
+    try {
+      setInvitando(true);
+
+      const respuesta = await api('/usuarios/invitar-docente', {
+        metodo: 'POST',
+        cuerpo: { correo: correo.trim() }
+      });
+
+      setResultado(respuesta);
+      setMensaje(respuesta.mensaje);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setInvitando(false);
+    }
+  };
 
   return (
     <>
@@ -1003,10 +1045,91 @@ function VistaUsuarios() {
           <h1>Usuarios</h1>
           <p>Docentes de la plataforma: {activos} activos de {DOCENTES.length}.</p>
         </div>
-        <button type="button" className="pnl-btn pnl-btn-primario" disabled title="Disponible cuando esta pantalla se conecte al backend">
+        <button type="button" className="pnl-btn pnl-btn-primario" onClick={() => setMostrarModal(true)}>
           <FiPlus />Invitar docente
         </button>
       </div>
+
+      {mostrarModal && (
+        <div className="modal-fondo" role="dialog" aria-modal="true" aria-labelledby="invitar-titulo">
+          <div className="modal-caja tarjeta">
+            <div className="cabeza-fila">
+              <h2 id="invitar-titulo">Invitar docente</h2>
+              <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={cerrarModal}>Cerrar</button>
+            </div>
+
+            {error && (
+              <div className="aviso-caja" role="alert">
+                {error}
+              </div>
+            )}
+
+            {mensaje && (
+              <div className="aviso-caja" role="status">
+                {mensaje}
+              </div>
+            )}
+
+            {!resultado && (
+              <>
+                <label htmlFor="invitar-correo">
+                  <strong>Correo institucional</strong>
+                </label>
+                <input
+                  id="invitar-correo"
+                  type="email"
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
+                  placeholder="docente@uniautonoma.edu.co"
+                  disabled={invitando}
+                />
+
+                <button
+                  type="button"
+                  className="pnl-btn pnl-btn-primario"
+                  onClick={invitar}
+                  disabled={invitando}
+                >
+                  {invitando ? 'Invitando...' : 'Enviar invitación'}
+                </button>
+              </>
+            )}
+
+            {resultado?.enlace && (
+              <div>
+                <label htmlFor="invitar-enlace">
+                  <strong>Enlace de respaldo</strong>
+                </label>
+                <p className="suave-txt">
+                  Copia y envía este enlace si el correo no llegó.
+                </p>
+                <div className="fila-botones">
+                  <input
+                    id="invitar-enlace"
+                    type="text"
+                    value={resultado.enlace}
+                    readOnly
+                  />
+                  <button
+                    type="button"
+                    className="pnl-btn pnl-btn-secundario"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(resultado.enlace);
+                        setMensaje('Enlace copiado.');
+                      } catch {
+                        setError('No se pudo copiar el enlace.');
+                      }
+                    }}
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="tarjeta">
         <label className="pregunta-caja" htmlFor="buscar-usuario">

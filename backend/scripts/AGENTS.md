@@ -6,10 +6,11 @@
 | `migrarTemas.js` | Pasa `src/data/temas.js` a MongoDB; solo crea lo que falta |
 | `crearAdmin.js` | Crea el administrador inicial desde `ADMIN_*` |
 | `crearUsuariosPrueba.js` | Una cuenta activa por rol; credenciales en `../usuarios-prueba.json`, ignorado por git; `--borrar` las quita |
+| `probarCorreo.js` | Envía una invitación de muestra para probar la cuenta SMTP del `.env` |
 
 ## Rutas y relaciones
 - Importa de: `schemas/`, `lib/`, `src/data/`, `src/lib/`.
-- `npm run migrar-temas` y `npm run crear-usuarios-prueba` desde `backend/`; `node scripts/crearAdmin.js` igual.
+- `npm run migrar-temas`, `npm run crear-usuarios-prueba` y `npm run probar-correo -- <correo>` desde `backend/`; `node scripts/crearAdmin.js` igual.
 
 ## No hacer
 - Usar `--forzar` sin confirmación: borra lo publicado por el administrador.

@@ -28,7 +28,7 @@ export function comprobarSecreto() {
 }
 
 export function abrirSesion(res, usuario) {
-    const token = jwt.sign({ id: String(usuario._id) }, secreto(), {
+    const token = jwt.sign({ id: String(usuario._id), v: usuario.versionSesion ?? 0 }, secreto(), {
         expiresIn: Math.floor(DURACION_MS / 1000),
     });
 
@@ -37,6 +37,14 @@ export function abrirSesion(res, usuario) {
 
 export function cerrarSesion(res) {
     res.clearCookie(NOMBRE_COOKIE, opcionesCookie());
+}
+
+/**
+ * Cierra todas las sesiones abiertas del usuario (BR-08). Se llama al cambiar
+ * o restablecer la contraseña; quien la cambió vuelve a abrir la suya.
+ */
+export async function invalidarSesiones(usuarioId) {
+    return Usuario.findByIdAndUpdate(usuarioId, { $inc: { versionSesion: 1 } }, { new: true });
 }
 
 /**
@@ -52,10 +60,11 @@ export async function requiereSesion(req, res, next) {
             return errorCliente(res, 401, "SESION_REQUERIDA", "Inicia sesión para continuar.");
         }
 
-        const { id } = jwt.verify(token, secreto());
+        const { id, v = 0 } = jwt.verify(token, secreto());
         const usuario = await Usuario.findById(id);
 
-        if (!usuario || usuario.estado !== "activo") {
+        // Una versión distinta = la contraseña cambió después de abrir esta sesión.
+        if (!usuario || usuario.estado !== "activo" || (usuario.versionSesion ?? 0) !== v) {
             cerrarSesion(res);
             return errorCliente(res, 401, "SESION_INVALIDA", "Tu sesión ya no es válida.");
         }

@@ -10,7 +10,9 @@
 | `BibliotecaMultimedia.jsx` | Videoteca |
 | `Laboratorio.jsx` | Laboratorio de graficación, con su propio marco |
 | `SeguirAprendiendo.jsx` | Evalúate público; maqueta sin guardar |
-| `Acceso.jsx` | Ingreso real; recuperar y registro son maqueta |
+| `Acceso.jsx` | Ingreso y registro del estudiante reales; recuperar es maqueta |
+| `Confirmar.jsx` | Confirma el correo del estudiante desde el enlace (`#token`) y permite pedir otro |
+| `Registro.jsx` | Registro del docente desde enlace de invitación |
 | `Espacio.jsx` | Marco de estudiante y maestro |
 | `Admin.jsx` | Panel completo: secciones, módulos y Evalúate |
 | `NoEncontrado.jsx` | 404 reutilizable con destino configurable |
