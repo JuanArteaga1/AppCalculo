@@ -317,6 +317,49 @@ async function buscarQuizDocente(id, docenteId) {
     });
 }
 
+// Si vence mientras responde, se acepta lo enviado en los 5 minutos siguientes
+// a quien lo abrió antes de vencer (spec-estudiante BR-03).
+const MARGEN_VENCIDO_MS = 5 * 60 * 1000;
+
+/** Un registro con nota ya se respondió; sin nota, solo se abrió. */
+const respondido = (registro) => registro?.nota !== null && registro?.nota !== undefined;
+
+function puedeResponder(quiz, abiertoEn) {
+    const ahora = Date.now();
+    const limite = new Date(quiz.fechaLimite).getTime();
+
+    if (ahora < limite) return true;
+
+    return Boolean(abiertoEn)
+        && new Date(abiertoEn).getTime() < limite
+        && ahora <= limite + MARGEN_VENCIDO_MS;
+}
+
+const quizNoDisponible = (res, quiz) => errorCliente(
+    res,
+    403,
+    quiz.habilitado ? "QUIZ_VENCIDO" : "QUIZ_NO_DISPONIBLE",
+    quiz.habilitado
+        ? "Este quiz ya venció y no recibe respuestas."
+        : "Este quiz no está disponible."
+);
+
+/** Registra que el estudiante abrió el quiz; dos aperturas a la vez dejan un solo registro. */
+async function registrarApertura(quizId, estudianteId) {
+    const filtro = { evaluacion: quizId, estudiante: estudianteId };
+
+    try {
+        return await RespuestasQuiz.findOneAndUpdate(
+            filtro,
+            { $setOnInsert: { abiertoEn: new Date() } },
+            { upsert: true, new: true }
+        ).lean();
+    } catch (error) {
+        if (error?.code === 11000) return RespuestasQuiz.findOne(filtro).lean();
+        throw error;
+    }
+}
+
 function quizVencido(quiz) {
     return Boolean(
         quiz.fechaLimite &&
@@ -757,7 +800,8 @@ class evaluacionController {
             }
 
             const respuestas = await RespuestasQuiz.exists({
-                evaluacion: quiz._id
+                evaluacion: quiz._id,
+                nota: { $ne: null }
             });
 
             if (respuestas) {
@@ -770,6 +814,8 @@ class evaluacionController {
             }
 
             await Evaluacion.deleteOne({ _id: quiz._id });
+            // Quita también los registros de quienes solo lo abrieron.
+            await RespuestasQuiz.deleteMany({ evaluacion: quiz._id });
 
             return res.json({
                 mensaje: "Quiz eliminado correctamente."
@@ -792,7 +838,8 @@ class evaluacionController {
             }
 
             const respuestas = await RespuestasQuiz.find({
-                evaluacion: quiz._id
+                evaluacion: quiz._id,
+                nota: { $ne: null }
             })
                 .populate("estudiante", "nombre correo")
                 .sort({ fechaRespuesta: 1 })
@@ -923,6 +970,54 @@ class evaluacionController {
         }
     }
 
+    /**
+     * Quices que el estudiante abrió alguna vez por enlace o QR, con su estado:
+     * pendiente, respondido (con nota), vencido o no disponible (RF-03, CA-02).
+     */
+    async listarEstudiante(req, res) {
+        try {
+            const registros = await RespuestasQuiz.find({ estudiante: req.usuario._id })
+                .sort({ updatedAt: -1 })
+                .populate({
+                    path: "evaluacion",
+                    select: "titulo modulo temas fechaLimite estado habilitado",
+                    populate: [
+                        { path: "modulo", select: "clave titulo" },
+                        { path: "temas", select: "numero titulo" }
+                    ]
+                })
+                .lean();
+
+            const evaluaciones = registros
+                .filter((registro) => registro.evaluacion?.estado === "publicado")
+                .map((registro) => {
+                    const quiz = registro.evaluacion;
+                    const hecho = respondido(registro);
+                    let estado = "pendiente";
+
+                    if (hecho) estado = "respondido";
+                    else if (!quiz.habilitado) estado = "no-disponible";
+                    else if (!puedeResponder(quiz, registro.abiertoEn)) estado = "vencido";
+
+                    return {
+                        id: quiz._id,
+                        titulo: quiz.titulo,
+                        modulo: quiz.modulo,
+                        temas: temasParaMostrar(quiz.temas),
+                        fechaLimite: quiz.fechaLimite,
+                        vencido: quizVencido(quiz),
+                        estado,
+                        nota: hecho ? registro.nota : null,
+                        fechaRespuesta: hecho ? registro.fechaRespuesta : null
+                    };
+                });
+
+            return res.json({ evaluaciones });
+        } catch (error) {
+            return responderError(res, error, "Listar quices del estudiante");
+        }
+    }
+
     /** Obtener un quiz publicado para que lo responda un estudiante. */
     async verParaEstudiante(req, res) {
         try {
@@ -932,9 +1027,7 @@ class evaluacionController {
 
             const quiz = await Evaluacion.findOne({
                 _id: req.params.id,
-                estado: "publicado",
-                habilitado: true,
-                fechaLimite: { $gt: new Date() }
+                estado: "publicado"
             })
                 .populate("modulo", "clave titulo")
                 .populate("temas", "numero titulo");
@@ -943,12 +1036,12 @@ class evaluacionController {
                 return errorNoEncontrado(res);
             }
 
-            const respuestaExistente = await RespuestasQuiz.exists({
+            const registro = await RespuestasQuiz.findOne({
                 evaluacion: quiz._id,
                 estudiante: req.usuario._id
-            });
+            }).lean();
 
-            if (respuestaExistente) {
+            if (respondido(registro)) {
                 return errorCliente(
                     res,
                     409,
@@ -957,8 +1050,18 @@ class evaluacionController {
                 );
             }
 
+            if (!quiz.habilitado || !puedeResponder(quiz, registro?.abiertoEn)) {
+                return quizNoDisponible(res, quiz);
+            }
+
+            // Abrirlo lo agrega a la lista del estudiante (CA-06).
+            const abierto = registro ?? await registrarApertura(quiz._id, req.usuario._id);
+
             return res.json({
-                evaluacion: datosQuizEstudiante(quiz)
+                evaluacion: {
+                    ...datosQuizEstudiante(quiz),
+                    abiertoEn: abierto?.abiertoEn ?? null
+                }
             });
         } catch (error) {
             return responderError(res, error, "Mostrar quiz al estudiante");
@@ -974,21 +1077,19 @@ class evaluacionController {
 
             const quiz = await Evaluacion.findOne({
                 _id: req.params.id,
-                estado: "publicado",
-                habilitado: true,
-                fechaLimite: { $gt: new Date() }
+                estado: "publicado"
             });
 
             if (!quiz) {
                 return errorNoEncontrado(res);
             }
 
-            const respuestaExistente = await RespuestasQuiz.exists({
+            const registro = await RespuestasQuiz.findOne({
                 evaluacion: quiz._id,
                 estudiante: req.usuario._id
-            });
+            }).lean();
 
-            if (respuestaExistente) {
+            if (respondido(registro)) {
                 return errorCliente(
                     res,
                     409,
@@ -997,7 +1098,19 @@ class evaluacionController {
                 );
             }
 
-            const respuestasRecibidas = req.body.respuestas;
+            // BR-03: vencido, solo dentro de los 5 minutos y si lo abrió antes.
+            if (!quiz.habilitado || !puedeResponder(quiz, registro?.abiertoEn)) {
+                return errorCliente(
+                    res,
+                    403,
+                    quiz.habilitado ? "QUIZ_VENCIDO" : "QUIZ_NO_DISPONIBLE",
+                    quiz.habilitado
+                        ? "El quiz venció y pasaron los 5 minutos de margen: ya no recibe respuestas."
+                        : "Este quiz no está disponible."
+                );
+            }
+
+            const respuestasRecibidas = req.body?.respuestas;
 
             if (
                 !Array.isArray(respuestasRecibidas) ||
@@ -1070,13 +1183,25 @@ class evaluacionController {
                 1 + 4 * (aciertos / quiz.preguntas.length)
             ).toFixed(1));
 
-            const nuevaRespuesta = await RespuestasQuiz.create({
-                evaluacion: quiz._id,
-                estudiante: req.usuario._id,
-                respuestas: respuestasGuardadas,
-                aciertos,
-                nota
-            });
+            const ahora = new Date();
+            let nuevaRespuesta;
+
+            try {
+                // Solo guarda si aún no tiene nota: dos envíos a la vez dejan uno.
+                nuevaRespuesta = await RespuestasQuiz.findOneAndUpdate(
+                    { evaluacion: quiz._id, estudiante: req.usuario._id, nota: null },
+                    {
+                        $set: { respuestas: respuestasGuardadas, aciertos, nota, fechaRespuesta: ahora },
+                        $setOnInsert: { abiertoEn: ahora }
+                    },
+                    { upsert: true, new: true }
+                );
+            } catch (error) {
+                if (error?.code === 11000) {
+                    return errorCliente(res, 409, "QUIZ_YA_RESPONDIDO", "Ya respondiste este quiz.");
+                }
+                throw error;
+            }
 
             return res.status(201).json({
                 mensaje: "Respuestas enviadas correctamente.",
@@ -1117,7 +1242,7 @@ class evaluacionController {
                 estudiante: req.usuario._id
             }).lean();
 
-            if (!respuesta) {
+            if (!respondido(respuesta)) {
                 return errorCliente(
                     res,
                     404,

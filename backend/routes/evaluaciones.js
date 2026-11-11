@@ -29,6 +29,7 @@ docentes.get("/:id/notas", evaluacionController.notas);
 // Rutas exclusivas para estudiantes.
 estudiantes.use(requiereRol("estudiante"));
 
+estudiantes.get("/", evaluacionController.listarEstudiante);
 estudiantes.get("/:id", evaluacionController.verParaEstudiante);
 estudiantes.post("/:id/respuestas", evaluacionController.responder);
 estudiantes.get("/:id/resultado", evaluacionController.resultadoEstudiante);

@@ -1,259 +1,278 @@
-
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { PreguntasQuiz } from '../components/espacio/EstructuraQuiz';
+import { alerta, alertaError } from '../services/alertas';
 import { api } from '../services/api';
 
-function QuizCompartido() {
+const VOLVER = '/espacio/estudiante/aprender';
+
+const fechaLarga = (fecha) =>
+  fecha
+    ? new Intl.DateTimeFormat('es-CO', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Bogota' }).format(new Date(fecha))
+    : 'Sin fecha';
+
+// Lo marcado se guarda en el navegador por si se cierra la pestaña (spec-estudiante BR-02, CA-10).
+const claveGuardado = (id) => `educalc-quiz-${id}`;
+
+function leerGuardado(id) {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(claveGuardado(id)) ?? '{}');
+    return guardado && typeof guardado === 'object' ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+
+function guardar(id, respuestas) {
+  try {
+    localStorage.setItem(claveGuardado(id), JSON.stringify(respuestas));
+  } catch {
+    // Sin almacenamiento (modo privado): se sigue respondiendo, solo no se conserva.
+  }
+}
+
+function olvidar(id) {
+  try {
+    localStorage.removeItem(claveGuardado(id));
+  } catch {
+    // Nada que borrar.
+  }
+}
+
+/**
+ * Responder un quiz desde el enlace o el QR (spec-estudiante tarea D):
+ * una sola vez, con todas las preguntas, y las correctas al vencer.
+ */
+export default function QuizCompartido() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
-  const [evaluacion, setEvaluacion] = useState(null);
-  const [respuestas, setRespuestas] = useState({});
+  const [vista, setVista] = useState('cargando');
+  const [quiz, setQuiz] = useState(null);
   const [resultado, setResultado] = useState(null);
-
-  const [cargando, setCargando] = useState(true);
+  const [motivo, setMotivo] = useState('');
+  const [respuestas, setRespuestas] = useState(() => leerGuardado(id));
+  const [faltantes, setFaltantes] = useState([]);
   const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState('');
-  const [mensaje, setMensaje] = useState('');
 
   useEffect(() => {
-    const cargarQuiz = async () => {
+    let vigente = true;
+
+    async function cargar() {
       try {
-        setCargando(true);
-        setError('');
+        const datos = await api(`/evaluaciones/estudiante/${id}`);
+        if (!vigente) return;
+        setQuiz(datos.evaluacion);
+        setVista('responder');
+      } catch (error) {
+        if (!vigente) return;
 
-        const respuesta = await api(
-          `/evaluaciones/estudiante/${id}`
-        );
+        // Ya respondido: se muestra su resultado.
+        if (error.codigo === 'QUIZ_YA_RESPONDIDO') {
+          try {
+            const datos = await api(`/evaluaciones/estudiante/${id}/resultado`);
+            if (!vigente) return;
+            setQuiz(datos.evaluacion);
+            setResultado(datos.resultado);
+            setVista('resultado');
+            return;
+          } catch (otro) {
+            if (!vigente) return;
+            setMotivo(otro.message);
+          }
+        } else {
+          setMotivo(error.message);
+        }
 
-        setEvaluacion(respuesta.evaluacion);
-      } catch (err) {
-        setError(err.message || 'No fue posible cargar el quiz.');
-      } finally {
-        setCargando(false);
+        setVista('error');
       }
-    };
+    }
 
-    cargarQuiz();
+    cargar();
+
+    return () => {
+      vigente = false;
+    };
   }, [id]);
 
-  const seleccionarRespuesta = (preguntaId, opcionSeleccionada) => {
-    setRespuestas((actuales) => ({
-      ...actuales,
-      [preguntaId]: opcionSeleccionada
-    }));
+  const marcar = (preguntaId, opcion) => {
+    setRespuestas((actuales) => {
+      const nuevas = { ...actuales, [preguntaId]: opcion };
+      guardar(id, nuevas);
+      return nuevas;
+    });
+    setFaltantes((actuales) => actuales.filter((faltante) => faltante !== preguntaId));
   };
 
-  const enviarRespuestas = async () => {
-    setError('');
-    setMensaje('');
+  const enviar = async (e) => {
+    e.preventDefault();
 
-    if (!evaluacion) return;
+    // CA-09: todas son obligatorias; se dice cuáles faltan.
+    const sinResponder = quiz.preguntas.filter((p) => !Number.isInteger(respuestas[p.id]));
 
-    const preguntasSinResponder = evaluacion.preguntas.filter(
-      (pregunta) => respuestas[pregunta.id] === undefined
-    );
-
-    if (preguntasSinResponder.length > 0) {
-      setError('Responde todas las preguntas antes de enviar el quiz.');
+    if (sinResponder.length > 0) {
+      setFaltantes(sinResponder.map((p) => p.id));
+      const numeros = sinResponder.map((p) => quiz.preguntas.indexOf(p) + 1);
+      alerta.aviso(
+        sinResponder.length === 1 ? 'Te falta una pregunta' : `Te faltan ${sinResponder.length} preguntas`,
+        `Responde ${numeros.length === 1 ? 'la pregunta' : 'las preguntas'} ${numeros.join(', ')} para poder enviar.`
+      );
+      document.getElementById(`pregunta-${sinResponder[0].id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    const cuerpo = {
-      respuestas: evaluacion.preguntas.map((pregunta) => ({
-        preguntaId: pregunta.id,
-        opcionSeleccionada: respuestas[pregunta.id]
-      }))
-    };
+    setEnviando(true);
 
     try {
-      setEnviando(true);
+      const datos = await api(`/evaluaciones/estudiante/${id}/respuestas`, {
+        metodo: 'POST',
+        cuerpo: {
+          respuestas: quiz.preguntas.map((p) => ({ preguntaId: p.id, opcionSeleccionada: respuestas[p.id] })),
+        },
+      });
 
-      const respuesta = await api(
-        `/evaluaciones/estudiante/${id}/respuestas`,
-        {
-          metodo: 'POST',
-          cuerpo
-        }
-      );
-
-      setResultado(respuesta.resultado);
-      setMensaje(respuesta.mensaje || 'Respuestas enviadas correctamente.');
-    } catch (err) {
-      setError(err.message || 'No fue posible enviar tus respuestas.');
+      olvidar(id);
+      setResultado(datos.resultado);
+      setVista('resultado');
+      alerta.ok('Quiz enviado', `Tu nota es ${Number(datos.resultado.nota).toFixed(1)} de 5.0.`);
+    } catch (error) {
+      alertaError('No se pudo enviar el quiz', error);
     } finally {
       setEnviando(false);
     }
   };
 
-  if (cargando) {
+  if (vista === 'cargando') {
     return (
-      <section className="panel">
-        <p>Cargando quiz...</p>
+      <section className="panel quiz-pagina">
+        <div className="sesion-espera" role="status">Abriendo el quiz...</div>
       </section>
     );
   }
 
-  if (error && !evaluacion) {
+  if (vista === 'error') {
     return (
-      <section className="panel">
+      <section className="panel quiz-pagina">
         <div className="panel-cabeza">
-          <h1>No se pudo abrir el quiz</h1>
+          <h1>No puedes responder este quiz</h1>
+          <p>{motivo}</p>
         </div>
-
-        <div className="aviso-caja" role="alert">
-          {error}
-        </div>
-
-        <button
-          type="button"
-          className="pnl-btn pnl-btn-secundario"
-          onClick={() => navigate(-1)}
-        >
-          Volver
-        </button>
+        <Link className="boton-volver" to={VOLVER}>← Volver a mis quices</Link>
       </section>
     );
   }
 
-  if (!evaluacion) return null;
+  if (vista === 'resultado') {
+    const revision = resultado.revision;
 
-  if (resultado) {
     return (
-      <section className="panel">
+      <section className="panel quiz-pagina">
+        <Link className="boton-volver" to={VOLVER}>← Volver a mis quices</Link>
+
         <div className="panel-cabeza">
-          <h1>Quiz completado</h1>
-          <p>{evaluacion.titulo}</p>
+          <h1>{quiz.titulo}</h1>
+          <p>Ya respondiste este quiz.</p>
         </div>
 
-        <div className="tarjeta">
-          <h2>Tu resultado</h2>
-
-          <p>
-            <strong>Nota obtenida:</strong> {Number(resultado.nota).toFixed(1)} / 5.0
-          </p>
-
-          <p>
-            <strong>Respuestas correctas:</strong> {resultado.aciertos} de{' '}
-            {resultado.totalPreguntas}
-          </p>
-
-          {resultado.fechaRespuesta && (
-            <p>
-              <strong>Fecha de entrega:</strong>{' '}
-              {new Date(resultado.fechaRespuesta).toLocaleString('es-CO')}
-            </p>
-          )}
-        </div>
-
-        <div className="aviso-caja" role="status">
-          {mensaje}
-          <p>
-            Las respuestas correctas estarán disponibles cuando finalice
-            el plazo del quiz.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          className="pnl-btn pnl-btn-primario"
-          onClick={() => navigate('/espacio/estudiante/progreso')}
-        >
-          Volver a mi espacio
-        </button>
-      </section>
-    );
-  }
-
-  return (
-    <section className="panel">
-      <div className="panel-cabeza">
-        <h1>{evaluacion.titulo}</h1>
-
-        <p>
-          <strong>Módulo:</strong>{' '}
-          {evaluacion.modulo?.titulo || 'Sin módulo'}
-        </p>
-
-        {evaluacion.temas?.length > 0 && (
-          <p>
-            <strong>{evaluacion.temas.length === 1 ? 'Tema:' : 'Temas:'}</strong>{' '}
-            {evaluacion.temas.map((t) => t.titulo).join(', ')}
-          </p>
-        )}
-
-        <p>
-          <strong>Fecha límite:</strong>{' '}
-          {evaluacion.fechaLimite
-            ? new Date(evaluacion.fechaLimite).toLocaleString('es-CO')
-            : 'No especificada'}
-        </p>
-
-        <p className="suave-txt">
-          Selecciona una respuesta para cada pregunta. Solo puedes enviar
-          este quiz una vez.
-        </p>
-      </div>
-
-      {error && (
-        <div className="aviso-caja" role="alert">
-          {error}
-        </div>
-      )}
-
-      {evaluacion.preguntas.map((pregunta, indice) => (
-        <div className="tarjeta" key={pregunta.id}>
-          <h3>
-            Pregunta {indice + 1}
-          </h3>
-
-          <p>{pregunta.enunciado}</p>
-
-          <div>
-            {pregunta.opciones.map((opcion, indiceOpcion) => (
-              <label
-                key={indiceOpcion}
-                className="fila-botones"
-              >
-                <input
-                  type="radio"
-                  name={`pregunta-${pregunta.id}`}
-                  value={indiceOpcion}
-                  checked={respuestas[pregunta.id] === indiceOpcion}
-                  onChange={() =>
-                    seleccionarRespuesta(pregunta.id, indiceOpcion)
-                  }
-                  disabled={enviando}
-                />
-
-                <span>{opcion}</span>
-              </label>
-            ))}
+        <div className="fila-3">
+          <div className="tarjeta">
+            <span className="mini-label">Tu nota</span>
+            <span className="mini-num">{Number(resultado.nota).toFixed(1)} <small>/ 5.0</small></span>
+          </div>
+          <div className="tarjeta">
+            <span className="mini-label">Correctas</span>
+            <span className="mini-num">{resultado.aciertos} <small>de {resultado.totalPreguntas}</small></span>
+          </div>
+          <div className="tarjeta">
+            <span className="mini-label">Enviado</span>
+            <span className="quiz-fecha">{fechaLarga(resultado.fechaRespuesta)}</span>
           </div>
         </div>
-      ))}
 
-      <div className="fila-botones">
-        <button
-          type="button"
-          className="pnl-btn pnl-btn-secundario"
-          onClick={() => navigate(-1)}
-          disabled={enviando}
-        >
-          Volver
-        </button>
+        {revision ? (
+          <div className="tarjeta">
+            <h2>Revisión</h2>
+            <p className="suave-txt">El quiz ya cerró: así eran las respuestas correctas.</p>
+            <PreguntasQuiz
+              preguntas={revision}
+              correcta={(i) => revision[i].respuestaCorrecta}
+              elegida={(i) => revision[i].opcionSeleccionada}
+            />
+          </div>
+        ) : (
+          <div className="aviso-caja" role="status">
+            Las respuestas correctas se muestran cuando cierre el quiz.
+            {quiz.fechaLimite && <> Cierra el <b>{fechaLarga(quiz.fechaLimite)}</b></>}
+          </div>
+        )}
+      </section>
+    );
+  }
 
-        <button
-          type="button"
-          className="pnl-btn pnl-btn-primario"
-          onClick={enviarRespuestas}
-          disabled={enviando}
-        >
-          {enviando ? 'Enviando...' : 'Enviar respuestas'}
-        </button>
+  const contestadas = quiz.preguntas.filter((p) => Number.isInteger(respuestas[p.id])).length;
+
+  return (
+    <section className="panel quiz-pagina">
+      <Link className="boton-volver" to={VOLVER}>← Volver a mis quices</Link>
+
+      <div className="panel-cabeza">
+        <h1>{quiz.titulo}</h1>
+        <p>
+          {quiz.modulo?.titulo ?? 'Módulo'}
+          {quiz.temas?.length > 0 && ` · ${quiz.temas.map((t) => t.titulo).join(', ')}`}
+        </p>
       </div>
+
+      <div className="aviso-caja">
+        Cierra el <b>{fechaLarga(quiz.fechaLimite)}</b>.<br />
+        Responde todas las preguntas; solo puedes enviarlo una vez.
+        Lo que marques se guarda en este navegador si cierras la pestaña.
+      </div>
+
+      <form onSubmit={enviar} className="quiz-formulario">
+        {quiz.preguntas.map((pregunta, i) => {
+          const falta = faltantes.includes(pregunta.id);
+
+          return (
+            <fieldset
+              key={pregunta.id}
+              id={`pregunta-${pregunta.id}`}
+              className="tarjeta quiz-pregunta"
+              data-falta={falta || undefined}
+              aria-invalid={falta || undefined}
+            >
+              <legend className="quiz-enunciado">
+                <span className="quiz-numero">Pregunta {i + 1}</span>
+                {pregunta.enunciado}
+              </legend>
+
+              {falta && <p className="campo-error">Falta responder esta pregunta.</p>}
+
+              <div className="quiz-opciones">
+                {pregunta.opciones.map((opcion, j) => (
+                  <label key={j} className="quiz-opcion quiz-opcion-elegible" data-marcada={respuestas[pregunta.id] === j || undefined}>
+                    <input
+                      type="radio"
+                      name={`pregunta-${pregunta.id}`}
+                      checked={respuestas[pregunta.id] === j}
+                      onChange={() => marcar(pregunta.id, j)}
+                      disabled={enviando}
+                    />
+                    <span className="quiz-letra" aria-hidden="true">{'ABCDE'[j]}</span>
+                    <span>{opcion}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          );
+        })}
+
+        <div className="quiz-enviar">
+          <span className="suave-txt">{contestadas} de {quiz.preguntas.length} respondidas</span>
+          <button type="submit" className="pnl-btn pnl-btn-primario" disabled={enviando}>
+            {enviando ? 'Enviando...' : 'Enviar respuestas'}
+          </button>
+        </div>
+      </form>
     </section>
   );
 }
-
-export default QuizCompartido;

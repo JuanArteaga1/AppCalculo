@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  EVALUACIONES,
-} from '../../data/mockEspacio';
 import { api } from '../../services/api';
+import { alerta, alertaReintentar } from '../../services/alertas';
+import { EstructuraQuizDocente } from './EstructuraQuiz';
 import QRCode from 'qrcode';
 import { cursoLocal } from '../../services/temasService';
 import { obtenerProgreso } from '../../services/progresoService';
@@ -144,47 +143,119 @@ export function PanelProgreso() {
 }
 
 /** Lista de talleres y quices del estudiante. Hoy los quices con nota están pausados. */
+const ESTADO_QUIZ = {
+  pendiente: { texto: 'Por responder', marca: 'pendiente' },
+  respondido: { texto: 'Respondido', marca: 'calificado' },
+  vencido: { texto: 'Vencido', marca: 'entregado' },
+  'no-disponible': { texto: 'No disponible', marca: undefined },
+};
+
+const cierre = (fecha) =>
+  fecha
+    ? new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Bogota' }).format(new Date(fecha))
+    : 'sin fecha';
+
+/**
+ * Evalúate del estudiante (spec-estudiante RF-03): los quices que abrió por
+ * enlace o QR, con su estado y su nota.
+ */
 export function PanelAprenderEstudiante() {
-  const porHacer = EVALUACIONES.filter((e) => e.alumno.estado === 'pendiente').length;
-  const esperando = EVALUACIONES.filter((e) => e.alumno.estado === 'entregado').length;
+  const [quices, setQuices] = useState([]);
+  const [estado, setEstado] = useState('cargando');
+  const [mensaje, setMensaje] = useState('');
+  const [intento, setIntento] = useState(0);
+
+  useEffect(() => {
+    let vigente = true;
+
+    api('/evaluaciones/estudiante')
+      .then((datos) => {
+        if (!vigente) return;
+        setQuices(datos.evaluaciones ?? []);
+        setEstado('listo');
+      })
+      .catch((error) => {
+        if (!vigente) return;
+        setMensaje(error.message);
+        setEstado('error');
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, [intento]);
+
+  const porHacer = quices.filter((q) => q.estado === 'pendiente').length;
+  const notas = quices.filter((q) => q.estado === 'respondido').map((q) => q.nota);
+  const promedio = notas.length ? notas.reduce((a, b) => a + b, 0) / notas.length : null;
 
   return (
     <section className="panel">
       <div className="panel-cabeza">
         <h1>Evalúate</h1>
-        <p>Los talleres, quices y evaluaciones que tu maestro publicó para el curso.</p>
-      </div>
-
-      <div className="aviso-caja">
-        Responder quices con nota está pausado hasta que esté el modelo de evaluaciones.
-        Mientras tanto puedes <Link to="/evaluate">practicar sin nota</Link>.
+        <p>Los quices que abriste con el enlace o el código QR de tu docente.</p>
       </div>
 
       <div className="fila-3">
-        <div className="tarjeta"><span className="mini-label">Por hacer</span><span className="mini-num">{porHacer}</span></div>
-        <div className="tarjeta"><span className="mini-label">Esperando nota</span><span className="mini-num">{esperando}</span></div>
+        <div className="tarjeta"><span className="mini-label">Por responder</span><span className="mini-num">{porHacer}</span></div>
+        <div className="tarjeta"><span className="mini-label">Respondidos</span><span className="mini-num">{notas.length}</span></div>
         <div className="tarjeta">
           <span className="mini-label">Promedio</span>
-          <span className="mini-num">0.0 <small>/ 5.0</small></span>
+          <span className="mini-num">{promedio === null ? '—' : promedio.toFixed(1)} <small>/ 5.0</small></span>
         </div>
       </div>
 
-      <ul className="lista">
-        {EVALUACIONES.map((e) => (
-          <li key={e.id} className="item">
-            <span className="item-icono">{e.tipo.slice(0, 1)}</span>
-            <span className="item-txt">
-              <b>{e.titulo}</b>
-              <span>{e.tipo} · {e.unidad} · entrega {e.vence}</span>
-            </span>
-            {e.alumno.nota && <span className="nota-grande">{e.alumno.nota.toFixed(1)}</span>}
-            <span className="estado" data-e="pendiente">En pausa</span>
-            <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to="/evaluate">
-              Practicar
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {estado === 'cargando' && <div className="sesion-espera" role="status">Cargando tus quices...</div>}
+
+      {estado === 'error' && (
+        <div className="aviso-caja" role="alert">
+          <b>No se pudieron cargar tus quices.</b>
+          <p>{mensaje}</p>
+          <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={() => setIntento((n) => n + 1)}>
+            Intentar de nuevo
+          </button>
+        </div>
+      )}
+
+      {estado === 'listo' && quices.length === 0 && (
+        <div className="aviso-caja">
+          Todavía no tienes quices. Cuando tu docente te comparta un enlace o un código QR, ábrelo y aparecerá aquí.
+          Mientras tanto puedes <Link to="/evaluate">practicar sin nota</Link>.
+        </div>
+      )}
+
+      {estado === 'listo' && quices.length > 0 && (
+        <ul className="lista">
+          {quices.map((q) => {
+            const info = ESTADO_QUIZ[q.estado] ?? ESTADO_QUIZ['no-disponible'];
+
+            return (
+              <li key={q.id} className="item">
+                <span className="item-icono">Q</span>
+                <span className="item-txt">
+                  <b>{q.titulo}</b>
+                  <span>
+                    {q.modulo?.titulo ?? 'Módulo'}
+                    {q.temas?.length ? ` · ${q.temas.map((t) => t.titulo).join(', ')}` : ''}
+                    {' · '}
+                    {q.estado === 'respondido' ? `Enviado ${cierre(q.fechaRespuesta)}` : `Cierra ${cierre(q.fechaLimite)}`}
+                  </span>
+                </span>
+                {q.estado === 'respondido' && <span className="nota-grande">{Number(q.nota).toFixed(1)}</span>}
+                <span className="estado" data-e={info.marca}>{info.texto}</span>
+                {q.estado === 'pendiente' && (
+                  <Link className="pnl-btn pnl-btn-primario pnl-btn-chico" to={`/quiz/${q.id}`}>Responder</Link>
+                )}
+                {q.estado === 'respondido' && (
+                  <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to={`/quiz/${q.id}`}>
+                    {q.vencido ? 'Ver correctas' : 'Ver resultado'}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </section>
   );
 }
@@ -393,9 +464,10 @@ export function PanelAprenderMaestro() {
 
                     <span>
                       {e.modulo?.titulo ?? 'Módulo sin nombre'}
-                      {e.tema?.titulo
-                        ? ` · ${e.tema.titulo}`
-                        : ''}
+                      {' · '}
+                      {e.temas?.length
+                        ? e.temas.map((t) => t.titulo).join(', ')
+                        : 'Sin tema'}
                       {' · '}
                       {e.fechaLimite
                         ? `Cierra ${fechaFormato(e.fechaLimite)}`
@@ -463,7 +535,7 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
     evaluacion?.estado === 'publicado'
   );
   const [fechaLimite, setFechaLimite] = useState('');
-  const [tema, setTema] = useState('');
+  const [temas, setTemas] = useState([]);
   const [titulo, setTitulo] = useState(evaluacion?.titulo ?? '');
   const [preguntas, setPreguntas] = useState([
     {
@@ -479,8 +551,6 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
 
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
-  const [mensaje, setMensaje] = useState('');
-  const [error, setError] = useState('');
   const [codigoQR, setCodigoQR] = useState('');
 
   const enlaceQuiz = publicado && evaluacionId
@@ -493,7 +563,6 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
     async function cargarDatos() {
       try {
         setCargando(true);
-        setError('');
 
         const curso = await api('/temas');
 
@@ -515,7 +584,7 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
 
           setTitulo(quiz.titulo ?? '');
 
-          setTema(quiz.tema?.numero ?? quiz.tema?.id ?? '');
+          setTemas((quiz.temas ?? []).map((t) => t.numero ?? t.id ?? '').filter(Boolean));
 
           if (quiz.fechaLimite) {
             const fecha = new Date(quiz.fechaLimite);
@@ -527,7 +596,7 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
 
             setFechaLimite(fecha.toISOString().slice(0, 16));
           }
-          //setTema(quiz.tema ?? '');//
+          //setTema(quiz.tema ?? '')//
           setPreguntas(
             quiz.preguntas?.length
               ? quiz.preguntas.map((p) => ({
@@ -552,7 +621,11 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
         }
       } catch (err) {
         if (vigente) {
-          setError(err.message);
+          alertaReintentar(
+            'No se cargó el formulario',
+            err,
+            cargarDatos
+          );
         }
       } finally {
         if (vigente) {
@@ -584,7 +657,10 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
       })
       .catch(() => {
         if (vigente) {
-          setError('No fue posible generar el código QR.');
+          alerta.error(
+            'Código QR',
+            'No fue posible generar el código QR.'
+          );
         }
       });
 
@@ -673,23 +749,25 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
   };
 
   const guardarBorrador = async () => {
-    setError('');
-    setMensaje('');
-
     if (!titulo.trim()) {
-      setError('Escribe el título del quiz.');
+      alerta.aviso('Revisa el quiz', 'Escribe el título del quiz.');
       return;
     }
 
     if (!modulo) {
-      setError('Selecciona un módulo.');
+      alerta.aviso('Revisa el quiz', 'Selecciona un módulo.');
+      return;
+    }
+
+    if (temas.length === 0) {
+      alerta.aviso('Revisa el quiz', 'Agrega al menos un tema del módulo.');
       return;
     }
 
     const cuerpo = {
       titulo: titulo.trim(),
       modulo,
-      tema: tema || null,
+      temas,
       preguntas,
       fechaLimite: fechaLimite || null
     };
@@ -716,35 +794,40 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
         setEvaluacionId(resultado.evaluacion.id);
       }
 
-      setMensaje(resultado.mensaje ?? 'Borrador guardado correctamente.');
+      alerta.ok(
+        'Quiz guardado',
+        resultado.mensaje ?? 'Borrador guardado correctamente.'
+      );
     } catch (err) {
-      setError(err.message);
+      alerta.error('No se pudo guardar el quiz', err);
     } finally {
       setGuardando(false);
     }
   };
 
   const publicarQuiz = async () => {
-    setError('');
-    setMensaje('');
-
     if (!titulo.trim()) {
-      setError('Escribe el título del quiz.');
+      alerta.aviso('Revisa el quiz', 'Escribe el título del quiz.');
       return;
     }
 
     if (!modulo) {
-      setError('Selecciona un módulo.');
+      alerta.aviso('Revisa el quiz', 'Selecciona un módulo.');
+      return;
+    }
+
+    if (temas.length === 0) {
+      alerta.aviso('Revisa el quiz', 'Agrega al menos un tema del módulo.');
       return;
     }
 
     if (!fechaLimite) {
-      setError('Selecciona una fecha límite.');
+      alerta.aviso('Revisa el quiz', 'Selecciona una fecha límite.');
       return;
     }
 
     if (preguntas.length === 0) {
-      setError('Agrega al menos una pregunta.');
+      alerta.aviso('Revisa el quiz', 'Agrega al menos una pregunta.');
       return;
     }
 
@@ -752,17 +835,17 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
       const pregunta = preguntas[i];
 
       if (!pregunta.enunciado.trim()) {
-        setError(`Escribe el enunciado de la pregunta ${i + 1}.`);
+        alerta.aviso('Revisa el quiz', `Escribe el enunciado de la pregunta ${i + 1}.`);
         return;
       }
 
       if (pregunta.opciones.length < 2 || pregunta.opciones.length > 5) {
-        setError(`La pregunta ${i + 1} debe tener entre 2 y 5 opciones.`);
+        alerta.aviso('Revisa el quiz', `La pregunta ${i + 1} debe tener entre 2 y 5 opciones.`);
         return;
       }
 
       if (pregunta.opciones.some(opcion => !opcion.trim())) {
-        setError(`Completa todas las opciones de la pregunta ${i + 1}.`);
+        alerta.aviso('Revisa el quiz', `Completa todas las opciones de la pregunta ${i + 1}.`);
         return;
       }
 
@@ -771,7 +854,7 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
         Number(pregunta.respuestaCorrecta) < 0 ||
         Number(pregunta.respuestaCorrecta) >= pregunta.opciones.length
       ) {
-        setError(`Selecciona una respuesta correcta para la pregunta ${i + 1}.`);
+        alerta.aviso('Revisa el quiz', `Selecciona una respuesta correcta para la pregunta ${i + 1}.`);
         return;
       }
     }
@@ -779,7 +862,7 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
     const cuerpo = {
       titulo: titulo.trim(),
       modulo,
-      tema: tema || null,
+      temas,
       preguntas,
       fechaLimite
     };
@@ -815,12 +898,13 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
       );
 
       setPublicado(true);
-      setMensaje(
+      alerta.ok(
+        'Quiz publicado',
         resultadoPublicacion.mensaje ?? 'Quiz publicado correctamente.'
       );
 
     } catch (err) {
-      setError(err.message);
+      alerta.error('No se pudo publicar el quiz', err);
     } finally {
       setGuardando(false);
     }
@@ -842,18 +926,6 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
           Completa la información y guarda tu quiz como borrador.
         </p>
       </div>
-
-      {error && (
-        <div className="aviso-caja" role="alert">
-          {error}
-        </div>
-      )}
-
-      {mensaje && (
-        <div className="aviso-caja" role="status">
-          {mensaje}
-        </div>
-      )}
 
       <div className="tarjeta">
         <label htmlFor="titulo-quiz">
@@ -877,7 +949,7 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
           value={modulo}
           onChange={(e) => {
             setModulo(e.target.value);
-            setTema('');
+            setTemas([]);
           }}
         >
           <option value="">Selecciona un módulo</option>
@@ -890,25 +962,62 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
         </select>
 
         <label htmlFor="tema-quiz">
-          <strong>Tema (opcional)</strong>
+          <strong>Temas</strong>
+          <span className="suave-txt"> (elige uno o varios del módulo)</span>
         </label>
+
+        {temas.length > 0 && (
+          <div className="lista-pastillas">
+            {temas.map((id) => {
+              const info = modulos
+                .find((m) => m.id === modulo)
+                ?.temas?.find((t) => t.id === id);
+
+              return (
+                <span key={id} className="pastilla pastilla-tema">
+                  {info?.titulo ?? id}
+                  <button
+                    type="button"
+                    onClick={() => setTemas((actuales) => actuales.filter((t) => t !== id))}
+                    aria-label={`Quitar ${info?.titulo ?? id}`}
+                    title="Quitar"
+                  >
+                    ×
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        )}
 
         <select
           id="tema-quiz"
-          value={tema}
-          onChange={(e) => setTema(e.target.value)}
+          value=""
+          onChange={(e) => {
+            const id = e.target.value;
+            if (!id) return;
+            setTemas((actuales) => (actuales.includes(id) ? actuales : [...actuales, id]));
+          }}
           disabled={!modulo}
         >
-          <option value="">Sin tema específico</option>
+          <option value="">
+            {temas.length === 0 ? 'Selecciona un tema' : 'Agregar otro tema'}
+          </option>
 
           {(
             modulos.find((m) => m.id === modulo)?.temas ?? []
-          ).map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.titulo}
-            </option>
-          ))}
+          )
+            .filter((t) => !temas.includes(t.id))
+            .map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.titulo}
+              </option>
+            ))}
         </select>
+
+        {temas.length === 0 && modulo && (
+          <p className="suave-txt">Agrega al menos un tema del módulo.</p>
+        )}
 
         <label htmlFor="fecha-limite-quiz">
           <strong>Fecha y hora límite</strong>
@@ -1064,9 +1173,9 @@ function FormularioQuizMaestro({ evaluacion, onVolver }) {
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(enlaceQuiz);
-                  setMensaje('Enlace copiado correctamente.');
+                  alerta.ok('Enlace copiado', 'El enlace del quiz está en el portapapeles.');
                 } catch {
-                  setError('No fue posible copiar el enlace.');
+                  alerta.error('No se pudo copiar', 'No fue posible copiar el enlace.');
                 }
               }}
             >
@@ -1224,9 +1333,13 @@ function DetalleMaestro({ evaluacion, onVolver }) {
         <p>
           {evaluacion.modulo?.titulo ?? 'Módulo sin nombre'}
           {' · '}
-          {evaluacion.tema?.titulo ?? 'Sin tema específico'}
+          {evaluacion.temas?.length
+            ? evaluacion.temas.map((t) => t.titulo).join(', ')
+            : 'Sin tema'}
         </p>
       </div>
+
+      <EstructuraQuizDocente id={evaluacion.id} />
 
       {estado === 'cargando' && (
         <div className="sesion-espera" role="status">
