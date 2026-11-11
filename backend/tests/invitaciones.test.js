@@ -54,7 +54,11 @@ async function registrarDocente(base, token, nombre, contrasena) {
 }
 
 async function validarInvitacion(base, token) {
-    const respuesta = await fetch(`${base}/usuarios/invitacion/${token}`);
+    const respuesta = await fetch(`${base}/usuarios/invitacion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+    });
 
     return {
         estado: respuesta.status,

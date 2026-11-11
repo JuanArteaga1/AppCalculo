@@ -4,6 +4,7 @@
 | Archivo | Qué hace |
 | --- | --- |
 | `modulos.js` | Módulos del curso: los tres de siempre, no se crean otros |
+| `respuestasQuiz.js` | Un registro por estudiante y quiz: nace al abrirlo (`abiertoEn`); con nota, ya lo respondió |
 | `evaluaciones.js` | Quiz del docente: módulo, uno o varios `temas`, preguntas y estado |
 | `temas.js` | Tema: `bloques` publicados y `borrador` |
 | `versionesTema.js` | Copia por publicación; historial restaurable |

@@ -33,28 +33,35 @@ const respuestasQuizSchema = new mongoose.Schema({
         required: true
     },
 
+    // Un registro nace al abrir el quiz (spec-estudiante RF-03): así aparece en
+    // la lista del estudiante. Mientras no responda, nota y respuestas van vacías.
+    abiertoEn: {
+        type: Date,
+        default: null
+    },
+
     respuestas: {
         type: [respuestaSchema],
-        required: true
+        default: []
     },
 
     aciertos: {
         type: Number,
-        required: true,
+        default: null,
         min: 0
     },
 
+    // null = abierto sin responder. Con nota = respondido (una sola vez).
     nota: {
         type: Number,
-        required: true,
+        default: null,
         min: 1,
         max: 5
     },
 
     fechaRespuesta: {
         type: Date,
-        default: Date.now,
-        required: true
+        default: null
     }
 }, {
     timestamps: true

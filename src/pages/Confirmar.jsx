@@ -6,6 +6,9 @@ import { api } from '../services/api';
 /** El token viene después de # en el enlace del correo: así nunca llega a un servidor ni a sus registros. */
 const leerToken = () => window.location.hash.slice(1);
 
+/** Evita que React Strict Mode envíe dos veces la misma confirmación (token de un solo uso). */
+const confirmacionesEnCurso = new Map();
+
 /**
  * Confirmación del correo del estudiante (spec-login CA-15 y CA-16).
  * Si el enlace venció o ya se usó, permite pedir otro con el correo.
@@ -20,14 +23,21 @@ export default function Confirmar() {
   useEffect(() => {
     if (!token) return undefined;
 
-    // Quita el token de la barra de direcciones y del historial.
-    window.history.replaceState(null, '', window.location.pathname);
+    let promesa = confirmacionesEnCurso.get(token);
+
+    if (!promesa) {
+      promesa = api('/usuarios/confirmar', { metodo: 'POST', cuerpo: { token } });
+      confirmacionesEnCurso.set(token, promesa);
+      promesa.finally(() => confirmacionesEnCurso.delete(token));
+    }
 
     let vigente = true;
 
-    api('/usuarios/confirmar', { metodo: 'POST', cuerpo: { token } })
+    promesa
       .then((respuesta) => {
         if (!vigente) return;
+        // Solo borramos el token de la URL si la confirmación funcionó.
+        window.history.replaceState(null, '', window.location.pathname);
         setMensaje(respuesta.mensaje);
         setEstado('ok');
       })

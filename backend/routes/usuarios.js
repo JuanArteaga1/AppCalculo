@@ -26,15 +26,26 @@ const limiteCorreos = rateLimit({
     handler: (req, res) => errorCliente(res, 429, "DEMASIADOS_INTENTOS", "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."),
 });
 
+// Abrir enlaces (invitación y confirmación): límite propio, para no gastar los
+// intentos de login. Los tokens son de 64 caracteres: no se pueden adivinar.
+const limiteEnlaces = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => errorCliente(res, 429, "DEMASIADOS_INTENTOS", "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."),
+});
+
 // Primero las rutas fijas: si no, "/:id" las atraparía.
 route.post('/login', limiteLogin, usuarioController.login);
 route.post('/logout', usuarioController.logout);
 route.get('/me', requiereSesion, usuarioController.me);
-route.get('/invitacion/:token', usuarioController.validarInvitacion);
+// El token va en el cuerpo, no en la dirección: así no queda en el registro de peticiones.
+route.post('/invitacion', limiteEnlaces, usuarioController.validarInvitacion);
 route.post('/registrar-docente', usuarioController.registrarDocente);
 route.get('/carreras', usuarioController.carreras);
 route.post('/registro', limiteCorreos, usuarioController.registrarEstudiante);
-route.post('/confirmar', limiteLogin, usuarioController.confirmarCorreo);
+route.post('/confirmar', limiteEnlaces, usuarioController.confirmarCorreo);
 route.post('/reenviar-confirmacion', limiteCorreos, usuarioController.reenviarConfirmacion);
 
 const soloAdmin = requiereRol('administrador');

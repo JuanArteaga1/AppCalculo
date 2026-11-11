@@ -12,7 +12,8 @@
 | `SeguirAprendiendo.jsx` | Evalúate público; maqueta sin guardar |
 | `Acceso.jsx` | Ingreso y registro del estudiante reales; recuperar es maqueta |
 | `Confirmar.jsx` | Confirma el correo del estudiante desde el enlace (`#token`) y permite pedir otro |
-| `Registro.jsx` | Registro del docente desde enlace de invitación |
+| `Registro.jsx` | Registro del docente desde la invitación (`#token`): correo fijo, contador de 10 minutos, avisos con Sileo |
+| `QuizCompartido.jsx` | `/quiz/:id`: el estudiante responde el quiz, con lo marcado guardado en el navegador, y ve su nota y las correctas al vencer |
 | `Espacio.jsx` | Marco de estudiante y maestro |
 | `Admin.jsx` | Panel completo: secciones, módulos y Evalúate |
 | `NoEncontrado.jsx` | 404 reutilizable con destino configurable |

@@ -33,10 +33,30 @@ export default function SeguirAprendiendo() {
       </div>
 
       {!usuario && (
-        <div className="aviso-caja" style={{ marginBottom: 22 }}>
-          ¿Quieres más?{' '}
-          <Link to={`/acceso?volver=${encodeURIComponent(volverEspacio)}`}>Inicia sesión</Link>
-          {' '}para ver tu progreso, guardar ejercicios y continuar en tu espacio de estudiante.
+        <div
+          className="aviso-caja"
+          style={{
+            marginBottom: 22,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            flexWrap: 'wrap',
+          }}
+        >
+          <div>
+            <b>¿Quieres más? Inicia sesión</b>
+            <p className="suave-txt" style={{ margin: '4px 0 0' }}>
+              Inicia sesión para ver tu progreso, guardar ejercicios del laboratorio y acceder a tu espacio de estudiante.
+            </p>
+          </div>
+          <Link
+            to={`/acceso?volver=${encodeURIComponent(volverEspacio)}`}
+            className="pnl-btn pnl-btn-primario pnl-btn-chico"
+            style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}
+          >
+            Iniciar sesión
+          </Link>
         </div>
       )}
 
@@ -140,8 +160,7 @@ function Ejercicio({ tarea, onSalir }) {
 
   if (paso === 'fin') {
     const aciertos = tarea.preguntas.reduce((a, q, k) => a + (respuestas[k] === q.ok ? 1 : 0), 0);
-    const nota = (aciertos / tarea.preguntas.length * 5).toFixed(1);
-    const pct = Math.round(aciertos / tarea.preguntas.length * 100);
+    const pct = Math.round((aciertos / tarea.preguntas.length) * 100);
 
     return (
       <div className="pagina-publica pagina-angosta">
@@ -153,10 +172,9 @@ function Ejercicio({ tarea, onSalir }) {
               {pct >= 60 ? '¡Buen trabajo!' : 'Casi. Vale la pena repasar'}
             </h1>
             <p className="suave-txt">
-              Acertaste {aciertos} de {tarea.preguntas.length} · resultado de práctica {nota} / 5.0 (no se guarda)
+              Acertaste {aciertos} de {tarea.preguntas.length} preguntas ({pct}%) · Práctica formativa libre sin nota (no se guarda en tu historial).
             </p>
           </div>
-          <span className="nota-grande" style={{ fontSize: '30px', marginLeft: 'auto' }}>{nota}</span>
         </article>
 
         <article className="tarjeta">

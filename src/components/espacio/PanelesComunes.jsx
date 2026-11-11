@@ -5,11 +5,13 @@ import { ChatEstudiante } from '../ChatSection';
 import { extraerYoutubeId, youtubeEmbed } from '../../data/videos';
 import { alerta, alertaError } from '../../services/alertas';
 import {
-  borrarEjercicio,
   listarChats,
-  listarEjercicios,
   listarVideosVistos,
 } from '../../services/progresoService';
+import {
+  borrarEjercicioGuardado,
+  listarEjerciciosGuardados,
+} from '../../services/ejercicioGuardadoService';
 
 export function PanelLaboratorio({ rol }) {
   const [ejercicios, setEjercicios] = useState([]);
@@ -17,7 +19,7 @@ export function PanelLaboratorio({ rol }) {
   useEffect(() => {
     if (rol !== 'estudiante') return undefined;
     let vigente = true;
-    listarEjercicios().then((lista) => {
+    listarEjerciciosGuardados().then((lista) => {
       if (vigente) setEjercicios(lista);
     });
     return () => {
@@ -27,7 +29,7 @@ export function PanelLaboratorio({ rol }) {
 
   const quitar = async (id) => {
     try {
-      await borrarEjercicio(id);
+      await borrarEjercicioGuardado(id);
       setEjercicios((prev) => prev.filter((e) => e._id !== id));
       alerta.ok('Ejercicio quitado', 'Ya no aparece en tu laboratorio.');
     } catch (error) {

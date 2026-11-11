@@ -871,6 +871,10 @@
 .pastilla-ok { background: rgba(5, 150, 105, 0.12); color: #047857; }
 .pastilla-borrador { background: var(--aviso); color: var(--acento-osc); }
 .pastilla-off { background: var(--suave); color: var(--texto-2); }
+.lista-pastillas { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+.pastilla-tema { background: var(--suave); color: var(--texto); }
+.pastilla-tema button { background: transparent; border: none; cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; color: var(--texto-2); }
+.pastilla-tema button:hover { color: var(--primario-osc); }
 .rejilla-tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
 
 /* ===== responsive ===== */
@@ -1278,3 +1282,39 @@ html body [data-sileo-viewport] {
 }
 html body [data-sileo-title] { text-transform: none; color: #FCD34D; }
 html body [data-sileo-viewport][data-theme="light"] [data-sileo-description] { color: #E6E5F5; }
+
+/* Quices: estructura para el docente, responder y revisión del estudiante */
+.quiz-pagina { max-width: 860px; margin-inline: auto; padding-inline: 16px; box-sizing: border-box; width: 100%; }
+.quiz-preguntas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+.quiz-formulario { display: flex; flex-direction: column; gap: 16px; }
+.quiz-pregunta { margin: 0; min-width: 0; }
+fieldset.quiz-pregunta { border: 1.5px solid var(--linea); }
+/* El legend va dentro de la tarjeta, no sobre su borde. */
+fieldset.quiz-pregunta > legend { float: left; width: 100%; padding: 0; }
+fieldset.quiz-pregunta > legend + * { clear: both; }
+.quiz-pregunta[data-falta] { border-color: var(--color-danger); }
+.quiz-enunciado { display: flex; flex-direction: column; gap: 4px; margin: 0 0 10px; font-weight: 600; color: var(--texto); overflow-wrap: anywhere; }
+.quiz-numero { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--texto-2); }
+.quiz-opciones { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.quiz-opcion {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border: 1.5px solid var(--linea); border-radius: 8px;
+  background: var(--card); color: var(--texto); overflow-wrap: anywhere;
+}
+.quiz-opcion-elegible { cursor: pointer; }
+.quiz-opcion-elegible:hover { border-color: var(--primario); }
+.quiz-opcion-elegible input { accent-color: var(--primario); margin: 0; }
+.quiz-opcion[data-marcada] { border-color: var(--primario); background: var(--suave); }
+.quiz-opcion[data-correcta] { border-color: var(--color-success); }
+.quiz-opcion[data-error] { border-color: var(--color-danger); }
+.quiz-letra {
+  flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--suave); font-size: 12.5px; font-weight: 700; color: var(--texto-2);
+}
+.quiz-opcion[data-correcta] .quiz-letra { background: var(--color-success); color: #fff; }
+.quiz-opcion[data-error] .quiz-letra { background: var(--color-danger); color: #fff; }
+.quiz-marca { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--texto-2); white-space: nowrap; }
+.quiz-opcion[data-correcta] .quiz-marca { color: var(--color-success); }
+.quiz-opcion[data-error] .quiz-marca { color: var(--color-danger); }
+.quiz-fecha { font-size: 14px; font-weight: 600; color: var(--texto); }
+.quiz-enviar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
