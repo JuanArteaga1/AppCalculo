@@ -19,6 +19,8 @@ import RutaProtegida, { RutaEspacio } from './components/RutaProtegida';
 import SesionProvider from './context/SesionProvider';
 import './styles/panel.css';
 import QuizCompartido from './pages/QuizCompartido';
+import Registro from './pages/Registro';
+import Confirmar from './pages/Confirmar';
 
 /**
  * Rutas que ocupan toda la pantalla, sin barra de navegación ni pie de página:
@@ -50,6 +52,8 @@ function Contenido() {
           <Route path="/videoteca" element={<BibliotecaMultimedia />} />
           <Route path="/laboratorio" element={<Laboratorio />} />
           <Route path="/acceso" element={<Acceso />} />
+          <Route path="/registro" element={<Registro />} />
+          <Route path="/confirmar" element={<Confirmar />} />
           <Route path="/evaluate" element={<SeguirAprendiendo />} />
           <Route path="/espacio" element={<Navigate to="/espacio/estudiante/progreso" replace />} />
           <Route path="/espacio/:rol" element={<RutaEspacio><Espacio /></RutaEspacio>} />

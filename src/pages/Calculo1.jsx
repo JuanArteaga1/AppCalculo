@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useCurso } from '../hooks/useCurso';
-import ChatSection from '../components/ChatSection';
+import { ChatEstudiante } from '../components/ChatSection';
 import HeroAnimation from '../components/HeroAnimation';
 import AnimatedIcon from '../components/AnimatedIcon';
 import NoEncontrado from './NoEncontrado';
@@ -56,7 +56,7 @@ export default function Calculo1() {
 
             {/* El chat acompana al alumno mientras baja por los subtemas */}
             <aside className="calculo-chat-lateral" style={styles.chatLateral}>
-              <ChatSection tema={unidadId} unidadTitulo={unidad.titulo} lateral />
+              <ChatEstudiante tema={unidadId} unidadTitulo={unidad.titulo} lateral />
             </aside>
           </div>
         </div>

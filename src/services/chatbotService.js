@@ -3,6 +3,8 @@
  * Incluye proteccion anti prompt-injection y rate limiting.
  */
 
+import { api } from './api';
+
 const DEV = import.meta.env.DEV;
 
 let lastCallTime = 0;
@@ -90,6 +92,24 @@ SEGURIDAD: Solo respondes preguntas relacionadas con calculo matematico (limites
 }
 
 export async function chatbotMensaje(tema, mensaje) {
+  try {
+    const datos = await api('/tutor', { metodo: 'POST', cuerpo: { tema, mensaje } });
+    return { ok: true, respuesta: datos.respuesta };
+  } catch (error) {
+    if (DEV && (error?.codigo === 'SIN_CLAVE_IA' || error?.estado === 0)) {
+      return chatbotMensajeCliente(tema, mensaje);
+    }
+
+    if (error?.codigo === 'SIN_CLAVE_IA') {
+      return { ok: false, error: 'NO_API_KEY' };
+    }
+
+    return { ok: false, error: error?.message || 'NO_API_KEY' };
+  }
+}
+
+/** Solo en desarrollo: si el servidor aún no tiene OPENAI_API_KEY (EG-052). */
+async function chatbotMensajeCliente(tema, mensaje) {
   const apiKey = getApiKey();
 
   if (!apiKey) {

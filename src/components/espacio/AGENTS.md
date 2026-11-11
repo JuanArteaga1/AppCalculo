@@ -3,16 +3,16 @@
 ## Contiene
 | Archivo | Qué hace |
 | --- | --- |
-| `PanelesEstudiante.jsx` | Progreso y Evalúate, de estudiante y de maestro |
+| `PanelesEstudiante.jsx` | Progreso y Evalúate, de estudiante y de maestro; el formulario de quiz elige módulo y varios temas del backend |
 | `PanelEstudiantes.jsx` | Lista del grupo y perfil de cada estudiante |
 | `PanelesComunes.jsx` | Laboratorio, videos, tutor y ajustes |
 
 ## Rutas y relaciones
-- Importa de: `data/mock*.js`.
+- Importa de: `data/mock*.js`, `services/api.js` y `services/alertas.js`.
 - Lo usa: `pages/Espacio.jsx`.
 
 ## Estilo y convenciones
-- Maquetas estáticas: aún sin backend.
+- Evalúate del maestro ya usa el backend (`/api/evaluaciones`, `/api/temas`); lo demás sigue con maquetas.
 - Clases de `styles/panel.css`.
 
 ## No hacer

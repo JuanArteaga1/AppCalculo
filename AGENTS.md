@@ -28,4 +28,4 @@
 - Confiar en `npm run lint`: incluye `backend/` y falla ahí (EG-056).
 
 ## Probar
-- `npx eslint src --max-warnings 0` y `npm run build`, desde `vite-project/`. Sin tests aún (EG-051).
+- `npx eslint src --max-warnings 0` y `npm run build`, desde `vite-project/`; `npm test` desde `backend/`. El frontend aún no tiene tests (EG-051).

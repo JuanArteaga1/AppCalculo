@@ -1,8 +1,10 @@
-import { Component } from 'react';
+import { Component, useEffect } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { enlazarTerminos } from '../../data/glosario';
 import { extraerYoutubeId, youtubeEmbed } from '../../data/videos';
+import { useSesion } from '../../context/sesion';
+import { registrarVideoVisto } from '../../services/progresoService';
 import { MARCA_ALINEACION } from '../../lib/bloques';
 import AsintotasInteractivas from '../AsintotasInteractivas';
 import GraficaAsintotaDefinicion from '../GraficaAsintotaDefinicion';
@@ -223,6 +225,13 @@ function Tabla({ bloque }) {
 
 function Video({ url, titulo }) {
   const id = extraerYoutubeId(url);
+  const { usuario } = useSesion();
+
+  useEffect(() => {
+    if (usuario?.rol !== 'estudiante' || !id) return;
+    registrarVideoVisto({ youtubeId: id, titulo: titulo || 'Video del tema' });
+  }, [usuario, id, titulo]);
+
   if (!id) return <p className="suave-txt">Enlace de video no válido.</p>;
 
   return (

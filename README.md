@@ -85,8 +85,10 @@ Vive en `backend/` y usa MongoDB. Toda la API cuelga de `/api`.
 ```bash
 cd backend
 npm install
-npm start
+npm run dev
 ```
+
+`npm run dev` reinicia el backend cada vez que guardas un archivo. En el servidor se usa `npm start`. Si cambias el `.env`, reinícialo a mano.
 
 La primera vez, copia `backend/.env.example` a `backend/.env`, llena los datos y carga los temas:
 

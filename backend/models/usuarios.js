@@ -8,6 +8,7 @@ class usuariosModelo {
     async create(usuario) {
         const correo = usuario.correo?.trim().toLowerCase();
         const rol = usuario.rol;
+        const modulos = usuario.modulos;
 
         if (!correo) {
             throw new Error("El correo es obligatorio.");
@@ -19,11 +20,17 @@ class usuariosModelo {
             );
         }
 
-        return await Usuario.create({
+        const datos = {
             correo,
             rol,
             estado: "pendiente"
-        });
+        };
+
+        if (rol === "docente" && Array.isArray(modulos)) {
+            datos.modulosAsignados = modulos;
+        }
+
+        return await Usuario.create(datos);
     }
 
     async update(id, usuario) {

@@ -43,10 +43,15 @@ const evaluacionSchema = new mongoose.Schema({
         required: true
     },
 
-    tema: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "temas",
-        default: null
+    // Uno o varios temas del módulo. Lo obligatorio lo exige el controlador:
+    // los quices anteriores, con el campo viejo `tema`, quedan sin temas.
+    temas: {
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "temas",
+            required: true
+        }],
+        default: []
     },
 
     fechaLimite: {

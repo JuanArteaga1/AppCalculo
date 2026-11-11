@@ -9,9 +9,10 @@
 | `middlewares/` | Sesión, roles y registro de peticiones |
 | `schemas/` | Modelos de Mongoose |
 | `models/` | Acceso a usuarios |
-| `lib/` | Contrato de errores y validación |
+| `lib/` | Contrato de errores, validación, contraseñas y correo saliente |
 | `config/` | Conexión a MongoDB |
-| `scripts/` | Migración, primer administrador y cuentas de prueba |
+| `scripts/` | Migración, primer administrador, cuentas de prueba y prueba del correo |
+| `tests/` | Tests con `node --test`, uno por criterio |
 | `package.json`, `package-lock.json` | Dependencias propias |
 | `.env.example` | Variables necesarias, sin valores |
 | `.env` | Secretos locales; ignorado por git |
@@ -31,4 +32,5 @@
 - Usar `npm audit fix --omit=dev` en `vite-project/`: borra Vite y ESLint.
 
 ## Probar
-- `node --check` del archivo y `npm start` desde `backend/`. Sin tests aún (EG-051).
+- `npm test` y `node --check` del archivo, desde `backend/`.
+- Para desarrollar, `npm run dev`: reinicia al guardar. Los cambios del `.env` piden reiniciar a mano.

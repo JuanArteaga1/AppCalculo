@@ -33,9 +33,26 @@ const usuarioSchema = new mongoose.Schema({
     estado: {
         type: String,
         required: true,
-        enum: ["pendiente", "activo"],
+        enum: ["pendiente", "activo", "inactivo"],
         default: "pendiente"
     },
+
+    // Solo estudiantes: un programa de lib/carreras.js (spec-login BR-11).
+    carrera: { type: String, trim: true, default: null },
+
+    // Cuándo aceptó la política de tratamiento de datos (Ley 1581).
+    aceptoPoliticaEn: { type: Date, default: null },
+
+    // Frecuencia de uso, para las estadísticas del panel.
+    ingresos: { type: Number, default: 0 },
+    ultimoIngreso: { type: Date, default: null },
+
+    // Bloqueo tras intentos fallidos seguidos.
+    intentosFallidos: { type: Number, default: 0 },
+    bloqueadoHasta: { type: Date, default: null },
+
+    // Va dentro del JWT: subirla invalida todas las sesiones abiertas.
+    versionSesion: { type: Number, default: 0 },
 
     modulosAsignados: {
         type: [{

@@ -4,7 +4,8 @@
 | Archivo | Qué hace |
 | --- | --- |
 | `temaController.js` | Curso, borrador, publicación, versiones y restauración |
-| `usuarioController.js` | Login, sesión y CRUD de usuarios |
+| `evaluacionController.js` | Quices: crear, editar y publicar con temas del módulo (400), 403 si es de otro docente; notas y respuestas |
+| `usuarioController.js` | Login, sesión, registro del estudiante con confirmación de correo, invitación de docentes y CRUD de usuarios |
 | `visitaController.js` | Registro y resumen de visitas |
 
 ## Rutas y relaciones

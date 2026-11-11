@@ -175,9 +175,10 @@ function QuizCompartido() {
           {evaluacion.modulo?.titulo || 'Sin módulo'}
         </p>
 
-        {evaluacion.tema && (
+        {evaluacion.temas?.length > 0 && (
           <p>
-            <strong>Tema:</strong> {evaluacion.tema.titulo}
+            <strong>{evaluacion.temas.length === 1 ? 'Tema:' : 'Temas:'}</strong>{' '}
+            {evaluacion.temas.map((t) => t.titulo).join(', ')}
           </p>
         )}
 

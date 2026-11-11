@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { FiUser, FiUsers } from 'react-icons/fi';
 import { destinoAlIngresar, MODO_DEMO, useSesion } from '../context/sesion';
-import { alertaError } from '../services/alertas';
+import { alerta, alertaError } from '../services/alertas';
 import { api } from '../services/api';
 
 /**
  * Pantalla de acceso: ingresar, recuperar contraseña y crear cuenta.
- * Ingresar funciona contra el backend; recuperar y crear cuenta siguen siendo
- * maqueta y solo cambian de vista.
+ * Ingresar y crear cuenta (estudiantes, con confirmación por correo) usan el
+ * backend; recuperar sigue siendo maqueta (spec-login tarea D).
  */
 export default function Acceso() {
 
@@ -24,9 +24,86 @@ export default function Acceso() {
   const [form, setForm] = useState(params.get('form') === 'registro' ? 'registro' : 'login');
   const [avisoEnviado, setAvisoEnviado] = useState(false);
 
+  // Registro del estudiante (spec-login RF-01, RF-03 y RF-08).
+  const [registro, setRegistro] = useState({ nombre: '', correo: '', carrera: '', contrasena: '', acepto: false });
+  const [carreras, setCarreras] = useState(null);
+  const [registrado, setRegistrado] = useState('');
+  // Correo de una cuenta pendiente de confirmar: ofrece reenviar el enlace.
+  const [pendiente, setPendiente] = useState('');
+
   const cambiar = (cual) => {
     setForm(cual);
     setAvisoEnviado(false);
+    setRegistrado('');
+  };
+
+  const campoRegistro = (campo) => (e) =>
+    setRegistro((actual) => ({ ...actual, [campo]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
+
+  useEffect(() => {
+    if (form !== 'registro' || carreras) return undefined;
+
+    let vigente = true;
+
+    api('/usuarios/carreras')
+      .then((datos) => {
+        if (vigente) setCarreras(datos);
+      })
+      .catch((error) => {
+        if (vigente) alertaError('No se pudo cargar la lista de carreras', error);
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, [form, carreras]);
+
+  const crearCuenta = async (e) => {
+    e.preventDefault();
+
+    if (!registro.carrera) {
+      alerta.aviso('Revisa tus datos', 'Elige tu carrera de la lista.');
+      return;
+    }
+
+    if (!registro.acepto) {
+      alerta.aviso('Revisa tus datos', 'Debes aceptar la política de tratamiento de datos.');
+      return;
+    }
+
+    setCargando(true);
+
+    try {
+      const respuesta = await api('/usuarios/registro', {
+        metodo: 'POST',
+        cuerpo: {
+          nombre: registro.nombre,
+          correo: registro.correo,
+          carrera: registro.carrera,
+          contrasena: registro.contrasena,
+          aceptarPolitica: true,
+        },
+      });
+
+      setRegistrado(respuesta.mensaje);
+    } catch (error) {
+      alertaError('No se pudo crear la cuenta', error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const reenviarEnlace = async (direccion) => {
+    setCargando(true);
+
+    try {
+      const respuesta = await api('/usuarios/reenviar-confirmacion', { metodo: 'POST', cuerpo: { correo: direccion } });
+      alerta.ok('Revisa tu correo', respuesta.mensaje);
+    } catch (error) {
+      alertaError('No se pudo enviar otro enlace', error);
+    } finally {
+      setCargando(false);
+    }
   };
 
 
@@ -34,6 +111,7 @@ export default function Acceso() {
     e.preventDefault();
 
     setCargando(true);
+    setPendiente('');
 
     try {
       const respuesta = await api('/usuarios/login', {
@@ -44,6 +122,7 @@ export default function Acceso() {
       // Con la sesión puesta, el render de abajo lleva a su espacio.
       entrar(respuesta.usuario);
     } catch (error) {
+      if (error.codigo === 'CUENTA_PENDIENTE') setPendiente(correo);
       alertaError('No se pudo ingresar', error);
     } finally {
       setCargando(false);
@@ -109,6 +188,21 @@ export default function Acceso() {
               {cargando ? 'Ingresando...' : 'Entrar'}
             </button>
 
+            {pendiente && (
+              <div className="aviso-caja" role="status">
+                <b>Tu cuenta aún no está confirmada.</b>
+                <p>Abre el enlace que te enviamos a {pendiente}. Si no te llegó, te mandamos otro.</p>
+                <button
+                  type="button"
+                  className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                  onClick={() => reenviarEnlace(pendiente)}
+                  disabled={cargando}
+                >
+                  Enviarme otro enlace
+                </button>
+              </div>
+            )}
+
             <div className="acceso-abajo">
               <span>¿Olvidaste tu contraseña?</span>
               <button type="button" onClick={() => cambiar('recuperar')}>Recuperar acceso</button>
@@ -167,38 +261,113 @@ export default function Acceso() {
           </form>
         )}
 
-        {form === 'registro' && (
-          <form className="acceso-form" onSubmit={(e) => e.preventDefault()}>
-            <h2>Crear cuenta</h2>
-            <p className="suave-txt">Solo necesitas tu correo institucional.</p>
+        {form === 'registro' && registrado && (
+          <div className="acceso-form" role="status">
+            <h2>Revisa tu correo</h2>
+            <p className="suave-txt">{registrado}</p>
+            <p className="suave-txt">
+              El enlace vence en 24 horas. Hasta que lo abras, tu cuenta queda pendiente y no puedes ingresar.
+            </p>
 
-            <div className="fila-2">
-              <div className="campo">
-                <label htmlFor="nombre">Nombre</label>
-                <input id="nombre" type="text" placeholder="María" autoComplete="given-name" />
-              </div>
-              <div className="campo">
-                <label htmlFor="apellido">Apellido</label>
-                <input id="apellido" type="text" placeholder="Benavidez" autoComplete="family-name" />
-              </div>
+            <button
+              type="button"
+              className="pnl-btn pnl-btn-secundario"
+              onClick={() => reenviarEnlace(registro.correo)}
+              disabled={cargando}
+            >
+              Enviarme otro enlace
+            </button>
+
+            <div className="acceso-abajo">
+              <span>¿Ya confirmaste tu correo?</span>
+              <button type="button" onClick={() => cambiar('login')}>Inicia sesión</button>
+            </div>
+          </div>
+        )}
+
+        {form === 'registro' && !registrado && (
+          <form className="acceso-form" onSubmit={crearCuenta}>
+            <h2>Crear cuenta</h2>
+            <p className="suave-txt">
+              Para estudiantes, con tu correo institucional. Los docentes reciben una invitación del administrador.
+            </p>
+
+            <div className="campo">
+              <label htmlFor="nombre">Nombre completo</label>
+              <input
+                id="nombre"
+                type="text"
+                placeholder="María Benavidez"
+                autoComplete="name"
+                minLength={3}
+                maxLength={120}
+                value={registro.nombre}
+                onChange={campoRegistro('nombre')}
+                required
+              />
             </div>
 
             <div className="campo">
               <label htmlFor="correo-reg">Correo institucional</label>
-              <input id="correo-reg" type="email" placeholder="nombre.apellido@uniautonoma.edu.co" autoComplete="email" />
+              <input
+                id="correo-reg"
+                type="email"
+                placeholder="nombre.apellido@uniautonoma.edu.co"
+                autoComplete="email"
+                pattern=".+@uniautonoma\.edu\.co"
+                title="Usa tu correo @uniautonoma.edu.co"
+                value={registro.correo}
+                onChange={campoRegistro('correo')}
+                required
+              />
+            </div>
+
+            <div className="campo">
+              <label htmlFor="carrera">Carrera</label>
+              <select
+                id="carrera"
+                value={registro.carrera}
+                onChange={campoRegistro('carrera')}
+                disabled={!carreras}
+                required
+              >
+                <option value="">{carreras ? 'Elige tu carrera' : 'Cargando carreras...'}</option>
+                {carreras && (
+                  <>
+                    <optgroup label="Pregrados">
+                      {carreras.pregrados.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </optgroup>
+                    <optgroup label="Especializaciones">
+                      {carreras.especializaciones.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </optgroup>
+                  </>
+                )}
+              </select>
             </div>
 
             <div className="campo">
               <label htmlFor="clave-reg">Contraseña</label>
-              <input id="clave-reg" type="password" placeholder="Mínimo 8 caracteres" autoComplete="new-password" />
+              <input
+                id="clave-reg"
+                type="password"
+                placeholder="Mínimo 10 caracteres"
+                autoComplete="new-password"
+                minLength={10}
+                value={registro.contrasena}
+                onChange={campoRegistro('contrasena')}
+                required
+              />
+              <span className="campo-ayuda">Mínimo 10 caracteres. Una frase fácil de recordar sirve.</span>
             </div>
 
             <label className="acepto" htmlFor="acepto">
-              <input id="acepto" type="checkbox" />
-              <span>Acepto el tratamiento de mis datos para el seguimiento académico del curso.</span>
+              <input id="acepto" type="checkbox" checked={registro.acepto} onChange={campoRegistro('acepto')} />
+              <span>Acepto la política de tratamiento de datos personales (Ley 1581 de 2012) para el seguimiento académico del curso.</span>
             </label>
 
-            <button className="pnl-btn pnl-btn-primario" type="submit">Crear cuenta</button>
+            <button className="pnl-btn pnl-btn-primario" type="submit" disabled={cargando}>
+              {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
+            </button>
 
             <div className="acceso-abajo">
               <span>¿Ya tienes cuenta?</span>

@@ -3,7 +3,7 @@
 ## Contiene
 | Archivo | Qué hace |
 | --- | --- |
-| `usuarios.js` | `/api/usuarios`: login con límite, logout, me y CRUD de administrador |
+| `usuarios.js` | `/api/usuarios`: login, registro del estudiante, confirmación y reenvío (con límite), carreras, validación de invitación de docente, logout, me y CRUD de administrador |
 | `temas.js` | `/api/temas`: curso y tema publicado, públicos |
 | `admin.js` | `/api/admin`: visitas, imágenes y edición de temas |
 
