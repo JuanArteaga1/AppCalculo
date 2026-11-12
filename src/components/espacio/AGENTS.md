@@ -14,6 +14,7 @@
 
 ## Estilo y convenciones
 - Evalúate del maestro y del estudiante usan el backend (`/api/evaluaciones`, `/api/temas`); lo demás sigue con maquetas.
+- El progreso vacío solo usa nombres de unidad: no muestra títulos de tema, que pueden ser privados o estar eliminados.
 - Clases de `styles/panel.css`.
 
 ## No hacer

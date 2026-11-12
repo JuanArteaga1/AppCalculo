@@ -12,6 +12,7 @@
 | `registro-estudiante.test.js` | Registro del estudiante, confirmación y reenvío (spec-login CA-15, CA-16, CA-18, BR-11, BR-12); puerto 5195, sin SMTP |
 | `quiz-estudiante.test.js` | Lista del estudiante, responder, margen de 5 minutos, correctas al vencer y notas del docente (spec-estudiante tarea D, spec-docente CA-18); puerto 5194 |
 | `invitaciones.test.js` | Invitaciones y registro de docentes (spec-login CA-02, CA-03, CA-07 a CA-09) |
+| `google.test.js` | Dominio, roles por correo, retorno seguro y configuración de Google; sin red |
 
 ## Rutas y relaciones
 - Usan la base del `.env` del backend: las cuentas temporales se borran al terminar.

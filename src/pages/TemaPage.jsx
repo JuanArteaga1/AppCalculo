@@ -13,13 +13,14 @@ import { ChatEstudiante } from '../components/ChatSection';
 import AnimatedIcon from '../components/AnimatedIcon';
 import { FiBookOpen, FiVideo, FiBarChart2, FiMessageCircle } from 'react-icons/fi';
 import { HiOutlineLightBulb } from 'react-icons/hi';
+import EstadoServicio from '../components/EstadoServicio';
 import NoEncontrado from './NoEncontrado';
 
 const TEMAS_CON_ANIMACION = ['limites/1.1', 'limites/1.2'];
 
 export default function TemaPage() {
   const { unidadId, temaId } = useParams();
-  const { tema, cargando } = useTema(unidadId, temaId);
+  const { tema, estado, reintentar } = useTema(unidadId, temaId);
   const { usuario } = useSesion();
   const navigate = useNavigate();
 
@@ -41,8 +42,18 @@ export default function TemaPage() {
     window.scrollTo(0, 0);
   };
 
-  if (cargando) {
+  if (estado === 'cargando') {
     return <div className="sesion-espera" role="status">Cargando el tema…</div>;
+  }
+
+  if (estado === 'error') {
+    return (
+      <EstadoServicio
+        titulo="No pudimos abrir este tema"
+        mensaje="El servidor no respondió. Revisa tu conexión e inténtalo de nuevo."
+        onReintentar={reintentar}
+      />
+    );
   }
 
   if (!tema) {

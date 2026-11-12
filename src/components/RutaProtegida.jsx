@@ -10,6 +10,9 @@ export default function RutaProtegida({ roles, children }) {
   const { usuario, cargando } = useSesion();
   const { pathname } = useLocation();
 
+  // Los atajos de desarrollo entran sin cookie; nunca ocurre en producción.
+  if (MODO_DEMO) return children;
+
   if (cargando) return <Espera />;
 
   if (!usuario) {

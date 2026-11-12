@@ -1,9 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { FiUser, FiUsers } from 'react-icons/fi';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { FiShield, FiUser, FiUsers } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
 import { destinoAlIngresar, MODO_DEMO, useSesion } from '../context/sesion';
 import { alerta, alertaError } from '../services/alertas';
 import { api } from '../services/api';
+
+const ERROR_GOOGLE = {
+  ok: 'Ingreso completado. Abriendo tu espacio…',
+  'no-configurado': 'Google todavía no está configurado. Falta GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en backend/.env.',
+  dominio: 'Solo puedes entrar con tu correo institucional @uniautonoma.edu.co.',
+  cancelado: 'Cancelaste el ingreso con Google. Puedes intentarlo de nuevo.',
+  inactivo: 'Tu cuenta está inactiva. Comunícate con el administrador.',
+  'estado-invalido': 'La sesión de Google venció. Inténtalo de nuevo.',
+  error: 'No se pudo completar el ingreso con Google. Inténtalo de nuevo.',
+};
 
 /**
  * Pantalla de acceso: ingresar, recuperar contraseña y crear cuenta.
@@ -18,11 +29,19 @@ export default function Acceso() {
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [entrandoDemo, setEntrandoDemo] = useState('');
+  const [errorDemo, setErrorDemo] = useState('');
 
 
   const [params] = useSearchParams();
   const [form, setForm] = useState(params.get('form') === 'registro' ? 'registro' : 'login');
   const [avisoEnviado, setAvisoEnviado] = useState(false);
+
+  const volver = params.get('volver');
+  const avisoGoogle = params.get('google')
+    ? ERROR_GOOGLE[params.get('google')] ?? ERROR_GOOGLE.error
+    : '';
+  const enlaceGoogle = `/api/usuarios/google${volver ? `?volver=${encodeURIComponent(volver)}` : ''}`;
 
   // Registro del estudiante (spec-login RF-01, RF-03 y RF-08).
   const [registro, setRegistro] = useState({ nombre: '', correo: '', carrera: '', contrasena: '', acepto: false });
@@ -107,6 +126,21 @@ export default function Acceso() {
   };
 
 
+  /** Atajo de desarrollo: el backend abre sesión con la cuenta prueba.<rol>. */
+  const entrarComo = async (rol) => {
+    setErrorDemo('');
+    setEntrandoDemo(rol);
+
+    try {
+      const respuesta = await api('/usuarios/demo', { metodo: 'POST', cuerpo: { rol } });
+      entrar(respuesta.usuario);
+    } catch (error) {
+      setErrorDemo(error?.message ?? 'No se pudo abrir la cuenta de prueba.');
+    } finally {
+      setEntrandoDemo('');
+    }
+  };
+
   const iniciarSesion = async (e) => {
     e.preventDefault();
 
@@ -153,6 +187,20 @@ export default function Acceso() {
           <form className="acceso-form" onSubmit={iniciarSesion}>
             <h2>Inicia sesión</h2>
             <p className="suave-txt">Usa el correo institucional que te dio la universidad.</p>
+
+            <a className="pnl-btn pnl-btn-google" href={enlaceGoogle}>
+              <FcGoogle aria-hidden="true" />
+              Continuar con Google
+            </a>
+            <p className="acceso-nota">
+              Solo correos @uniautonoma.edu.co. Al continuar aceptas la política de tratamiento de datos.
+            </p>
+
+            {avisoGoogle && (
+              <div className="aviso-caja" role="alert">{avisoGoogle}</div>
+            )}
+
+            <div className="acceso-separador"><span>o entra con tu contraseña</span></div>
 
             <div className="campo">
               <label htmlFor="correo">Correo institucional</label>
@@ -214,17 +262,40 @@ export default function Acceso() {
 
             {MODO_DEMO && (
               <div className="acceso-perfiles">
-                <span className="acceso-perfiles-rotulo">Demo sin sesión · entra directo como</span>
+                <span className="acceso-perfiles-rotulo">Acceso de prueba · sesión automática</span>
                 <div className="acceso-perfiles-botones">
-                  <Link className="perfil-btn" to="/espacio/estudiante/progreso">
+                  <button
+                    type="button"
+                    className="perfil-btn"
+                    onClick={() => entrarComo('estudiante')}
+                    disabled={Boolean(entrandoDemo)}
+                  >
                     <FiUser aria-hidden="true" />
-                    Estudiante
-                  </Link>
-                  <Link className="perfil-btn" to="/espacio/maestro/aprender">
+                    {entrandoDemo === 'estudiante' ? 'Entrando…' : 'Estudiante'}
+                  </button>
+                  <button
+                    type="button"
+                    className="perfil-btn"
+                    onClick={() => entrarComo('docente')}
+                    disabled={Boolean(entrandoDemo)}
+                  >
                     <FiUsers aria-hidden="true" />
-                    Maestro
-                  </Link>
+                    {entrandoDemo === 'docente' ? 'Entrando…' : 'Docente'}
+                  </button>
+                  <button
+                    type="button"
+                    className="perfil-btn"
+                    onClick={() => entrarComo('administrador')}
+                    disabled={Boolean(entrandoDemo)}
+                  >
+                    <FiShield aria-hidden="true" />
+                    {entrandoDemo === 'administrador' ? 'Entrando…' : 'Administrador'}
+                  </button>
                 </div>
+                {errorDemo && <div className="aviso-caja" role="alert">{errorDemo}</div>}
+                <p className="acceso-nota">
+                  Atajos de desarrollo: abren una cuenta de prueba con su rol. Se desactivan en producción.
+                </p>
               </div>
             )}
           </form>

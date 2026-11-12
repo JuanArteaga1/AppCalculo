@@ -51,6 +51,29 @@ export const youtubeThumb = (id) =>
 
 export const youtubeEmbed = (id) =>
   id ? `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` : '';
+
+// Videos que los usuarios agregaron a mano antes de que la videoteca viviera
+// en MongoDB. Ya no se muestran aquí: el administrador los importa al tema.
+export const CLAVE_VIDEOS_LOCALES = 'limitshub_videos';
+
+export function leerVideosLocales() {
+  if (typeof localStorage === 'undefined') return [];
+  try {
+    const lista = JSON.parse(localStorage.getItem(CLAVE_VIDEOS_LOCALES) ?? '[]');
+    return Array.isArray(lista) ? lista : [];
+  } catch {
+    return [];
+  }
+}
+
+export function quitarVideoLocal(id) {
+  const restantes = leerVideosLocales().filter((video) => video?.id !== id);
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(CLAVE_VIDEOS_LOCALES, JSON.stringify(restantes));
+  }
+  return restantes;
+}
+
 /**
  * Videos con los que arranca un tema: el suyo y uno relacionado de la unidad.
  * Después los administra el panel; esto solo alimenta la migración y el respaldo.

@@ -1,11 +1,13 @@
 import "dotenv/config";
 import mongoose from "mongoose";
+import { uriMongo } from "../config/uriMongo.js";
 import Modulo from "../schemas/modulos.js";
 import Tema from "../schemas/temas.js";
 import { validarBloques } from "../lib/validarBloques.js";
 import { unidades } from "../../src/data/temas.js";
 import { videosDeTema } from "../../src/data/videos.js";
 import { contenidoABloques } from "../../src/lib/bloques.js";
+import { sincronizarTodosLosVideos } from "../lib/videoteca.js";
 
 /**
  * Pasa los temas de src/data/temas.js a MongoDB.
@@ -19,17 +21,10 @@ import { contenidoABloques } from "../../src/lib/bloques.js";
  */
 async function migrar() {
     const forzar = process.argv.includes("--forzar");
-    const { USER_DB, PASS_DB, SERVER_DB } = process.env;
 
-    if (!USER_DB || !PASS_DB || !SERVER_DB) {
-        throw new Error("Faltan las variables de conexión de MongoDB en .env");
-    }
+    await mongoose.connect(uriMongo());
 
-    await mongoose.connect(
-        `mongodb+srv://${encodeURIComponent(USER_DB)}:${encodeURIComponent(PASS_DB)}@${SERVER_DB}/PlataformaEducativa?retryWrites=true&w=majority`,
-    );
-
-    const cuenta = { creados: 0, reemplazados: 0, sinCambios: 0, conVideos: 0 };
+    const cuenta = { creados: 0, reemplazados: 0, sinCambios: 0, conVideos: 0, conVisibilidad: 0 };
 
     for (const [iModulo, unidad] of unidades.entries()) {
         await Modulo.updateOne(
@@ -62,6 +57,9 @@ async function migrar() {
                     ...datos,
                     videos: videosDeTema(unidad.id, tema.id),
                     practicas: [],
+                    // Todo lo migrado nace público y fuera de la papelera.
+                    visibilidad: "publico",
+                    eliminado: false,
                 });
                 cuenta.creados += 1;
             } else if (forzar) {
@@ -84,6 +82,19 @@ async function migrar() {
             );
         }
     }
+
+    // Los temas que ya existían no tienen estos campos: se dejan explícitos.
+    // No se toca la visibilidad ni la papelera de un tema que ya las tenga.
+    const visibilidad = await Tema.updateMany(
+        { visibilidad: { $exists: false } },
+        { $set: { visibilidad: "publico" } },
+    );
+    const papelera = await Tema.updateMany(
+        { eliminado: { $exists: false } },
+        { $set: { eliminado: false, eliminadoEn: null } },
+    );
+    cuenta.conVisibilidad = visibilidad.modifiedCount + papelera.modifiedCount;
+    cuenta.videoteca = await sincronizarTodosLosVideos();
 
     console.log("Migración terminada:", cuenta);
 }

@@ -8,6 +8,7 @@
 | `contrasenas.js` | Reglas de contraseña: mínimo 10 caracteres y sin las más comunes |
 | `carreras.js` | Lista cerrada de pregrados y especializaciones (spec-login BR-11) |
 | `correo.js` | Envío por SMTP de invitación, confirmación y restablecimiento, con enlace de respaldo |
+| `google.js` | Dominio institucional, correos con rol fijo, URL de retorno y configuración de OAuth |
 
 ## Rutas y relaciones
 - Lo usan: `controllers/`, `middlewares/`, `routes/`, `app.js`, `scripts/migrarTemas.js`.

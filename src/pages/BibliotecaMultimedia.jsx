@@ -1,156 +1,159 @@
-import { useEffect, useState, useMemo } from 'react';
-import { FiSearch } from 'react-icons/fi';
-import { FaPlay, FaCheck, FaTrash, FaYoutube } from 'react-icons/fa';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FiRefreshCw, FiSearch } from 'react-icons/fi';
+import { FaPlay, FaCheck, FaYoutube } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
-import {
-  videosBase,
-  categorias,
-  niveles,
-  extraerYoutubeId,
-  youtubeThumb,
-  youtubeEmbed,
-} from '../data/videos';
+import { extraerYoutubeId, youtubeThumb, youtubeEmbed, leerVideosLocales } from '../data/videos';
 import { useSesion } from '../context/sesion';
-import { registrarVideoVisto } from '../services/progresoService';
-
-const STORAGE_KEY = 'limitshub_videos';
-
-function loadCustomVideos() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveCustomVideos(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
+import { listarVideosVistos, registrarVideoVisto } from '../services/progresoService';
+import { api } from '../services/api';
 
 export default function BibliotecaMultimedia() {
   const { usuario } = useSesion();
-  const [customVideos, setCustomVideos] = useState(loadCustomVideos);
+  const [estado, setEstado] = useState('cargando');
+  const [datos, setDatos] = useState({ modulos: [], videos: [] });
+  const [error, setError] = useState('');
+  const [recarga, setRecarga] = useState(0);
   const [search, setSearch] = useState('');
   const [categoriaActiva, setCategoriaActiva] = useState('todos');
-  const [nivelActivo, setNivelActivo] = useState('todos');
-  const [vistos, setVistos] = useState(() => {
-    const initial = {};
-    [...videosBase, ...customVideos].forEach((v) => {
-      initial[v.id] = v.visto || false;
-    });
-    return initial;
-  });
+  const [vistos, setVistos] = useState({});
   const [reproduciendo, setReproduciendo] = useState(null);
+  const [locales] = useState(() => leerVideosLocales().length);
 
-  // Formulario agregar video
-  const [mostrarForm, setMostrarForm] = useState(false);
-  const [nuevoTitulo, setNuevoTitulo] = useState('');
-  const [nuevoUrl, setNuevoUrl] = useState('');
-  const [nuevoDesc, setNuevoDesc] = useState('');
-  const [nuevoUnidad, setNuevoUnidad] = useState('limites');
-  const [nuevoNivel, setNuevoNivel] = useState('basico');
-  const [nuevoDuracion, setNuevoDuracion] = useState('');
-  const [formError, setFormError] = useState('');
+  useEffect(() => {
+    let vigente = true;
 
-  const allVideos = useMemo(() => [...videosBase, ...customVideos], [customVideos]);
+    api('/videos')
+      .then((respuesta) => {
+        if (!vigente) return;
+        setDatos({ modulos: respuesta.modulos ?? [], videos: respuesta.videos ?? [] });
+        setEstado('listo');
+      })
+      .catch((e) => {
+        if (!vigente) return;
+        setError(e.message);
+        setEstado('error');
+      });
 
-  // Un video que aun no esta en el mapa conserva su valor por defecto: así no hace
-  // falta sembrar el estado desde un efecto cada vez que se agrega uno nuevo.
-  const estaVisto = (video) => vistos[video.id] ?? video.visto ?? false;
-
-  const filtrados = useMemo(() => {
-    return allVideos.filter((v) => {
-      const matchSearch =
-        v.titulo.toLowerCase().includes(search.toLowerCase()) ||
-        v.descripcion.toLowerCase().includes(search.toLowerCase());
-      const matchCat = categoriaActiva === 'todos' || v.unidad === categoriaActiva;
-      const matchNivel = nivelActivo === 'todos' || v.nivel === nivelActivo;
-      return matchSearch && matchCat && matchNivel;
-    });
-  }, [search, categoriaActiva, nivelActivo, allVideos]);
-
-  const toggleVisto = (id) => {
-    setVistos((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleAgregarVideo = (e) => {
-    e.preventDefault();
-    setFormError('');
-
-    const youtubeId = extraerYoutubeId(nuevoUrl);
-    if (!youtubeId) {
-      setFormError('URL de YouTube no válida. Intenta con https://www.youtube.com/watch?v=... o https://youtu.be/...');
-      return;
-    }
-    if (!nuevoTitulo.trim()) {
-      setFormError('Ingresa un título para el video.');
-      return;
-    }
-
-    const nuevo = {
-      id: `custom-${Date.now()}`,
-      titulo: nuevoTitulo.trim(),
-      descripcion: nuevoDesc.trim() || 'Video agregado por el usuario',
-      youtubeId,
-      unidad: nuevoUnidad,
-      nivel: nuevoNivel,
-      duracion: nuevoDuracion.trim() || '??:??',
-      visto: false,
+    return () => {
+      vigente = false;
     };
+  }, [recarga]);
 
-    const updated = [...customVideos, nuevo];
-    setCustomVideos(updated);
-    saveCustomVideos(updated);
+  useEffect(() => {
+    if (usuario?.rol !== 'estudiante') return undefined;
 
-    // Limpiar formulario
-    setNuevoTitulo('');
-    setNuevoUrl('');
-    setNuevoDesc('');
-    setNuevoDuracion('');
-    setMostrarForm(false);
-  };
+    let vigente = true;
 
-  const handleEliminarVideo = (id) => {
-    const updated = customVideos.filter((v) => v.id !== id);
-    setCustomVideos(updated);
-    saveCustomVideos(updated);
-    if (reproduciendo === id) setReproduciendo(null);
-  };
+    listarVideosVistos().then((lista) => {
+      if (!vigente) return;
+      setVistos(Object.fromEntries(lista.map((video) => [video.youtubeId, true])));
+    });
 
-  const videoActual = allVideos.find((v) => v.id === reproduciendo);
+    return () => {
+      vigente = false;
+    };
+  }, [usuario]);
+
+  const videoActual = datos.videos.find((video) => video.id === reproduciendo) ?? null;
 
   useEffect(() => {
     if (usuario?.rol !== 'estudiante' || !videoActual) return;
-    const youtubeId = extraerYoutubeId(videoActual.youtubeId);
-    if (!youtubeId) return;
+
     registrarVideoVisto({
-      videoId: videoActual.id,
-      youtubeId,
+      videoId: videoActual.videoId || videoActual.id,
+      youtubeId: videoActual.youtubeId,
       titulo: videoActual.titulo,
-      unidad: videoActual.unidad,
+      unidad: videoActual.modulo,
     });
   }, [usuario, videoActual]);
+
+  const filtrados = useMemo(() => {
+    const texto = search.trim().toLowerCase();
+
+    return datos.videos.filter((video) => {
+      const coincide = !texto
+        || `${video.titulo} ${video.descripcion}`.toLowerCase().includes(texto);
+      const delModulo = categoriaActiva === 'todos' || video.modulo === categoriaActiva;
+
+      return coincide && delModulo;
+    });
+  }, [search, categoriaActiva, datos.videos]);
+
+  const nombreModulo = (id) => datos.modulos.find((modulo) => modulo.id === id)?.titulo ?? id;
+  const estaVisto = (video) => usuario?.rol === 'estudiante' && Boolean(vistos[video.youtubeId]);
+
+  const toggleVisto = (video) => {
+    const nuevo = !estaVisto(video);
+    setVistos((previos) => ({ ...previos, [video.youtubeId]: nuevo }));
+
+    if (nuevo && usuario?.rol === 'estudiante') {
+      registrarVideoVisto({
+        videoId: video.videoId || video.id,
+        youtubeId: video.youtubeId,
+        titulo: video.titulo,
+        unidad: video.modulo,
+      });
+    }
+  };
 
   return (
     <div style={styles.page}>
       <div className="container">
-        {/* Header */}
         <div style={styles.header}>
-          <span style={styles.tag}>HU09 — Sprint 3</span>
+          <span style={styles.tag}>Recursos</span>
           <h1 style={styles.title}>Videoteca</h1>
           <p style={styles.desc}>
-            Refuerza tu comprensión con explicaciones audiovisuales organizadas por tema, módulo y nivel de complejidad.
+            Refuerza tu comprensión con explicaciones audiovisuales organizadas por módulo y tema.
           </p>
         </div>
 
-        {/* Reproductor YouTube */}
-        {videoActual && (
+        {locales > 0 && (
+          <div style={styles.aviso}>
+            <FaYoutube style={styles.avisoIcono} />
+            <div style={styles.avisoTexto}>
+              <b>{locales} video{locales !== 1 ? 's' : ''} guardado{locales !== 1 ? 's' : ''} en este navegador</b>
+              <p>
+                Son de la versión anterior de la videoteca. Un administrador puede importarlos
+                desde Recursos y asignarles un tema.
+              </p>
+            </div>
+            {usuario?.rol === 'administrador' && (
+              <Link style={styles.avisoBoton} to="/admin/recursos">Importar en Recursos</Link>
+            )}
+          </div>
+        )}
+
+        {estado === 'cargando' && (
+          <div className="sesion-espera" role="status">Cargando la videoteca…</div>
+        )}
+
+        {estado === 'error' && (
+          <div style={styles.estadoCaja}>
+            <b>No se pudo cargar la videoteca</b>
+            <p style={styles.estadoTexto}>{error}</p>
+            <button
+              type="button"
+              style={styles.reintentar}
+              onClick={() => {
+                setEstado('cargando');
+                setError('');
+                setRecarga((n) => n + 1);
+              }}
+            >
+              <FiRefreshCw /> Reintentar
+            </button>
+          </div>
+        )}
+
+        {estado === 'listo' && videoActual && (
           <div style={styles.playerWrap}>
             <div style={styles.playerHeader}>
               <div>
-                <h3 style={styles.playerTitle}>{videoActual.titulo}</h3>
-                <p style={styles.playerMeta}>{videoActual.descripcion}</p>
+                <h3 style={styles.playerTitle}>{videoActual.titulo || 'Video de YouTube'}</h3>
+                <p style={styles.playerMeta}>
+                  {videoActual.descripcion || `${nombreModulo(videoActual.modulo)} · Tema ${videoActual.numero}`}
+                </p>
               </div>
               <button style={styles.playerClose} onClick={() => setReproduciendo(null)} title="Cerrar reproductor">
                 <IoClose />
@@ -159,218 +162,128 @@ export default function BibliotecaMultimedia() {
             <div style={styles.videoBox}>
               <iframe
                 style={styles.iframe}
-                src={youtubeEmbed(videoActual.youtubeId)}
-                title={videoActual.titulo}
+                src={youtubeEmbed(extraerYoutubeId(videoActual.youtubeId))}
+                title={videoActual.titulo || 'Video de YouTube'}
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             </div>
             <div style={styles.playerControls}>
-              <span style={styles.playerBadge}>{videoActual.nivel === 'basico' ? '🟢 Básico' : videoActual.nivel === 'intermedio' ? '🟡 Intermedio' : '🔴 Avanzado'}</span>
-              <span style={styles.playerBadge}>⏱ {videoActual.duracion}</span>
-              {estaVisto(videoActual) && <span style={styles.playerBadgeVisto}><FaCheck style={{ marginRight: 4 }} /> Visto</span>}
+              <span style={styles.playerBadge}>{nombreModulo(videoActual.modulo)}</span>
+              <span style={styles.playerBadge}>Tema {videoActual.numero}</span>
+              {estaVisto(videoActual) && (
+                <span style={styles.playerBadgeVisto}><FaCheck style={{ marginRight: 4 }} /> Visto</span>
+              )}
             </div>
           </div>
         )}
 
-        {/* Filtros */}
-        <div style={styles.filters}>
-          <div style={styles.searchWrap}>
-            <FiSearch style={{ color: '#8B89AE', flexShrink: 0 }} />
-            <input
-              style={styles.searchInput}
-              placeholder="Buscar videos por título o tema..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div style={styles.filterGroup}>
-            <span style={styles.filterLabel}>Módulo:</span>
-            <div style={styles.filterButtons}>
-              {categorias.map((c) => (
-                <button
-                  key={c.id}
-                  style={{ ...styles.filterBtn, ...(categoriaActiva === c.id ? styles.filterBtnActive : {}) }}
-                  onClick={() => setCategoriaActiva(c.id)}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div style={styles.filterGroup}>
-            <span style={styles.filterLabel}>Nivel:</span>
-            <div style={styles.filterButtons}>
-              {niveles.map((n) => (
-                <button
-                  key={n.id}
-                  style={{ ...styles.filterBtn, ...(nivelActivo === n.id ? styles.filterBtnActive : {}) }}
-                  onClick={() => setNivelActivo(n.id)}
-                >
-                  {n.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Botón agregar */}
-        <div style={styles.addBar}>
-          <div style={styles.resultsCount}>
-            {filtrados.length} video{filtrados.length !== 1 ? 's' : ''} encontrado{filtrados.length !== 1 ? 's' : ''}
-            {' · '}
-            {allVideos.filter(estaVisto).length}/{allVideos.length} vistos
-          </div>
-          <button style={styles.addBtn} onClick={() => setMostrarForm(!mostrarForm)}>
-            {mostrarForm ? '− Cancelar' : '+ Agregar video de YouTube'}
-          </button>
-        </div>
-
-        {/* Formulario agregar video */}
-        {mostrarForm && (
-          <form onSubmit={handleAgregarVideo} style={styles.formPanel}>
-            <h3 style={styles.formTitle}><FaYoutube style={{ verticalAlign: 'middle', marginRight: 6 }} /> Agregar video de YouTube</h3>
-            <div style={styles.formGrid}>
-              <div style={styles.formField}>
-                <label style={styles.formLabel}>Título del video *</label>
+        {estado === 'listo' && datos.videos.length > 0 && (
+          <>
+            <div style={styles.filters}>
+              <div style={styles.searchWrap}>
+                <FiSearch style={{ color: '#8B89AE', flexShrink: 0 }} />
                 <input
-                  style={styles.formInput}
-                  value={nuevoTitulo}
-                  onChange={(e) => setNuevoTitulo(e.target.value)}
-                  placeholder="Ej: Introducción a Derivadas"
-                  required
+                  style={styles.searchInput}
+                  placeholder="Buscar videos por título o tema..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <div style={styles.formField}>
-                <label style={styles.formLabel}>URL de YouTube *</label>
-                <input
-                  style={styles.formInput}
-                  value={nuevoUrl}
-                  onChange={(e) => setNuevoUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  required
-                />
-              </div>
-              <div style={styles.formField}>
-                <label style={styles.formLabel}>Descripción</label>
-                <input
-                  style={styles.formInput}
-                  value={nuevoDesc}
-                  onChange={(e) => setNuevoDesc(e.target.value)}
-                  placeholder="Breve descripción del contenido"
-                />
-              </div>
-              <div style={styles.formField}>
-                <label style={styles.formLabel}>Duración (ej: 12:34)</label>
-                <input
-                  style={styles.formInput}
-                  value={nuevoDuracion}
-                  onChange={(e) => setNuevoDuracion(e.target.value)}
-                  placeholder="??:??"
-                />
-              </div>
-              <div style={styles.formField}>
-                <label style={styles.formLabel}>Módulo</label>
-                <select style={styles.formInput} value={nuevoUnidad} onChange={(e) => setNuevoUnidad(e.target.value)}>
-                  {categorias.filter((c) => c.id !== 'todos').map((c) => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={styles.formField}>
-                <label style={styles.formLabel}>Nivel</label>
-                <select style={styles.formInput} value={nuevoNivel} onChange={(e) => setNuevoNivel(e.target.value)}>
-                  {niveles.filter((n) => n.id !== 'todos').map((n) => (
-                    <option key={n.id} value={n.id}>{n.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            {formError && <div style={styles.formError}>{formError}</div>}
-            <div style={styles.formActions}>
-              <button type="submit" style={styles.formSubmit}><FaCheck style={{ marginRight: 4 }} /> Guardar video</button>
-            </div>
-          </form>
-        )}
 
-        {/* Grid de videos */}
-        <div style={styles.grid}>
-          {filtrados.map((video) => {
-            const isCustom = video.id.startsWith('custom-');
-            return (
-              <div key={video.id} style={styles.card}>
-                <div style={styles.thumbWrap} onClick={() => setReproduciendo(video.id)}>
-                  <img
-                    // El campo guarda la URL completa de YouTube, no el ID:
-                    // hay que extraerlo o la miniatura sale 404.
-                    src={youtubeThumb(extraerYoutubeId(video.youtubeId))}
-                    alt={video.titulo}
-                    style={styles.thumb}
-                    onError={(e) => { e.target.src = '/Estudiantes(1).jpeg'; }}
-                  />
-                  <div style={styles.thumbOverlay}>
-                    <div style={styles.playBtn}><FaPlay /></div>
-                  </div>
-                  <span style={styles.duracion}>{video.duracion}</span>
-                  {estaVisto(video) && <span style={styles.vistoBadge}><FaCheck style={{ marginRight: 4 }} /> Visto</span>}
-                </div>
-                <div style={styles.cardBody}>
-                  <h3 style={styles.cardTitle}>{video.titulo}</h3>
-                  <p style={styles.cardDesc}>{video.descripcion}</p>
-                  <div style={styles.cardMeta}>
-                    <span
-                      style={{
-                        ...styles.nivelBadge,
-                        ...(video.nivel === 'basico'
-                          ? styles.nivelBasico
-                          : video.nivel === 'intermedio'
-                          ? styles.nivelIntermedio
-                          : styles.nivelAvanzado),
-                      }}
-                    >
-                      {video.nivel === 'basico' ? 'Básico' : video.nivel === 'intermedio' ? 'Intermedio' : 'Avanzado'}
-                    </span>
-                    <span style={styles.unidadBadge}>
-                      {video.unidad === 'limites' ? 'Límites' : video.unidad === 'derivadas' ? 'Derivadas' : 'Aplicaciones'}
-                    </span>
-                  </div>
-                  <div style={styles.cardActions}>
-                    <button style={styles.actionBtnPlay} onClick={() => setReproduciendo(video.id)}>
-                      <FaPlay style={{ marginRight: 4 }} /> Reproducir
-                    </button>
+              {datos.modulos.length > 0 && (
+                <div style={styles.filterGroup}>
+                  <span style={styles.filterLabel}>Módulo:</span>
+                  <div style={styles.filterButtons}>
                     <button
-                      style={{
-                        ...styles.actionBtnCheck,
-                        ...(estaVisto(video) ? styles.actionBtnCheckActive : {}),
-                      }}
-                      onClick={() => toggleVisto(video.id)}
+                      style={{ ...styles.filterBtn, ...(categoriaActiva === 'todos' ? styles.filterBtnActive : {}) }}
+                      onClick={() => setCategoriaActiva('todos')}
                     >
-                      {estaVisto(video) ? <><FaCheck style={{ marginRight: 4 }} /> Visto</> : 'Marcar visto'}
+                      Todos
                     </button>
-                    {isCustom && (
+                    {datos.modulos.map((modulo) => (
                       <button
-                        style={styles.actionBtnDelete}
-                        onClick={() => handleEliminarVideo(video.id)}
-                        title="Eliminar video"
+                        key={modulo.id}
+                        style={{ ...styles.filterBtn, ...(categoriaActiva === modulo.id ? styles.filterBtnActive : {}) }}
+                        onClick={() => setCategoriaActiva(modulo.id)}
                       >
-                        <FaTrash />
+                        {modulo.titulo}
                       </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.addBar}>
+              <div style={styles.resultsCount}>
+                {filtrados.length} video{filtrados.length !== 1 ? 's' : ''} encontrado{filtrados.length !== 1 ? 's' : ''}
+                {' · '}
+                {datos.videos.filter(estaVisto).length}/{datos.videos.length} vistos
+              </div>
+            </div>
+
+            <div style={styles.grid}>
+              {filtrados.map((video) => (
+                <div key={video.id} style={styles.card}>
+                  <div style={styles.thumbWrap} onClick={() => setReproduciendo(video.id)}>
+                    <img
+                      src={youtubeThumb(extraerYoutubeId(video.youtubeId))}
+                      alt={video.titulo || 'Video'}
+                      style={styles.thumb}
+                      onError={(e) => { e.target.src = '/Estudiantes(1).jpeg'; }}
+                    />
+                    <div style={styles.thumbOverlay}>
+                      <div style={styles.playBtn}><FaPlay /></div>
+                    </div>
+                    {estaVisto(video) && (
+                      <span style={styles.vistoBadge}><FaCheck style={{ marginRight: 4 }} /> Visto</span>
                     )}
                   </div>
+                  <div style={styles.cardBody}>
+                    <h3 style={styles.cardTitle}>{video.titulo || 'Video de YouTube'}</h3>
+                    <p style={styles.cardDesc}>{video.descripcion || 'Video de apoyo del tema.'}</p>
+                    <div style={styles.cardMeta}>
+                      <span style={styles.unidadBadge}>{nombreModulo(video.modulo)}</span>
+                      <span style={styles.temaBadge}>Tema {video.numero}</span>
+                    </div>
+                    <div style={styles.cardActions}>
+                      <button style={styles.actionBtnPlay} onClick={() => setReproduciendo(video.id)}>
+                        <FaPlay style={{ marginRight: 4 }} /> Reproducir
+                      </button>
+                      <button
+                        style={{
+                          ...styles.actionBtnCheck,
+                          ...(estaVisto(video) ? styles.actionBtnCheckActive : {}),
+                        }}
+                        onClick={() => toggleVisto(video)}
+                      >
+                        {estaVisto(video) ? <><FaCheck style={{ marginRight: 4 }} /> Visto</> : 'Marcar visto'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              ))}
+            </div>
 
-        {filtrados.length === 0 && (
+            {filtrados.length === 0 && (
+              <div style={styles.empty}>
+                <div style={styles.emptyIcon}><FiSearch /></div>
+                <h3 style={styles.emptyTitle}>No se encontraron videos</h3>
+                <p style={styles.emptyText}>Intenta con otro término de búsqueda o cambia el módulo.</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {estado === 'listo' && datos.videos.length === 0 && (
           <div style={styles.empty}>
-            <div style={styles.emptyIcon}><FiSearch /></div>
-            <h3 style={styles.emptyTitle}>No se encontraron videos</h3>
-            <p style={styles.emptyText}>Intenta con otros términos de búsqueda, ajusta los filtros o agrega un video nuevo.</p>
+            <div style={styles.emptyIcon}><FaYoutube /></div>
+            <h3 style={styles.emptyTitle}>La videoteca está vacía</h3>
+            <p style={styles.emptyText}>
+              Los videos se agregan desde el editor de cada tema y aparecen aquí al publicarlo.
+            </p>
           </div>
         )}
       </div>
@@ -394,6 +307,30 @@ const styles = {
   },
   desc: {
     fontSize: '16px', color: '#64628A', margin: 0, lineHeight: 1.55,
+  },
+
+  aviso: {
+    display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap',
+    padding: '16px 20px', marginBottom: '24px', borderRadius: '14px',
+    background: '#FFFBEB', border: '1px solid rgba(245,158,11,0.35)',
+  },
+  avisoIcono: { fontSize: '24px', color: '#DC2626', flexShrink: 0 },
+  avisoTexto: { flex: 1, minWidth: '220px' },
+  avisoBoton: {
+    padding: '9px 16px', borderRadius: '10px', background: '#F59E0B',
+    color: '#252350', fontSize: '13px', fontWeight: 700, textDecoration: 'none',
+  },
+
+  estadoCaja: {
+    padding: '40px 24px', textAlign: 'center', color: '#252350',
+    background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E6E5F5',
+  },
+  estadoTexto: { color: '#64628A', fontSize: '14px', margin: '8px 0 18px' },
+  reintentar: {
+    display: 'inline-flex', alignItems: 'center', gap: '8px',
+    padding: '10px 18px', borderRadius: '10px', border: '1px solid #E6E5F5',
+    background: '#FFFBEB', color: '#B45309', fontSize: '14px',
+    fontWeight: 700, cursor: 'pointer',
   },
 
   playerWrap: {
@@ -431,7 +368,7 @@ const styles = {
   },
   playerBadge: {
     fontSize: '12px', color: '#64628A',
-    padding: '6px 12px', background: '#F3F2FC', borderRadius: '8px',
+    padding: '6px 12px', background: '#FFFFFF', borderRadius: '8px',
     display: 'inline-flex', alignItems: 'center',
   },
   playerBadgeVisto: {
@@ -478,49 +415,6 @@ const styles = {
   resultsCount: {
     fontSize: '13px', color: '#64628A', fontWeight: 600,
   },
-  addBtn: {
-    padding: '10px 18px', borderRadius: '10px', border: '2px dashed rgba(245,158,11,0.35)',
-    background: '#FFFBEB', color: '#B45309', fontSize: '14px',
-    fontWeight: 700, cursor: 'pointer',
-  },
-
-  formPanel: {
-    background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E6E5F5',
-    padding: '24px', marginBottom: '24px', boxShadow: '0 4px 12px rgba(37,35,80,0.05)',
-  },
-  formTitle: {
-    fontSize: '17px', fontWeight: 700, color: '#252350', margin: '0 0 16px',
-    fontFamily: "'Poppins', sans-serif",
-    display: 'flex', alignItems: 'center',
-  },
-  formGrid: {
-    display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px',
-  },
-  formField: {
-    display: 'flex', flexDirection: 'column', gap: '6px',
-  },
-  formLabel: {
-    fontSize: '12px', fontWeight: 700, color: '#64628A',
-    textTransform: 'uppercase', letterSpacing: '0.5px',
-  },
-  formInput: {
-    padding: '10px 12px', borderRadius: '10px', border: '1px solid #E6E5F5',
-    fontSize: '14px', fontFamily: "'Inter', sans-serif", outline: 'none',
-    background: '#F3F2FC', color: '#252350',
-  },
-  formError: {
-    marginTop: '12px', padding: '10px 14px', background: 'rgba(239,68,68,0.1)',
-    color: '#DC2626', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
-  },
-  formActions: {
-    marginTop: '16px', display: 'flex', justifyContent: 'flex-end',
-  },
-  formSubmit: {
-    padding: '10px 24px', borderRadius: '10px', border: 'none',
-    background: '#F59E0B', color: '#252350', fontSize: '14px', fontWeight: 700,
-    cursor: 'pointer',
-    display: 'inline-flex', alignItems: 'center',
-  },
 
   grid: {
     display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(360px, 100%), 1fr))', gap: '24px',
@@ -551,11 +445,6 @@ const styles = {
     fontSize: '20px', paddingLeft: '4px',
     boxShadow: '0 4px 12px rgba(37,35,80,0.07)',
   },
-  duracion: {
-    position: 'absolute', bottom: '10px', right: '10px',
-    background: 'rgba(0,0,0,0.75)', color: '#FFFFFF', fontSize: '12px',
-    fontWeight: 700, padding: '4px 8px', borderRadius: '6px',
-  },
   vistoBadge: {
     position: 'absolute', top: '10px', left: '10px',
     background: '#047857', color: '#FFFFFF', fontSize: '11px',
@@ -575,17 +464,15 @@ const styles = {
   cardMeta: {
     display: 'flex', gap: '8px', flexWrap: 'wrap',
   },
-  nivelBadge: {
-    fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px',
-    textTransform: 'uppercase', letterSpacing: '0.5px',
-  },
-  nivelBasico: { background: 'rgba(16,185,129,0.12)', color: '#047857' },
-  nivelIntermedio: { background: '#FFFBEB', color: '#B45309' },
-  nivelAvanzado: { background: 'rgba(239,68,68,0.12)', color: '#B91C1C' },
   unidadBadge: {
     fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px',
     textTransform: 'uppercase', letterSpacing: '0.5px',
     background: '#FFFBEB', color: '#B45309',
+  },
+  temaBadge: {
+    fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px',
+    textTransform: 'uppercase', letterSpacing: '0.5px',
+    background: '#F3F2FC', color: '#4F46E5',
   },
   cardActions: {
     display: 'flex', gap: '8px', marginTop: '4px',
@@ -604,11 +491,6 @@ const styles = {
   actionBtnCheckActive: {
     background: '#047857', color: '#FFFFFF', borderColor: '#047857',
   },
-  actionBtnDelete: {
-    padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.3)',
-    background: 'rgba(239,68,68,0.06)', color: '#DC2626', fontSize: '14px', cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-  },
 
   empty: {
     textAlign: 'center', padding: '64px 24px',
@@ -620,18 +502,3 @@ const styles = {
   },
   emptyText: { fontSize: '15px', color: '#64628A', margin: 0 },
 };
-
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = `
-    @media (max-width: 1024px) {
-      .biblioteca-grid { grid-template-columns: repeat(2, 1fr) !important; }
-      .biblioteca-form-grid { grid-template-columns: repeat(2, 1fr) !important; }
-    }
-    @media (max-width: 768px) {
-      .biblioteca-grid { grid-template-columns: 1fr !important; }
-      .biblioteca-form-grid { grid-template-columns: 1fr !important; }
-    }
-  `;
-  document.head.appendChild(style);
-}

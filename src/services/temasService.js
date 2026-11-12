@@ -1,48 +1,21 @@
-import { getTemaById, unidades } from '../data/temas';
-import { videosDeTema } from '../data/videos';
-import { contenidoABloques } from '../lib/bloques';
 import { api } from './api';
 
 /**
- * El curso sale de la base de datos. data/temas.js queda como respaldo: si el
- * backend no responde, la app pública sigue funcionando con esa copia.
+ * El curso sale siempre de la API. data/temas.js no se usa como respaldo:
+ * esa copia no conoce la visibilidad actual y podría mostrar temas privados,
+ * en papelera o ya eliminados.
  */
-export const cursoLocal = () => ({
-  modulos: unidades.map(({ id, titulo, descripcion, icono, color, temas }) => ({
-    id,
-    titulo,
-    descripcion,
-    icono,
-    color,
-    temas: temas.map((t) => ({ id: t.id, titulo: t.titulo, descripcion: t.descripcion })),
-  })),
-});
-
 export async function obtenerCurso() {
-  try {
-    const curso = await api('/temas');
-    return curso.modulos.length ? curso : cursoLocal();
-  } catch {
-    return cursoLocal();
-  }
+  return api('/temas');
 }
 
 export async function obtenerTema(modulo, numero) {
   try {
-    const tema = await api(`/temas/${encodeURIComponent(modulo)}/${encodeURIComponent(numero)}`);
-    return { ...tema, videos: tema.videos ?? videosDeTema(modulo, numero) };
-  } catch {
-    const local = getTemaById(modulo, numero);
-
-    return local
-      ? {
-        ...local,
-        modulo,
-        bloques: contenidoABloques(local.contenido),
-        videos: videosDeTema(modulo, numero),
-        practicas: [],
-      }
-      : null;
+    return await api(`/temas/${encodeURIComponent(modulo)}/${encodeURIComponent(numero)}`);
+  } catch (error) {
+    // Privado o en papelera: el backend responde 404 y el tema no existe.
+    if (error?.estado === 404) return null;
+    throw error;
   }
 }
 

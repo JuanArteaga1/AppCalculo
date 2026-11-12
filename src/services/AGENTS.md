@@ -4,7 +4,7 @@
 | Archivo | Qué hace |
 | --- | --- |
 | `api.js` | Toda llamada al backend; lanza `ErrorApi` |
-| `temasService.js` | Curso desde la API con respaldo local y visitas |
+| `temasService.js` | Curso y temas desde la API, sin respaldo local; visitas |
 | `alertas.js` | Toda alerta Sileo: duración y Deshacer |
 | `chatbotService.js` | Tutor con OpenAI desde el navegador |
 | `openaiService.js` | Resolución con IA desde el navegador |

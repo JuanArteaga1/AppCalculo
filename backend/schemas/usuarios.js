@@ -24,6 +24,13 @@ const usuarioSchema = new mongoose.Schema({
         select: false
     },
 
+    // Identificador de Google: une la cuenta aunque el correo cambie de formato.
+    googleId: {
+        type: String,
+        trim: true,
+        default: null
+    },
+
     rol: {
         type: String,
         required: true,

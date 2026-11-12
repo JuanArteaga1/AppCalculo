@@ -3,6 +3,8 @@ import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-r
 import {
   FiArrowLeft,
   FiArrowRight,
+  FiBarChart2,
+  FiBookOpen,
   FiClipboard,
   FiFolder,
   FiGrid,
@@ -10,8 +12,11 @@ import {
   FiPlus,
   FiSearch,
   FiSettings,
+  FiTrash2,
   FiUsers,
+  FiVideo,
 } from 'react-icons/fi';
+import { alerta, alertaError } from '../services/alertas';
 import EditorTema from '../components/admin/EditorTema';
 import { decimal, entero } from '../components/admin/formato';
 import { BarrasMagnitud, LineaSemanas } from '../components/admin/GraficasAdmin';
@@ -19,9 +24,9 @@ import {
   CREACIONES,
   DOCENTES,
   PASTILLA_ESTADO,
-  RECURSOS,
 } from '../data/mockAdmin';
 import { unidades } from '../data/temas';
+import { extraerYoutubeId, youtubeThumb, leerVideosLocales, quitarVideoLocal } from '../data/videos';
 import { useSesion } from '../context/sesion';
 import { api } from '../services/api';
 import NoEncontrado from './NoEncontrado';
@@ -33,10 +38,14 @@ const SECCIONES = [
   ['panel', 'Panel', FiGrid, null],
   ['modulos', 'Módulos', FiFolder, MODULOS.length],
   ['evaluate', 'Evalúate', FiClipboard, CREACIONES.length],
-  ['recursos', 'Recursos', FiGrid, RECURSOS.length],
+  ['recursos', 'Recursos', FiGrid, null],
   ['usuarios', 'Usuarios', FiUsers, DOCENTES.length],
+  ['papelera', 'Papelera', FiTrash2, null],
   ['configuracion', 'Configuración', FiSettings, null],
 ];
+
+/** Módulo especial del curso: no aparece en Cálculo I. */
+const MODULO_CONCEPTOS_PREVIOS = 'conceptos-previos';
 
 const moduloPorId = (id) => MODULOS.find((m) => m.id === id);
 const docentePorId = (id) => DOCENTES.find((d) => d.id === id);
@@ -82,7 +91,8 @@ function useDatosAdmin() {
   return { datos, reintentar };
 }
 
-const COLOR_MODULO = (id) => `var(--serie-${id})`;
+// conceptos-previos no tiene color de serie: se pinta con el ámbar del repaso.
+const COLOR_MODULO = (id) => (id === MODULO_CONCEPTOS_PREVIOS ? '#B45309' : `var(--serie-${id})`);
 const visitasDe = (modulo, porTema) => modulo.temas.reduce((suma, t) => suma + (porTema[t.id] ?? 0), 0);
 
 function Carga({ datos, reintentar, children }) {
@@ -130,12 +140,15 @@ export default function Admin() {
       ? <EditorTema key={`${detalle}/${tema}`} modulo={detalle} numero={tema} />
       : (
         <Carga datos={datos} reintentar={reintentar}>
-          {(d) => (detalle ? <VistaModulo id={detalle} {...d} /> : <VistaModulos {...d} />)}
+          {(d) => (detalle
+            ? <VistaModulo id={detalle} {...d} recargar={reintentar} />
+            : <VistaModulos {...d} />)}
         </Carga>
       ),
     evaluate: detalle ? <VistaCreacion id={detalle} /> : <VistaEvaluate />,
     recursos: <VistaRecursos />,
     usuarios: <VistaUsuarios />,
+    papelera: <VistaPapelera recargar={reintentar} />,
     configuracion: <VistaConfiguracion />,
   };
 
@@ -360,14 +373,164 @@ function VistaModulos({ curso, visitas }) {
   );
 }
 
-function VistaModulo({ id, curso, visitas }) {
+const PREFIJO_MODULO = { limites: '1', derivadas: '2', aplicaciones: '3', 'conceptos-previos': 'CP' };
+
+const rutaTema = (modulo, numero) => `/admin/temas/${encodeURIComponent(modulo)}/${encodeURIComponent(numero)}`;
+
+/** Sugiere el siguiente número del módulo: 1.11, 2.9, CP.2… */
+function siguienteNumero(modulo) {
+  const numeros = modulo.temas
+    .map((tema) => String(tema.id).match(/^([\w]+)\.(\d+)$/))
+    .filter(Boolean)
+    .map(([, prefijo, numero]) => ({ prefijo, numero: Number(numero) }));
+
+  const prefijo = PREFIJO_MODULO[modulo.id] ?? numeros[0]?.prefijo ?? '1';
+  const mayor = numeros
+    .filter((n) => n.prefijo === prefijo)
+    .reduce((maximo, n) => Math.max(maximo, n.numero), 0);
+
+  return `${prefijo}.${mayor + 1}`;
+}
+
+function NuevoTema({ modulo, onCerrar, onCreado }) {
+  const [numero, setNumero] = useState(() => siguienteNumero(modulo));
+  const [titulo, setTitulo] = useState('');
+  const [visibilidad, setVisibilidad] = useState('privado');
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState('');
+
+  const enviar = async (evento) => {
+    evento.preventDefault();
+    setError('');
+
+    if (!titulo.trim()) {
+      setError('Escribe el título del tema.');
+      return;
+    }
+
+    setGuardando(true);
+
+    try {
+      const creado = await api('/admin/temas', {
+        metodo: 'POST',
+        cuerpo: {
+          modulo: modulo.id,
+          numero: numero.trim(),
+          titulo: titulo.trim(),
+          visibilidad,
+        },
+      });
+      onCreado(creado);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  return (
+    <div className="modal-fondo" role="dialog" aria-modal="true" aria-labelledby="nuevo-tema-titulo">
+      <form className="modal-caja tarjeta" onSubmit={enviar}>
+        <div className="cabeza-fila">
+          <h2 id="nuevo-tema-titulo">Nuevo tema en {modulo.titulo}</h2>
+          <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={onCerrar}>Cerrar</button>
+        </div>
+
+        {error && <div className="aviso-caja" role="alert">{error}</div>}
+
+        <div className="campo">
+          <label htmlFor="nuevo-numero">Número del tema</label>
+          <input
+            id="nuevo-numero"
+            value={numero}
+            maxLength={20}
+            onChange={(e) => setNumero(e.target.value)}
+            disabled={guardando}
+          />
+          <span className="campo-ayuda">Es el identificador de la URL, por ejemplo 1.11.</span>
+        </div>
+
+        <div className="campo">
+          <label htmlFor="nuevo-titulo">Título</label>
+          <input
+            id="nuevo-titulo"
+            value={titulo}
+            maxLength={200}
+            onChange={(e) => setTitulo(e.target.value)}
+            disabled={guardando}
+            autoFocus
+          />
+        </div>
+
+        <div className="campo">
+          <label htmlFor="nuevo-visibilidad">Visibilidad</label>
+          <select
+            id="nuevo-visibilidad"
+            value={visibilidad}
+            onChange={(e) => setVisibilidad(e.target.value)}
+            disabled={guardando}
+          >
+            <option value="privado">Privado (solo administradores)</option>
+            <option value="publico">Público (visible para estudiantes)</option>
+          </select>
+          <span className="campo-ayuda">Nace privado para que puedas prepararlo antes de mostrarlo.</span>
+        </div>
+
+        <div className="fila-botones">
+          <button type="button" className="pnl-btn pnl-btn-secundario" onClick={onCerrar} disabled={guardando}>Cancelar</button>
+          <button type="submit" className="pnl-btn pnl-btn-primario" disabled={guardando}>
+            {guardando ? 'Creando…' : 'Crear tema'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function VistaModulo({ id, curso, visitas, recargar }) {
   const modulo = curso.modulos.find((m) => m.id === id);
+  const navigate = useNavigate();
+  const [creando, setCreando] = useState(false);
+  const [confirmarBorrado, setConfirmarBorrado] = useState('');
+  const [ocupado, setOcupado] = useState('');
 
   if (!modulo) return <NoEncontrado titulo="Módulo no encontrado" mensaje="Ese módulo no existe." destino="/admin/modulos" textoDestino="Volver a Módulos" />;
 
   const color = COLOR_MODULO(modulo.id);
   const { porTema } = visitas;
   const maximo = Math.max(...modulo.temas.map((t) => porTema[t.id] ?? 0), 1);
+
+  const cambiarVisibilidad = async (tema) => {
+    const visibilidad = tema.visibilidad === 'privado' ? 'publico' : 'privado';
+    setOcupado(tema.id);
+
+    try {
+      await api(`${rutaTema(modulo.id, tema.id)}/visibilidad`, { metodo: 'PUT', cuerpo: { visibilidad } });
+      alerta.ok(visibilidad === 'publico' ? 'Tema visible' : 'Tema oculto', visibilidad === 'publico'
+        ? 'Los estudiantes ya pueden verlo.'
+        : 'Los estudiantes y docentes recibirán un 404.');
+      recargar();
+    } catch (e) {
+      alertaError('No se pudo cambiar la visibilidad', e);
+    } finally {
+      setOcupado('');
+    }
+  };
+
+  const moverAPapelera = async (tema) => {
+    setConfirmarBorrado('');
+    setOcupado(tema.id);
+
+    try {
+      await api(rutaTema(modulo.id, tema.id), { metodo: 'DELETE' });
+      alerta.info('Tema en la papelera', 'Puedes restaurarlo desde la sección Papelera.');
+      recargar();
+    } catch (e) {
+      alertaError('No se pudo mover el tema a la papelera', e);
+    } finally {
+      setOcupado('');
+    }
+  };
 
   return (
     <>
@@ -378,7 +541,23 @@ function VistaModulo({ id, curso, visitas }) {
           <h1>{modulo.titulo}</h1>
           <p>{modulo.temas.length} temas · {entero(visitasDe(modulo, porTema))} visitas en 8 semanas</p>
         </div>
+        <button type="button" className="pnl-btn pnl-btn-primario" onClick={() => setCreando(true)}>
+          <FiPlus />Nuevo tema
+        </button>
       </div>
+
+      {creando && (
+        <NuevoTema
+          modulo={modulo}
+          onCerrar={() => setCreando(false)}
+          onCreado={(creado) => {
+            setCreando(false);
+            recargar();
+            alerta.ok('Tema creado', 'Se abrió el editor para que agregues el contenido.');
+            navigate(`/admin/modulos/${encodeURIComponent(modulo.id)}/${encodeURIComponent(creado.numero)}`);
+          }}
+        />
+      )}
 
       <div className="tarjeta">
         <div className="tabla-caja">
@@ -389,12 +568,14 @@ function VistaModulo({ id, curso, visitas }) {
                 <th>Tema</th>
                 <th>Visitas</th>
                 <th>Estado</th>
+                <th>Visibilidad</th>
                 <th aria-label="Acciones" />
               </tr>
             </thead>
             <tbody>
               {modulo.temas.map((t) => {
                 const cantidad = porTema[t.id] ?? 0;
+                const privado = t.visibilidad === 'privado';
                 return (
                   <tr key={t.id}>
                     <td><b>{t.id}</b></td>
@@ -408,8 +589,43 @@ function VistaModulo({ id, curso, visitas }) {
                       </span>
                     </td>
                     <td><Pastilla estado={t.tieneBorrador ? 'borrador' : 'publicada'} /></td>
+                    <td>
+                      <button
+                        type="button"
+                        className={`pastilla ${privado ? 'pastilla-off' : 'pastilla-ok'}`}
+                        title={privado ? 'Hacer público' : 'Hacer privado'}
+                        onClick={() => cambiarVisibilidad(t)}
+                        disabled={ocupado === t.id}
+                      >
+                        {privado ? 'Privado' : 'Público'}
+                      </button>
+                    </td>
                     <td style={{ textAlign: 'right' }}>
-                      <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to={`/admin/modulos/${modulo.id}/${t.id}`}>Editar</Link>
+                      {confirmarBorrado === t.id ? (
+                        <span className="fila-botones">
+                          <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={() => setConfirmarBorrado('')}>Cancelar</button>
+                          <button
+                            type="button"
+                            className="pnl-btn pnl-btn-peligro pnl-btn-chico"
+                            onClick={() => moverAPapelera(t)}
+                            disabled={ocupado === t.id}
+                          >
+                            Sí, mover
+                          </button>
+                        </span>
+                      ) : (
+                        <span className="fila-botones">
+                          <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to={`/admin/modulos/${modulo.id}/${t.id}`}>Editar</Link>
+                          <button
+                            type="button"
+                            className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                            onClick={() => setConfirmarBorrado(t.id)}
+                            disabled={ocupado === t.id}
+                          >
+                            <FiTrash2 />Papelera
+                          </button>
+                        </span>
+                      )}
                     </td>
                   </tr>
                 );
@@ -961,31 +1177,600 @@ function VistaCreacion({ id }) {
   );
 }
 
+const PESTANAS_RECURSOS = [
+  ['videoteca', 'Videoteca', FiVideo],
+  ['laboratorio', 'Laboratorio', FiBarChart2],
+  ['conceptos', 'Conceptos previos', FiBookOpen],
+];
+
 function VistaRecursos() {
+  const [pestana, setPestana] = useState('videoteca');
+
+  const contenido = {
+    videoteca: <RecursosVideoteca />,
+    laboratorio: <RecursosLaboratorio />,
+    conceptos: <RecursosConceptosPrevios />,
+  };
+
   return (
     <>
       <div className="admin-cabeza">
         <div>
           <h1>Recursos</h1>
-          <p>Son las pestañas que el estudiante ve dentro de cada lección.</p>
+          <p>
+            Videos, ejercicios de práctica y conceptos previos del curso. Aquí solo se consultan:
+            la edición vive en el editor de cada tema.
+          </p>
         </div>
-        <button type="button" className="pnl-btn pnl-btn-primario"><FiPlus />Agregar recurso</button>
       </div>
 
-      <ul className="lista">
-        {RECURSOS.map((r) => (
-          <li key={r.id} className="item">
-            <span className="item-icono">{r.nombre.slice(0, 1)}</span>
-            <span className="item-txt">
-              <b>{r.nombre}</b>
-              <span>{r.descripcion}</span>
-            </span>
-            <span className="suave-txt">{r.piezas} piezas</span>
-            <Pastilla estado={r.visible ? 'activo' : 'oculta'} />
-            <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico">Editar</button>
-          </li>
+      <div className="filtros" role="tablist" aria-label="Recursos">
+        {PESTANAS_RECURSOS.map(([clave, texto, Icono]) => (
+          <button
+            key={clave}
+            type="button"
+            role="tab"
+            className="pildora"
+            aria-selected={pestana === clave}
+            aria-pressed={pestana === clave}
+            onClick={() => setPestana(clave)}
+          >
+            <Icono aria-hidden="true" /> {texto}
+          </button>
         ))}
-      </ul>
+      </div>
+
+      {contenido[pestana]}
+    </>
+  );
+}
+
+function RecursosVideoteca() {
+  const [datos, setDatos] = useState({ estado: 'cargando' });
+  const [modulosCurso, setModulosCurso] = useState([]);
+  const [locales, setLocales] = useState(() => leerVideosLocales());
+  const [destinos, setDestinos] = useState({});
+  const [importando, setImportando] = useState('');
+  const [recarga, setRecarga] = useState(0);
+
+  useEffect(() => {
+    let vigente = true;
+
+    Promise.all([api('/videos'), api('/admin/temas')])
+      .then(([videoteca, curso]) => {
+        if (!vigente) return;
+        setDatos({ estado: 'listo', modulos: videoteca.modulos ?? [], videos: videoteca.videos ?? [] });
+        setModulosCurso(curso.modulos ?? []);
+      })
+      .catch((e) => {
+        if (!vigente) return;
+        setDatos({ estado: 'error', mensaje: e.message });
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, [recarga]);
+
+  const reintentar = () => {
+    setDatos({ estado: 'cargando' });
+    setRecarga((valor) => valor + 1);
+  };
+
+  const destinoDe = (video) => destinos[video.id] ?? { modulo: '', tema: '' };
+
+  const cambiarDestino = (id, campo, valor) => {
+    setDestinos((actual) => ({
+      ...actual,
+      [id]: {
+        ...(actual[id] ?? { modulo: '', tema: '' }),
+        [campo]: valor,
+        ...(campo === 'modulo' ? { tema: '' } : {}),
+      },
+    }));
+  };
+
+  const importar = async (video) => {
+    const destino = destinoDe(video);
+
+    if (!destino.modulo || !destino.tema) {
+      alerta.aviso('Falta el destino', 'Elige el módulo y el tema al que pertenece el video.');
+      return;
+    }
+
+    setImportando(video.id);
+
+    try {
+      const respuesta = await api('/admin/videos/importar', {
+        metodo: 'POST',
+        cuerpo: {
+          modulo: destino.modulo,
+          tema: destino.tema,
+          url: video.youtubeId ?? video.url,
+          titulo: video.titulo,
+          descripcion: video.descripcion,
+        },
+      });
+
+      setLocales(quitarVideoLocal(video.id));
+      alerta.ok(
+        'Video importado',
+        `Se agregó al borrador de ${respuesta.tema.titulo}. Publica ese tema para verlo en la videoteca.`,
+      );
+    } catch (e) {
+      alertaError('No se pudo importar el video', e);
+    } finally {
+      setImportando('');
+    }
+  };
+
+  return (
+    <>
+      {locales.length > 0 && (
+        <div className="tarjeta">
+          <div className="tarjeta-cabeza">
+            <h2>Videos guardados en este navegador</h2>
+            <p className="suave-txt">
+              Se agregaron antes de que la videoteca viviera en la base de datos. Asigna cada uno a un
+              tema y publícalo para que quede disponible para los estudiantes.
+            </p>
+          </div>
+
+          <ul className="lista">
+            {locales.map((video) => {
+              const destino = destinoDe(video);
+              const temas = modulosCurso.find((modulo) => modulo.id === destino.modulo)?.temas ?? [];
+
+              return (
+                <li key={video.id} className="item recursos-fila">
+                  <img
+                    className="recursos-mini"
+                    src={youtubeThumb(extraerYoutubeId(video.youtubeId))}
+                    alt=""
+                  />
+                  <span className="item-txt">
+                    <b>{video.titulo || 'Video sin título'}</b>
+                    <span>{video.descripcion || 'Sin descripción'}</span>
+                  </span>
+                  <div className="recursos-destino">
+                    <select
+                      className="admin-select"
+                      value={destino.modulo}
+                      onChange={(e) => cambiarDestino(video.id, 'modulo', e.target.value)}
+                      aria-label="Módulo de destino"
+                    >
+                      <option value="">Módulo…</option>
+                      {modulosCurso.map((modulo) => (
+                        <option key={modulo.id} value={modulo.id}>{modulo.titulo}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="admin-select"
+                      value={destino.tema}
+                      onChange={(e) => cambiarDestino(video.id, 'tema', e.target.value)}
+                      disabled={!destino.modulo}
+                      aria-label="Tema de destino"
+                    >
+                      <option value="">Tema…</option>
+                      {temas.map((tema) => (
+                        <option key={tema.id} value={tema.id}>{tema.titulo}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="pnl-btn pnl-btn-primario pnl-btn-chico"
+                      disabled={importando === video.id}
+                      onClick={() => importar(video)}
+                    >
+                      {importando === video.id ? 'Importando…' : 'Importar'}
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      <Carga datos={datos} reintentar={reintentar}>
+        {(d) => {
+          if (d.videos.length === 0) {
+            return (
+              <div className="admin-vacio">
+                <b>La videoteca está vacía</b>
+                <p className="suave-txt">
+                  Agrega videos desde la pestaña Videos del editor de un tema y publícalo.
+                </p>
+              </div>
+            );
+          }
+
+          return d.modulos.map((modulo) => {
+            const videos = d.videos.filter((video) => video.modulo === modulo.id);
+
+            return (
+              <div key={modulo.id} className="tarjeta">
+                <div className="tarjeta-cabeza">
+                  <h2>{modulo.titulo}</h2>
+                  <p className="suave-txt">
+                    {videos.length} {videos.length === 1 ? 'video' : 'videos'}
+                  </p>
+                </div>
+
+                <ul className="lista">
+                  {videos.map((video) => (
+                    <li key={video.id} className="item">
+                      <img className="recursos-mini" src={youtubeThumb(video.youtubeId)} alt="" />
+                      <span className="item-txt">
+                        <b>{video.titulo || 'Video sin título'}</b>
+                        <span>{video.descripcion || 'Sin descripción'}</span>
+                        <span className="recursos-meta">
+                          Tema {video.numero} · {video.temaTitulo}
+                        </span>
+                      </span>
+                      <Link
+                        className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                        to={rutaTema(video.modulo, video.numero)}
+                      >
+                        Editar tema
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          });
+        }}
+      </Carga>
+    </>
+  );
+}
+
+function RecursosLaboratorio() {
+  const [datos, setDatos] = useState({ estado: 'cargando' });
+  const [recarga, setRecarga] = useState(0);
+
+  useEffect(() => {
+    let vigente = true;
+
+    api('/admin/practicas')
+      .then((respuesta) => {
+        if (!vigente) return;
+
+        const modulos = (respuesta.modulos ?? [])
+          .filter((modulo) => modulo.id !== MODULO_CONCEPTOS_PREVIOS)
+          .map((modulo) => ({
+            ...modulo,
+            temas: modulo.temas.filter((tema) => (tema.practicas ?? []).length > 0),
+          }))
+          .filter((modulo) => modulo.temas.length > 0);
+
+        setDatos({ estado: 'listo', modulos });
+      })
+      .catch((e) => {
+        if (!vigente) return;
+        setDatos({ estado: 'error', mensaje: e.message });
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, [recarga]);
+
+  const reintentar = () => {
+    setDatos({ estado: 'cargando' });
+    setRecarga((valor) => valor + 1);
+  };
+
+  return (
+    <Carga datos={datos} reintentar={reintentar}>
+      {(d) => {
+        if (d.modulos.length === 0) {
+          return (
+            <div className="admin-vacio">
+              <b>Sin ejercicios de práctica</b>
+              <p className="suave-txt">
+                Agrega ejercicios desde la pestaña Laboratorio del editor de un tema.
+              </p>
+            </div>
+          );
+        }
+
+        return d.modulos.map((modulo) => {
+          const total = modulo.temas.reduce((suma, tema) => suma + tema.practicas.length, 0);
+
+          return (
+            <div key={modulo.id} className="tarjeta">
+              <div className="tarjeta-cabeza">
+                <h2>{modulo.titulo}</h2>
+                <p className="suave-txt">
+                  {total} {total === 1 ? 'ejercicio' : 'ejercicios'} en {modulo.temas.length} {' '}
+                  {modulo.temas.length === 1 ? 'tema' : 'temas'}
+                </p>
+              </div>
+
+              <div className="recursos-temas">
+                {modulo.temas.map((tema) => (
+                  <div key={tema.id} className="recursos-tema">
+                    <div className="recursos-tema-cabeza">
+                      <b>{tema.titulo}</b>
+                      {tema.tieneBorrador && <Pastilla estado="borrador" />}
+                      {tema.visibilidad === 'privado' && <Pastilla estado="oculta" />}
+                      <Link
+                        className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                        to={rutaTema(modulo.id, tema.id)}
+                      >
+                        Editar tema
+                      </Link>
+                    </div>
+
+                    <ul className="lista">
+                      {tema.practicas.map((practica) => (
+                        <li key={practica.id} className="item">
+                          <span className="item-txt">
+                            <b>{practica.titulo}</b>
+                            <span>
+                              {practica.funcion} · {practica.herramienta === 'limite' ? 'Límite' : 'Derivada'} en x = {practica.punto}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        });
+      }}
+    </Carga>
+  );
+}
+
+function RecursosConceptosPrevios() {
+  const [datos, setDatos] = useState({ estado: 'cargando' });
+  const [recarga, setRecarga] = useState(0);
+
+  useEffect(() => {
+    let vigente = true;
+
+    api('/admin/temas')
+      .then((respuesta) => {
+        if (!vigente) return;
+        const modulo = (respuesta.modulos ?? []).find((item) => item.id === MODULO_CONCEPTOS_PREVIOS) ?? null;
+        setDatos({ estado: 'listo', modulo });
+      })
+      .catch((e) => {
+        if (!vigente) return;
+        setDatos({ estado: 'error', mensaje: e.message });
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, [recarga]);
+
+  const reintentar = () => {
+    setDatos({ estado: 'cargando' });
+    setRecarga((valor) => valor + 1);
+  };
+
+  return (
+    <>
+      <div className="tarjeta">
+        <div className="tarjeta-cabeza">
+          <h2>Cómo funcionan</h2>
+          <p className="suave-txt">
+            Viven en el módulo especial «Conceptos previos», fuera de Cálculo I: no aparecen en el
+            curso ni en sus rutas. Se editan como cualquier tema y se muestran en la página pública.
+          </p>
+          <div className="fila-botones">
+            <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to="/conceptos-previos">
+              Ver página pública
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <Carga datos={datos} reintentar={reintentar}>
+        {(d) => {
+          if (!d.modulo || d.modulo.temas.length === 0) {
+            return (
+              <div className="admin-vacio">
+                <b>No hay conceptos previos</b>
+                <p className="suave-txt">
+                  Ejecuta <code>npm run migrar-conceptos-previos</code> en la carpeta backend para
+                  crear los temas iniciales.
+                </p>
+              </div>
+            );
+          }
+
+          return (
+            <ul className="lista">
+              {d.modulo.temas.map((tema) => (
+                <li key={tema.id} className="item">
+                  <span className="item-icono"><FiBookOpen /></span>
+                  <span className="item-txt">
+                    <b>{tema.titulo}</b>
+                    <span>Tema {tema.id}</span>
+                  </span>
+                  {tema.tieneBorrador && <Pastilla estado="borrador" />}
+                  {tema.visibilidad === 'privado' && <Pastilla estado="oculta" />}
+                  <Link
+                    className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                    to={rutaTema(MODULO_CONCEPTOS_PREVIOS, tema.id)}
+                  >
+                    Editar tema
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          );
+        }}
+      </Carga>
+    </>
+  );
+}
+
+const fechaCorta = (valor) => (valor
+  ? new Date(valor).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
+  : '—');
+
+function VistaPapelera({ recargar }) {
+  const [estado, setEstado] = useState('cargando');
+  const [temas, setTemas] = useState([]);
+  const [error, setError] = useState('');
+  const [confirmar, setConfirmar] = useState('');
+  const [ocupado, setOcupado] = useState('');
+
+  useEffect(() => {
+    let vigente = true;
+
+    api('/admin/temas/papelera')
+      .then((respuesta) => {
+        if (!vigente) return;
+        setTemas(respuesta.temas ?? []);
+        setEstado('listo');
+      })
+      .catch((e) => {
+        if (!vigente) return;
+        setError(e.message);
+        setEstado('error');
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, []);
+
+  const quitar = (tema) => setTemas((actual) => actual.filter(
+    (item) => !(item.modulo === tema.modulo && item.numero === tema.numero),
+  ));
+
+  const restaurar = async (tema) => {
+    const clave = `${tema.modulo}/${tema.numero}`;
+    setOcupado(clave);
+
+    try {
+      await api(`${rutaTema(tema.modulo, tema.numero)}/restaurar`, { metodo: 'POST' });
+      quitar(tema);
+      alerta.ok('Tema restaurado', 'Volvió a la lista del módulo con su visibilidad anterior.');
+      recargar();
+    } catch (e) {
+      alertaError('No se pudo restaurar el tema', e);
+    } finally {
+      setOcupado('');
+    }
+  };
+
+  const eliminarDefinitivo = async (tema) => {
+    const clave = `${tema.modulo}/${tema.numero}`;
+    setConfirmar('');
+    setOcupado(clave);
+
+    try {
+      await api(`${rutaTema(tema.modulo, tema.numero)}/definitivo`, {
+        metodo: 'DELETE',
+        cuerpo: { confirmar: true },
+      });
+      quitar(tema);
+      alerta.info('Tema eliminado', 'Esta acción no se puede deshacer.');
+      recargar();
+    } catch (e) {
+      alertaError('No se pudo eliminar el tema', e);
+    } finally {
+      setOcupado('');
+    }
+  };
+
+  return (
+    <>
+      <div className="admin-cabeza">
+        <div>
+          <h1>Papelera</h1>
+          <p>Los temas eliminados se guardan aquí. Los estudiantes y docentes no los ven.</p>
+        </div>
+      </div>
+
+      {estado === 'cargando' && <div className="sesion-espera" role="status">Cargando la papelera…</div>}
+
+      {estado === 'error' && (
+        <div className="admin-vacio">
+          <b>No se pudo cargar la papelera</b>
+          <p className="suave-txt">{error}</p>
+        </div>
+      )}
+
+      {estado === 'listo' && temas.length === 0 && (
+        <div className="admin-vacio">
+          <b>La papelera está vacía</b>
+          <p className="suave-txt">Cuando muevas un tema a la papelera, aparecerá aquí para restaurarlo.</p>
+        </div>
+      )}
+
+      {estado === 'listo' && temas.length > 0 && (
+        <div className="tarjeta">
+          <div className="tabla-caja">
+            <table className="tabla-panel">
+              <thead>
+                <tr>
+                  <th>Módulo</th>
+                  <th>Tema</th>
+                  <th>Eliminado</th>
+                  <th aria-label="Acciones" />
+                </tr>
+              </thead>
+              <tbody>
+                {temas.map((tema) => {
+                  const clave = `${tema.modulo}/${tema.numero}`;
+                  return (
+                    <tr key={clave}>
+                      <td>{tema.moduloTitulo}</td>
+                      <td><b>{tema.numero}</b> · {tema.titulo}</td>
+                      <td className="suave-txt">{fechaCorta(tema.eliminadoEn)}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        {confirmar === clave ? (
+                          <span className="fila-botones">
+                            <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={() => setConfirmar('')}>Cancelar</button>
+                            <button
+                              type="button"
+                              className="pnl-btn pnl-btn-peligro pnl-btn-chico"
+                              onClick={() => eliminarDefinitivo(tema)}
+                              disabled={ocupado === clave}
+                            >
+                              Sí, eliminar para siempre
+                            </button>
+                          </span>
+                        ) : (
+                          <span className="fila-botones">
+                            <button
+                              type="button"
+                              className="pnl-btn pnl-btn-primario pnl-btn-chico"
+                              onClick={() => restaurar(tema)}
+                              disabled={ocupado === clave}
+                            >
+                              Restaurar
+                            </button>
+                            <button
+                              type="button"
+                              className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                              onClick={() => setConfirmar(clave)}
+                              disabled={ocupado === clave}
+                            >
+                              Eliminar definitivamente
+                            </button>
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </>
   );
 }
