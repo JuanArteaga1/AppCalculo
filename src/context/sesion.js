@@ -34,5 +34,8 @@ export function destinoAlIngresar(rol, volver) {
 /** En las rutas el docente aparece como "maestro". */
 export const ROL_DE_RUTA = { estudiante: 'estudiante', maestro: 'docente' };
 
-/** Muestra los espacios sin sesión para revisar las maquetas. Apagado por defecto. */
-export const MODO_DEMO = import.meta.env.VITE_DEMO_ESPACIOS === 'true';
+/**
+ * Accesos de prueba por rol. En desarrollo se muestran siempre; en producción
+ * solo si VITE_DEMO_ESPACIOS=true, porque saltan la sesión real.
+ */
+export const MODO_DEMO = import.meta.env.DEV || import.meta.env.VITE_DEMO_ESPACIOS === 'true';

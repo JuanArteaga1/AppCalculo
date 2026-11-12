@@ -3,7 +3,7 @@
 ## Contiene
 | Archivo | Qué hace |
 | --- | --- |
-| `useCurso.js` | `useCurso` y `useTema`, con copia local de arranque |
+| `useCurso.js` | `useCurso` y `useTema`, con estado de carga, error y reintento |
 
 ## Rutas y relaciones
 - Importa de: `services/temasService.js`.

@@ -10,7 +10,7 @@
 | `BibliotecaMultimedia.jsx` | Videoteca |
 | `Laboratorio.jsx` | Laboratorio de graficación, con su propio marco |
 | `SeguirAprendiendo.jsx` | Evalúate público; maqueta sin guardar |
-| `Acceso.jsx` | Ingreso y registro del estudiante reales; recuperar es maqueta |
+| `Acceso.jsx` | Ingreso con Google o contraseña, registro del estudiante y atajos de desarrollo que abren sesión de prueba; recuperar es maqueta |
 | `Confirmar.jsx` | Confirma el correo del estudiante desde el enlace (`#token`) y permite pedir otro |
 | `Registro.jsx` | Registro del docente desde la invitación (`#token`): correo fijo, contador de 10 minutos, avisos con Sileo |
 | `QuizCompartido.jsx` | `/quiz/:id`: el estudiante responde el quiz, con lo marcado guardado en el navegador, y ve su nota y las correctas al vencer |

@@ -3,11 +3,26 @@ import { useCurso } from '../hooks/useCurso';
 import { ChatEstudiante } from '../components/ChatSection';
 import HeroAnimation from '../components/HeroAnimation';
 import AnimatedIcon from '../components/AnimatedIcon';
+import EstadoServicio from '../components/EstadoServicio';
 import NoEncontrado from './NoEncontrado';
 
 export default function Calculo1() {
   const { unidadId } = useParams();
-  const { modulos: unidades } = useCurso();
+  const { modulos: unidades, estado, reintentar } = useCurso();
+
+  if (estado === 'cargando') {
+    return <div className="sesion-espera" role="status">Cargando Cálculo I…</div>;
+  }
+
+  if (estado === 'error') {
+    return (
+      <EstadoServicio
+        titulo="No pudimos cargar Cálculo I"
+        mensaje="No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo."
+        onReintentar={reintentar}
+      />
+    );
+  }
 
   // Si hay unidadId, mostrar temas de esa unidad
   if (unidadId) {

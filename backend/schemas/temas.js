@@ -17,6 +17,11 @@ const temaSchema = new mongoose.Schema({
     videos: { type: [Mixed], default: undefined },
     practicas: { type: [Mixed], default: undefined },
     borrador: { type: Mixed, default: null },
+    // Por defecto público: los temas que ya existen no cambian de comportamiento.
+    visibilidad: { type: String, enum: ["publico", "privado"], default: "publico" },
+    // Papelera recuperable: nada se borra hasta que el administrador lo confirme.
+    eliminado: { type: Boolean, default: false },
+    eliminadoEn: { type: Date, default: null },
     version: { type: Number, default: 1 },
     publicadoPor: { type: String, default: "" },
 }, {

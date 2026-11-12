@@ -81,6 +81,39 @@ export async function requiereSesion(req, res, next) {
     }
 }
 
+/**
+ * Carga al usuario si la cookie es válida; si no hay sesión o venció, sigue
+ * como anónimo. Lo usan las rutas públicas para distinguir al administrador,
+ * que puede ver temas privados, sin exigirle sesión a los demás.
+ */
+export async function sesionOpcional(req, res, next) {
+    const token = req.cookies?.[NOMBRE_COOKIE];
+
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const { id, v = 0 } = jwt.verify(token, secreto());
+        const usuario = await Usuario.findById(id);
+
+        if (usuario && usuario.estado === "activo" && (usuario.versionSesion ?? 0) === v) {
+            req.usuario = usuario;
+        } else {
+            cerrarSesion(res);
+        }
+
+        return next();
+    } catch (error) {
+        if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+            cerrarSesion(res);
+            return next();
+        }
+
+        return errorSistema(res, "Revisar sesión opcional", error);
+    }
+}
+
 export function requiereRol(...roles) {
     return [
         requiereSesion,

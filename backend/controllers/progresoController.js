@@ -3,6 +3,11 @@ import Modulo from "../schemas/modulos.js";
 import Tema from "../schemas/temas.js";
 import Progreso from "../schemas/progreso.js";
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
+import {
+    filtroTemasDelCurso,
+    filtroTemasVisibles,
+    MODULO_CONCEPTOS_PREVIOS,
+} from "../lib/visibilidad.js";
 
 const CAMPOS_TEMA = "modulo numero orden titulo";
 
@@ -23,11 +28,18 @@ class progresoController {
         try {
             const [progreso, modulos, temas] = await Promise.all([
                 asegurar(req.usuario._id),
-                Modulo.find().sort({ orden: 1 }).lean(),
-                Tema.find().select(CAMPOS_TEMA).sort({ orden: 1 }).lean(),
+                Modulo.find({ clave: { $ne: MODULO_CONCEPTOS_PREVIOS } }).sort({ orden: 1 }).lean(),
+                Tema.find(filtroTemasDelCurso(req.usuario)).select(CAMPOS_TEMA).sort({ orden: 1 }).lean(),
             ]);
 
-            const visitados = new Set(progreso.temas.map((t) => `${t.modulo}/${t.tema}`));
+            // Lo que el estudiante visitó antes de que un tema pasara a privado
+            // o a la papelera deja de contar.
+            const clavesVisibles = new Set(temas.map((t) => `${t.modulo}/${t.numero}`));
+            const visitados = new Set(
+                progreso.temas
+                    .map((t) => `${t.modulo}/${t.tema}`)
+                    .filter((clave) => clavesVisibles.has(clave)),
+            );
             const porModulo = modulos.map((m) => {
                 const delModulo = temas.filter((t) => t.modulo === m.clave);
                 const vistos = delModulo.filter((t) => visitados.has(`${t.modulo}/${t.numero}`)).length;
@@ -43,9 +55,9 @@ class progresoController {
                 };
             });
 
-            const ultimo = [...progreso.temas].sort(
-                (a, b) => new Date(b.ultimaVisita) - new Date(a.ultimaVisita),
-            )[0] ?? null;
+            const ultimo = [...progreso.temas]
+                .filter((t) => clavesVisibles.has(`${t.modulo}/${t.tema}`))
+                .sort((a, b) => new Date(b.ultimaVisita) - new Date(a.ultimaVisita))[0] ?? null;
 
             const notas = progreso.notas ?? [];
             const promedio = notas.length
@@ -83,6 +95,16 @@ class progresoController {
 
             if (!modulo || !tema) {
                 return errorCliente(res, 400, "DATOS_INVALIDOS", "Indica el módulo y el tema.");
+            }
+
+            const visible = await Tema.exists({
+                modulo,
+                numero: tema,
+                ...filtroTemasVisibles(req.usuario),
+            });
+
+            if (!visible) {
+                return errorCliente(res, 404, "TEMA_NO_ENCONTRADO", "Ese tema no existe.");
             }
 
             const progreso = await asegurar(req.usuario._id);

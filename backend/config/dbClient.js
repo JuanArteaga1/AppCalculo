@@ -1,6 +1,7 @@
 import dns from "node:dns";
 import "./entorno.js";
 import mongoose from "mongoose";
+import { uriMongo } from "./uriMongo.js";
 
 dns.setDefaultResultOrder("ipv4first");
 
@@ -17,18 +18,6 @@ function prepararDns() {
         dns.setServers(DNS_PUBLICO);
         console.log("DNS local no resuelve MongoDB Atlas; se usa un DNS público para el SRV.");
     }
-}
-
-function uriMongo() {
-    const usuario = process.env.USER_DB;
-    const clave = process.env.PASS_DB;
-    const servidor = process.env.SERVER_DB;
-
-    if (!usuario || !clave || !servidor) {
-        throw new Error("Faltan USER_DB, PASS_DB o SERVER_DB en backend/.env");
-    }
-
-    return `mongodb+srv://${encodeURIComponent(usuario)}:${encodeURIComponent(clave)}@${servidor}/PlataformaEducativa?retryWrites=true&w=majority`;
 }
 
 function explicarError(error) {

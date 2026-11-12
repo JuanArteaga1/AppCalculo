@@ -1,6 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiExternalLink } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
+import { FiArrowLeft, FiExternalLink, FiTrash2 } from 'react-icons/fi';
 import { alerta, alertaDeshacer, alertaError, cerrarAlerta } from '../../services/alertas';
 import { api } from '../../services/api';
 import NoEncontrado from '../../pages/NoEncontrado';
@@ -28,7 +28,10 @@ export default function EditorTema({ modulo, numero }) {
   const [sucio, setSucio] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [confirmarDescarte, setConfirmarDescarte] = useState(false);
+  const [confirmarPapelera, setConfirmarPapelera] = useState(false);
+  const [ocupadoAccion, setOcupadoAccion] = useState('');
   const [versiones, setVersiones] = useState(null);
+  const navigate = useNavigate();
 
   // Evita que una respuesta lenta marque como guardado algo que ya cambió.
   const edicion = useRef(0);
@@ -180,6 +183,45 @@ export default function EditorTema({ modulo, numero }) {
     }
   };
 
+  const cambiarVisibilidad = async () => {
+    const visibilidad = tema.visibilidad === 'privado' ? 'publico' : 'privado';
+    setOcupadoAccion('visibilidad');
+
+    try {
+      const respuesta = await api(`${ruta(modulo, numero)}/visibilidad`, {
+        metodo: 'PUT',
+        cuerpo: { visibilidad },
+      });
+      setTema(respuesta);
+      alerta.ok(
+        visibilidad === 'publico' ? 'Tema visible' : 'Tema oculto',
+        visibilidad === 'publico'
+          ? 'Los estudiantes ya pueden verlo.'
+          : 'Los estudiantes y docentes recibirán un 404.',
+      );
+    } catch (e) {
+      alertaError('No se pudo cambiar la visibilidad', e);
+    } finally {
+      setOcupadoAccion('');
+    }
+  };
+
+  const moverAPapelera = async () => {
+    setConfirmarPapelera(false);
+    setOcupadoAccion('papelera');
+
+    try {
+      if (sucio && !(await guardar())) return;
+      await api(ruta(modulo, numero), { metodo: 'DELETE' });
+      alerta.info('Tema en la papelera', 'Puedes restaurarlo desde la sección Papelera.');
+      navigate(`/admin/modulos/${encodeURIComponent(modulo)}`);
+    } catch (e) {
+      alertaError('No se pudo mover el tema a la papelera', e);
+    } finally {
+      setOcupadoAccion('');
+    }
+  };
+
   if (estado === 'no-existe') {
     return <NoEncontrado titulo="Tema no encontrado" mensaje="Ese tema no existe en este módulo." destino="/admin/modulos" textoDestino="Volver a Módulos" />;
   }
@@ -208,11 +250,38 @@ export default function EditorTema({ modulo, numero }) {
             <span className={`pastilla ${hayBorrador ? 'pastilla-borrador' : 'pastilla-ok'}`}>
               {hayBorrador ? 'Borrador sin publicar' : `Publicado · versión ${tema.version}`}
             </span>
+            <span className={`pastilla ${tema.visibilidad === 'privado' ? 'pastilla-off' : 'pastilla-ok'}`}>
+              {tema.visibilidad === 'privado' ? 'Privado' : 'Público'}
+            </span>
             <span className="suave-txt" role="status">{estadoGuardado}</span>
           </p>
         </div>
         <div className="admin-acciones">
           <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to={`/calculo1/${modulo}/${numero}`} target="_blank"><FiExternalLink />Ver publicado</Link>
+          <button
+            type="button"
+            className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+            onClick={cambiarVisibilidad}
+            disabled={ocupadoAccion === 'visibilidad'}
+          >
+            {tema.visibilidad === 'privado' ? 'Hacer público' : 'Hacer privado'}
+          </button>
+          {!confirmarPapelera && (
+            <button
+              type="button"
+              className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+              onClick={() => setConfirmarPapelera(true)}
+              disabled={ocupadoAccion === 'papelera'}
+            >
+              <FiTrash2 />Papelera
+            </button>
+          )}
+          {confirmarPapelera && (
+            <>
+              <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={() => setConfirmarPapelera(false)}>Conservar</button>
+              <button type="button" className="pnl-btn pnl-btn-peligro pnl-btn-chico" onClick={moverAPapelera} disabled={ocupadoAccion === 'papelera'}>Sí, mover</button>
+            </>
+          )}
           {tema.tieneBorrador && !confirmarDescarte && (
             <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={() => setConfirmarDescarte(true)}>Descartar borrador</button>
           )}

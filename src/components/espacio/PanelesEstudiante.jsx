@@ -4,7 +4,7 @@ import { api } from '../../services/api';
 import { alerta, alertaReintentar } from '../../services/alertas';
 import { EstructuraQuizDocente } from './EstructuraQuiz';
 import QRCode from 'qrcode';
-import { cursoLocal } from '../../services/temasService';
+import { unidades } from '../../data/temas';
 import { obtenerProgreso } from '../../services/progresoService';
 
 /** Anillo de progreso: el trazo se calcula sobre la circunferencia r=37. */
@@ -27,13 +27,14 @@ export function Anillo({ pct }) {
   );
 }
 
+/** Solo nombres de unidad: los títulos de tema pueden ser privados o estar eliminados. */
 function unidadesVacias() {
-  return cursoLocal().modulos.map((m) => ({
+  return unidades.map((m) => ({
     id: m.id,
     nombre: m.titulo,
     pct: 0,
-    temas: `0 de ${m.temas.length} temas`,
-    sigue: m.temas[0] ? `${m.temas[0].id} ${m.temas[0].titulo}` : 'Sin temas aún',
+    temas: 'Sin avance registrado',
+    sigue: 'Abre un tema para empezar',
   }));
 }
 

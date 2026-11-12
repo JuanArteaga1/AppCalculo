@@ -5,11 +5,13 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import routesUsuarios from "./routes/usuarios.js";
 import routesTemas from "./routes/temas.js";
+import routesVideos from "./routes/videos.js";
+import routesConceptosPrevios from "./routes/conceptosPrevios.js";
 import routesProgreso from "./routes/progreso.js";
 import routesAdmin, { CARPETA_ARCHIVOS } from "./routes/admin.js";
 import visitaController from "./controllers/visitaController.js";
 import tutorController from "./controllers/tutorController.js";
-import { comprobarSecreto } from "./middlewares/sesion.js";
+import { comprobarSecreto, sesionOpcional } from "./middlewares/sesion.js";
 import { registrarMongo, registrarPeticiones } from "./middlewares/registro.js";
 import { errorCliente, errorSistema } from "./lib/respuestas.js";
 import bodyParser from "body-parser";
@@ -48,11 +50,13 @@ const limiteVisitas = rateLimit({
 
 app.use('/api/usuarios', routesUsuarios);
 app.use('/api/temas', routesTemas);
+app.use('/api/videos', routesVideos);
+app.use('/api/conceptos-previos', routesConceptosPrevios);
 app.use('/api/progreso', routesProgreso);
 app.use('/api/ejercicios-guardados', routesEjerciciosGuardados);
 app.use('/api/admin', routesAdmin);
 app.use("/api/evaluaciones", routesEvaluaciones);
-app.post('/api/visitas', limiteVisitas, visitaController.registrar);
+app.post('/api/visitas', limiteVisitas, sesionOpcional, visitaController.registrar);
 app.post('/api/tutor', limiteVisitas, tutorController.preguntar);
 app.use('/api/archivos', express.static(CARPETA_ARCHIVOS, {
     dotfiles: "deny",

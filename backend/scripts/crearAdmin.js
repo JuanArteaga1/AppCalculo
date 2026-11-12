@@ -1,27 +1,13 @@
 
 import "dotenv/config";
 import mongoose from "mongoose";
+import { uriMongo } from "../config/uriMongo.js";
 import bcrypt from "bcryptjs";
 import Usuario from "../schemas/usuarios.js";
 
 async function crearAdmin() {
     try {
-        // Comprobar que existan los datos de conexión
-        const { USER_DB, PASS_DB, SERVER_DB } = process.env;
-
-        if (!USER_DB || !PASS_DB || !SERVER_DB) {
-            throw new Error(
-                "Faltan las variables de conexión de MongoDB en .env"
-            );
-        }
-
-        // Conectar a la misma base de datos del proyecto
-        const queryString =
-            `mongodb+srv://${encodeURIComponent(USER_DB)}:` +
-            `${encodeURIComponent(PASS_DB)}@${SERVER_DB}/PlataformaEducativa` +
-            "?retryWrites=true&w=majority";
-
-        await mongoose.connect(queryString);
+        await mongoose.connect(uriMongo());
 
         console.log("Conexión a MongoDB establecida.");
 

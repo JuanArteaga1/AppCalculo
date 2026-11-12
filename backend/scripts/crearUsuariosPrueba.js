@@ -2,6 +2,7 @@ import "dotenv/config";
 import { randomBytes } from "crypto";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import mongoose from "mongoose";
+import { uriMongo } from "../config/uriMongo.js";
 import bcrypt from "bcryptjs";
 import Usuario from "../schemas/usuarios.js";
 
@@ -37,17 +38,7 @@ async function borrarUsuariosPrueba() {
 
 async function crearUsuariosPrueba() {
     try {
-        const { USER_DB, PASS_DB, SERVER_DB } = process.env;
-
-        if (!USER_DB || !PASS_DB || !SERVER_DB) {
-            throw new Error("Faltan las variables de conexión de MongoDB en .env");
-        }
-
-        await mongoose.connect(
-            `mongodb+srv://${encodeURIComponent(USER_DB)}:` +
-            `${encodeURIComponent(PASS_DB)}@${SERVER_DB}/PlataformaEducativa` +
-            "?retryWrites=true&w=majority"
-        );
+        await mongoose.connect(uriMongo());
 
         if (process.argv.includes("--borrar")) {
             await borrarUsuariosPrueba();

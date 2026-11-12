@@ -1,10 +1,23 @@
 import usuariosModelo from "../models/usuarios.js";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
 import { abrirSesion, cerrarSesion } from "../middlewares/sesion.js";
 import mongoose from "mongoose";
 import Usuario from "../schemas/usuarios.js";
 import Modulo from "../schemas/modulos.js";
+import {
+    GOOGLE_AUTORIZACION,
+    GOOGLE_TOKEN,
+    GOOGLE_USERINFO,
+    esCorreoInstitucional,
+    googleConfigurado,
+    normalizarCorreo,
+    rolParaCorreo,
+    rutaSegura,
+    urlAplicacion,
+    urlRedireccionGoogle,
+} from "../lib/google.js";
 import Invitacion, {
     hashToken as hashInvitacion,
     generarTokenInvitacion
@@ -53,6 +66,38 @@ const CONFIRMACION_MS = 24 * 60 * 60 * 1000;
 const INVITACION_VENCE_MS = 72 * 60 * 60 * 1000;
 const INVITACION_ABIERTA_MS = 10 * 60 * 1000;
 const CORREO_INSTITUCIONAL = /^[a-zA-Z0-9._%+-]+@uniautonoma\.edu\.co$/;
+
+const COOKIE_ESTADO_GOOGLE = "google_estado";
+const COOKIE_VOLVER_GOOGLE = "google_volver";
+const GOOGLE_ESTADO_MS = 10 * 60 * 1000;
+
+function opcionesCookieGoogle() {
+    return {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/api/usuarios/google",
+    };
+}
+
+/** Los errores vuelven a la pantalla de acceso; nunca se muestran tokens. */
+function redirigirAcceso(res, codigo, volver = "") {
+    const destino = new URL("/acceso", urlAplicacion());
+    destino.searchParams.set("google", codigo);
+    if (volver) destino.searchParams.set("volver", volver);
+
+    return res.redirect(302, destino.toString());
+}
+
+function guardarEstadoGoogle(res, estado, volver) {
+    res.cookie(COOKIE_ESTADO_GOOGLE, estado, { ...opcionesCookieGoogle(), maxAge: GOOGLE_ESTADO_MS });
+    res.cookie(COOKIE_VOLVER_GOOGLE, volver, { ...opcionesCookieGoogle(), maxAge: GOOGLE_ESTADO_MS });
+}
+
+function limpiarCookiesGoogle(res) {
+    res.clearCookie(COOKIE_ESTADO_GOOGLE, opcionesCookieGoogle());
+    res.clearCookie(COOKIE_VOLVER_GOOGLE, opcionesCookieGoogle());
+}
 
 /** Comprueba si una invitación sigue vigente: 72h sin abrir o 10 min tras abrir (BR-01). */
 function invitacionVigente(invitacion) {
@@ -275,6 +320,203 @@ class usuarioController {
 
         } catch (error) {
             return errorSistema(res, "Asignar módulos al docente", error);
+        }
+    }
+
+    /** Manda a Google con un state propio; el correo se valida al volver. */
+    iniciarGoogle(req, res) {
+        const volver = rutaSegura(req.query?.volver);
+
+        if (!googleConfigurado()) {
+            return redirigirAcceso(res, "no-configurado", volver);
+        }
+
+        const estado = randomBytes(32).toString("hex");
+        guardarEstadoGoogle(res, estado, volver);
+
+        const destino = new URL(GOOGLE_AUTORIZACION);
+        destino.searchParams.set("client_id", process.env.GOOGLE_CLIENT_ID);
+        destino.searchParams.set("redirect_uri", urlRedireccionGoogle());
+        destino.searchParams.set("response_type", "code");
+        destino.searchParams.set("scope", "openid email profile");
+        destino.searchParams.set("state", estado);
+        destino.searchParams.set("hd", "uniautonoma.edu.co");
+        destino.searchParams.set("prompt", "select_account");
+
+        return res.redirect(302, destino.toString());
+    }
+
+    async callbackGoogle(req, res) {
+        const volver = rutaSegura(req.cookies?.[COOKIE_VOLVER_GOOGLE]);
+        const estadoEsperado = req.cookies?.[COOKIE_ESTADO_GOOGLE];
+
+        limpiarCookiesGoogle(res);
+
+        try {
+            if (!googleConfigurado()) {
+                return redirigirAcceso(res, "no-configurado", volver);
+            }
+
+            if (req.query?.error) {
+                return redirigirAcceso(res, "cancelado", volver);
+            }
+
+            const { code, state } = req.query ?? {};
+
+            // Sin state válido no se acepta el código: evita pegar un callback ajeno.
+            if (
+                typeof code !== "string" || !code ||
+                typeof state !== "string" || !state ||
+                !estadoEsperado || state !== estadoEsperado
+            ) {
+                return redirigirAcceso(res, "estado-invalido", volver);
+            }
+
+            const respuestaToken = await fetch(GOOGLE_TOKEN, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    code,
+                    client_id: process.env.GOOGLE_CLIENT_ID,
+                    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+                    redirect_uri: urlRedireccionGoogle(),
+                    grant_type: "authorization_code",
+                }),
+                signal: AbortSignal.timeout(10000),
+            });
+
+            if (!respuestaToken.ok) {
+                return redirigirAcceso(res, "error", volver);
+            }
+
+            const { access_token: accessToken } = await respuestaToken.json();
+
+            if (!accessToken) {
+                return redirigirAcceso(res, "error", volver);
+            }
+
+            const respuestaPerfil = await fetch(GOOGLE_USERINFO, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                signal: AbortSignal.timeout(10000),
+            });
+
+            if (!respuestaPerfil.ok) {
+                return redirigirAcceso(res, "error", volver);
+            }
+
+            const perfil = await respuestaPerfil.json();
+            const correo = normalizarCorreo(perfil.email);
+
+            if (!esCorreoInstitucional(correo) || perfil.email_verified !== true) {
+                return redirigirAcceso(res, "dominio", volver);
+            }
+
+            if (perfil.hd && perfil.hd !== "uniautonoma.edu.co") {
+                return redirigirAcceso(res, "dominio", volver);
+            }
+
+            let usuario = await Usuario.findOne({ correo });
+
+            if (!usuario) {
+                usuario = await Usuario.create({
+                    nombre: (perfil.name ?? "").trim() || correo.split("@")[0],
+                    correo,
+                    rol: rolParaCorreo(correo),
+                    estado: "activo",
+                    googleId: typeof perfil.sub === "string" ? perfil.sub : null,
+                    // La pantalla de acceso avisa que continuar implica aceptar la política.
+                    aceptoPoliticaEn: new Date(),
+                    ultimoIngreso: new Date(),
+                    ingresos: 1,
+                });
+            } else {
+                if (usuario.estado === "inactivo") {
+                    return redirigirAcceso(res, "inactivo", volver);
+                }
+
+                const rolFinal = rolParaCorreo(correo, usuario.rol);
+                const cambios = {
+                    ultimoIngreso: new Date(),
+                    intentosFallidos: 0,
+                    bloqueadoHasta: null,
+                };
+
+                if (!usuario.googleId && typeof perfil.sub === "string") cambios.googleId = perfil.sub;
+                if (usuario.estado === "pendiente") cambios.estado = "activo";
+                if (rolFinal !== usuario.rol) cambios.rol = rolFinal;
+                if (!usuario.nombre && perfil.name) cambios.nombre = perfil.name.trim();
+
+                usuario = await Usuario.findByIdAndUpdate(
+                    usuario._id,
+                    { $set: cambios, $inc: { ingresos: 1 } },
+                    { new: true }
+                );
+            }
+
+            abrirSesion(res, usuario);
+
+            return redirigirAcceso(res, "ok", volver);
+        } catch (error) {
+            console.error("[Login con Google]", error?.message ?? error);
+            return redirigirAcceso(res, "error", volver);
+        }
+    }
+
+    /**
+     * Atajo de desarrollo: abre sesión con la cuenta prueba.<rol> que crea
+     * `npm run crear-usuarios-prueba`. Solo responde si DEMO_ACCESO=true y
+     * nunca en producción; no inicia sesión con cuentas reales.
+     */
+    async entrarDemo(req, res) {
+        if (process.env.NODE_ENV === "production" || process.env.DEMO_ACCESO !== "true") {
+            return errorCliente(res, 404, "RUTA_NO_ENCONTRADA", "Esa ruta no existe.");
+        }
+
+        const roles = {
+            estudiante: "estudiante",
+            docente: "docente",
+            maestro: "docente",
+            administrador: "administrador",
+        };
+        const rol = roles[req.body?.rol];
+
+        if (!rol) {
+            return errorCliente(res, 400, "ROL_INVALIDO", "Elige estudiante, docente o administrador.");
+        }
+
+        try {
+            const usuario = await Usuario.findOne({
+                correo: `prueba.${rol}@uniautonoma.edu.co`,
+                rol,
+                estado: "activo",
+            });
+
+            if (!usuario) {
+                return errorCliente(
+                    res,
+                    409,
+                    "SIN_CUENTA_DEMO",
+                    "No hay una cuenta de prueba para ese rol. Ejecuta npm run crear-usuarios-prueba."
+                );
+            }
+
+            await Usuario.updateOne({ _id: usuario._id }, {
+                $set: { ultimoIngreso: new Date(), intentosFallidos: 0, bloqueadoHasta: null },
+                $inc: { ingresos: 1 },
+            });
+
+            abrirSesion(res, usuario);
+
+            return res.status(200).json({
+                usuario: {
+                    id: usuario._id,
+                    nombre: usuario.nombre,
+                    correo: usuario.correo,
+                    rol: usuario.rol,
+                },
+            });
+        } catch (error) {
+            return errorSistema(res, "Abrir sesión de prueba", error);
         }
     }
 

@@ -1,85 +1,39 @@
-import { useState } from 'react';
-import { MdAdd } from 'react-icons/md';
-import { FiTrendingUp, FiTriangle, FiMaximize2, FiGrid } from 'react-icons/fi';
-import { HiOutlineScale, HiBookOpen, HiOutlineLightBulb } from 'react-icons/hi';
-
-const saberes = [
-  {
-    id: 'sp-1',
-    titulo: 'Aritmética y Álgebra Básica',
-    icono: <MdAdd />,
-    temas: [
-      'Operaciones con fracciones y números racionales',
-      'Propiedades de las potencias y raíces',
-      'Factorización de expresiones algebraicas',
-      'Productos notables: binomio al cuadrado, suma por diferencia',
-      'Simplificación de expresiones algebraicas',
-    ],
-  },
-  {
-    id: 'sp-2',
-    titulo: 'Ecuaciones e Inecuaciones',
-    icono: <HiOutlineScale />,
-    temas: [
-      'Ecuaciones lineales de primer grado',
-      'Ecuaciones cuadráticas y fórmula general',
-      'Sistemas de ecuaciones lineales 2x2',
-      'Inecuaciones lineales y cuadráticas',
-      'Intervalos y representación en la recta real',
-    ],
-  },
-  {
-    id: 'sp-3',
-    titulo: 'Funciones y Gráficas',
-    icono: <FiTrendingUp />,
-    temas: [
-      'Concepto de función: dominio, rango y correspondencia',
-      'Función lineal: forma pendiente-intercepto',
-      'Función cuadrática: vértice, eje de simetría, raíces',
-      'Funciones polinómicas básicas',
-      'Transformaciones de gráficas: traslaciones y escalamientos',
-    ],
-  },
-  {
-    id: 'sp-4',
-    titulo: 'Trigonometría Esencial',
-    icono: <FiTriangle />,
-    temas: [
-      'Razones trigonométricas: seno, coseno y tangente',
-      'Identidades pitagóricas fundamentales',
-      'Funciones trigonométricas básicas y sus gráficas',
-      'Resolución de triángulos rectángulos',
-      'Ángulos en radianes y grados',
-    ],
-  },
-  {
-    id: 'sp-5',
-    titulo: 'Geometría Analítica',
-    icono: <FiMaximize2 />,
-    temas: [
-      'Plano cartesiano: puntos y distancias',
-      'Ecuación de la recta: punto-pendiente y forma general',
-      'Circunferencia y sus elementos',
-      'Parábola, elipse e hipérbola (introducción)',
-      'Relación entre ecuaciones y sus gráficas',
-    ],
-  },
-  {
-    id: 'sp-6',
-    titulo: 'Pensamiento Lógico-Matemático',
-    icono: <FiGrid />,
-    temas: [
-      'Reconocimiento de patrones y secuencias',
-      'Razonamiento proporcional y porcentajes',
-      'Interpretación de tablas y gráficos estadísticos',
-      'Planteamiento de problemas con variables',
-      'Estrategias de verificación de resultados',
-    ],
-  },
-];
+import { useCallback, useEffect, useState } from 'react';
+import { HiOutlineLightBulb } from 'react-icons/hi';
+import ContenidoTema from '../components/tema/ContenidoTema';
+import { api } from '../services/api';
 
 export default function SaberesPrevios() {
+  const [temas, setTemas] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const [recarga, setRecarga] = useState(0);
   const [active, setActive] = useState(null);
+
+  const reintentar = useCallback(() => {
+    setCargando(true);
+    setError('');
+    setRecarga((valor) => valor + 1);
+  }, []);
+
+  useEffect(() => {
+    let vigente = true;
+
+    api('/conceptos-previos')
+      .then((datos) => {
+        if (vigente) setTemas(datos.temas ?? []);
+      })
+      .catch((fallo) => {
+        if (vigente) setError(fallo.mensaje);
+      })
+      .finally(() => {
+        if (vigente) setCargando(false);
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, [recarga]);
 
   return (
     <div style={styles.page}>
@@ -89,54 +43,66 @@ export default function SaberesPrevios() {
           <span style={styles.tag}>Preparación</span>
           <h1 style={styles.title}>Conceptos Previos</h1>
           <p style={styles.desc}>
-            Antes de adentrarte en el mundo del Cálculo, es importante que revises estos conceptos 
-            fundamentales. Dominarlos te permitirá avanzar con confianza y reducir la frustración 
+            Antes de adentrarte en el mundo del Cálculo, es importante que revises estos conceptos
+            fundamentales. Dominarlos te permitirá avanzar con confianza y reducir la frustración
             al estudiar temas nuevos.
           </p>
         </div>
 
-        {/* Accordion */}
-        <div className="saberes-grid" style={styles.grid}>
-          {saberes.map((s) => {
-            const isOpen = active === s.id;
-            return (
-              <div
-                key={s.id}
-                style={{
-                  ...styles.card,
-                  ...(isOpen ? styles.cardOpen : {}),
-                }}
-              >
-                <button
-                  style={styles.cardHeader}
-                  onClick={() => setActive(isOpen ? null : s.id)}
-                >
-                  <div style={styles.cardTitleWrap}>
-                    <span style={styles.cardIcon}>{s.icono}</span>
-                    <span style={styles.cardTitle}>{s.titulo}</span>
-                  </div>
-                  <span style={styles.cardArrow}>{isOpen ? '−' : '+'}</span>
-                </button>
+        {cargando && (
+          <div className="sesion-espera" role="status">Cargando los conceptos previos…</div>
+        )}
 
-                {isOpen && (
-                  <div style={styles.cardBody}>
-                    <ul style={styles.list}>
-                      {s.temas.map((t, i) => (
-                        <li key={i} style={styles.listItem}>
-                          <span style={styles.bullet}>▸</span>
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                    <div style={styles.cardFooter}>
-                      <span style={styles.note}><HiBookOpen style={{ verticalAlign: 'middle', marginRight: 6 }} /> Material de repaso disponible próximamente</span>
+        {!cargando && error && (
+          <div style={styles.error}>
+            <p style={styles.errorText}>{error}</p>
+            <button style={styles.retry} onClick={reintentar}>Reintentar</button>
+          </div>
+        )}
+
+        {!cargando && !error && temas.length === 0 && (
+          <div style={styles.empty}>
+            <p style={styles.emptyText}>
+              Todavía no hay material de repaso publicado. Vuelve más tarde.
+            </p>
+          </div>
+        )}
+
+        {/* Accordion */}
+        {!cargando && !error && temas.length > 0 && (
+          <div className="saberes-grid" style={styles.grid}>
+            {temas.map((tema, indice) => {
+              const isOpen = active === tema.id;
+              return (
+                <div
+                  key={tema.id}
+                  style={{
+                    ...styles.card,
+                    ...(isOpen ? styles.cardOpen : {}),
+                  }}
+                >
+                  <button
+                    style={styles.cardHeader}
+                    onClick={() => setActive(isOpen ? null : tema.id)}
+                  >
+                    <div style={styles.cardTitleWrap}>
+                      <span style={styles.cardIcon}>{indice + 1}</span>
+                      <span style={styles.cardTitle}>{tema.titulo}</span>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                    <span style={styles.cardArrow}>{isOpen ? '−' : '+'}</span>
+                  </button>
+
+                  {isOpen && (
+                    <div style={styles.cardBody}>
+                      {tema.descripcion && <p style={styles.cardDesc}>{tema.descripcion}</p>}
+                      <ContenidoTema bloques={tema.bloques} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Callout */}
         <div style={styles.callout}>
@@ -144,9 +110,8 @@ export default function SaberesPrevios() {
           <div>
             <h3 style={styles.calloutTitle}>¿No recuerdas alguno de estos temas?</h3>
             <p style={styles.calloutText}>
-              No te preocupes. El asistente IA pronto podrá ayudarte a repasar cualquier concepto 
-              paso a paso. Mientras tanto, te recomendamos repasar con tus apuntes de pre-cálculo 
-              o buscar recursos complementarios en la videoteca.
+              No te preocupes. Repasa aquí cada concepto antes de continuar y complementa con
+              los videos de la videoteca.
             </p>
           </div>
         </div>
@@ -203,6 +168,7 @@ const styles = {
     boxShadow: '0 1px 3px rgba(37,35,80,0.04)',
     overflow: 'hidden',
     transition: 'box-shadow 0.2s ease',
+    alignSelf: 'start',
   },
   cardOpen: {
     boxShadow: '0 10px 25px rgba(37,35,80,0.08)',
@@ -225,7 +191,8 @@ const styles = {
     gap: '12px',
   },
   cardIcon: {
-    fontSize: '22px',
+    fontSize: '14px',
+    fontWeight: 800,
     width: '36px',
     height: '36px',
     display: 'flex',
@@ -234,6 +201,7 @@ const styles = {
     background: '#FFFBEB',
     color: '#B45309',
     borderRadius: '10px',
+    flexShrink: 0,
   },
   cardTitle: {
     fontSize: '16px',
@@ -250,44 +218,57 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   cardBody: {
     padding: '0 24px 20px',
-  },
-  list: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '12px',
   },
-  listItem: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '10px',
+  cardDesc: {
     fontSize: '14px',
-    color: '#252350',
-    lineHeight: 1.5,
-    padding: '8px 12px',
-    background: '#FFFBEB',
-    borderRadius: '8px',
+    color: '#64628A',
+    margin: 0,
   },
-  bullet: {
-    color: '#B45309',
+  error: {
+    maxWidth: '520px',
+    margin: '0 auto',
+    padding: '24px',
+    borderRadius: '16px',
+    background: 'rgba(239,68,68,0.08)',
+    border: '1px solid rgba(239,68,68,0.25)',
+    textAlign: 'center',
+  },
+  errorText: {
+    margin: '0 0 14px',
+    fontSize: '15px',
+    color: '#B91C1C',
+    fontWeight: 600,
+  },
+  retry: {
+    padding: '10px 20px',
+    borderRadius: '10px',
+    border: 'none',
+    background: '#B91C1C',
+    color: '#FFFFFF',
+    fontSize: '14px',
     fontWeight: 700,
-    lineHeight: 1.5,
+    cursor: 'pointer',
   },
-  cardFooter: {
-    marginTop: '14px',
-    padding: '10px 12px',
+  empty: {
+    maxWidth: '520px',
+    margin: '0 auto',
+    padding: '24px',
+    borderRadius: '16px',
     background: '#FFFBEB',
-    borderRadius: '8px',
+    border: '1px solid rgba(245,158,11,0.35)',
+    textAlign: 'center',
   },
-  note: {
-    fontSize: '13px',
-    color: '#B45309',
-    fontWeight: 500,
+  emptyText: {
+    margin: 0,
+    fontSize: '15px',
+    color: '#64628A',
   },
   callout: {
     display: 'flex',

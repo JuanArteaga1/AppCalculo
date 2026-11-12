@@ -737,6 +737,31 @@
 .campo select:focus { outline: 0; border-color: var(--primario); }
 .acepto { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--texto-2); line-height: 1.45; }
 .acepto input { margin-top: 3px; accent-color: var(--primario); }
+.pnl-btn-google {
+  background: #FFFFFF;
+  color: var(--texto);
+  border-color: var(--linea);
+}
+.pnl-btn-google:hover { border-color: var(--primario); background: var(--suave); }
+.pnl-btn-google svg { width: 20px; height: 20px; }
+.acceso-nota { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--texto-2); }
+.acceso-separador {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-2);
+}
+.acceso-separador::before,
+.acceso-separador::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--linea);
+}
 .acceso-abajo {
   display: flex;
   align-items: center;
@@ -1062,6 +1087,40 @@ a.graf-fila:active { background: var(--linea); }
   color: var(--texto);
 }
 .admin-select:focus-visible { outline: 2px solid var(--primario); outline-offset: 2px; }
+.fila-botones { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+button.pastilla { border: 0; cursor: pointer; font-family: inherit; }
+button.pastilla:disabled { opacity: 0.6; cursor: progress; }
+
+/* El modal se usa en Usuarios y en Módulos. */
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.45);
+}
+.modal-caja {
+  width: min(520px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal-caja > input,
+.modal-caja > select {
+  padding: 13px 15px;
+  border-radius: 8px;
+  border: 1.5px solid var(--linea);
+  background: var(--card);
+  color: var(--texto);
+  font-size: 14.5px;
+}
+.modal-caja > input:focus,
+.modal-caja > select:focus { outline: 0; border-color: var(--primario); }
+
 .admin-vacio { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 16px; text-align: center; }
 .admin-vacio b { font-size: 16px; color: var(--primario-osc); }
 
@@ -1268,6 +1327,31 @@ a.graf-fila:active { background: var(--linea); }
   .recurso-campos { order: 3; flex-basis: 100%; }
   .recurso-fila-datos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .recurso-fila-datos input:first-child { grid-column: 1 / -1; }
+}
+
+/* Recursos: pestañas, importación de videos locales y ejercicios del editor. */
+.pildora { display: inline-flex; align-items: center; gap: 7px; }
+.pildora svg { width: 16px; height: 16px; }
+.recursos-fila { flex-wrap: wrap; }
+.recursos-mini {
+  width: 96px;
+  height: 54px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--suave);
+  flex-shrink: 0;
+}
+.recursos-meta { display: block; margin-top: 2px; font-size: 12.5px; color: var(--texto-2); }
+.recursos-destino { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.recursos-destino .admin-select { max-width: 220px; }
+.recursos-temas { display: flex; flex-direction: column; gap: 16px; }
+.recursos-tema { display: flex; flex-direction: column; gap: 10px; }
+.recursos-tema-cabeza { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.recursos-tema-cabeza b { flex: 1; min-width: 180px; font-size: 15px; color: var(--primario-osc); }
+
+@media (max-width: 720px) {
+  .recursos-destino { width: 100%; }
+  .recursos-destino .admin-select { flex: 1 1 140px; max-width: none; }
 }
 
 /* Las alertas van sobre la barra de navegacion (z-index 1000). Sileo inyecta su CSS

@@ -37,7 +37,11 @@ const limiteEnlaces = rateLimit({
 });
 
 // Primero las rutas fijas: si no, "/:id" las atraparía.
+route.get('/google', limiteLogin, usuarioController.iniciarGoogle);
+route.get('/google/callback', limiteEnlaces, usuarioController.callbackGoogle);
 route.post('/login', limiteLogin, usuarioController.login);
+// Atajo de desarrollo, apagado salvo DEMO_ACCESO=true; responde 404 en producción.
+route.post('/demo', usuarioController.entrarDemo);
 route.post('/logout', usuarioController.logout);
 route.get('/me', requiereSesion, usuarioController.me);
 // El token va en el cuerpo, no en la dirección: así no queda en el registro de peticiones.

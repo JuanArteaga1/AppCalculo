@@ -4,6 +4,7 @@ import RespuestasQuiz from "../schemas/respuestasQuiz.js";
 import Modulo from "../schemas/modulos.js";
 import Tema from "../schemas/temas.js";
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
+import { esAdministrador, filtroTemasVisibles, soloTemasVisibles } from "../lib/visibilidad.js";
 
 const esIdValido = (id) => mongoose.Types.ObjectId.isValid(id);
 
@@ -248,13 +249,14 @@ const temaInvalido = (res) => errorCliente(
  * Todos los temas guardados están publicados: el borrador del administrador
  * vive dentro de cada tema y nunca se lista aparte (BR-05).
  */
-async function buscarTemasDelModulo(valores, modulo) {
+async function buscarTemasDelModulo(valores, modulo, usuario) {
     const unicos = [...new Set(valores.map((valor) => String(valor).trim()))];
     const ids = unicos.filter((valor) => /^[a-fA-F0-9]{24}$/.test(valor));
     const numeros = unicos.filter((valor) => !ids.includes(valor));
 
     const encontrados = await Tema.find({
         modulo: modulo.clave,
+        ...filtroTemasVisibles(usuario),
         $or: [{ _id: { $in: ids } }, { numero: { $in: numeros } }]
     }).select("_id numero orden").sort({ orden: 1 }).lean();
 
@@ -277,9 +279,14 @@ function temasRecibidosValidos(valores) {
         && valores.every((valor) => typeof valor === "string" && valor.trim());
 }
 
-/** Temas listos para responder: número y título, en el orden del curso. */
-function temasParaMostrar(temas) {
-    return (temas ?? [])
+/**
+ * Temas listos para responder: número y título, en el orden del curso.
+ * Un tema privado o en papelera se oculta a docentes y estudiantes.
+ */
+function temasParaMostrar(temas, usuario) {
+    const visibles = esAdministrador(usuario) ? (temas ?? []) : soloTemasVisibles(temas, usuario);
+
+    return visibles
         .filter((tema) => tema && tema.numero)
         .map((tema) => ({ id: tema.numero, numero: tema.numero, titulo: tema.titulo }));
 }
@@ -387,12 +394,12 @@ function datosQuizDocente(quiz) {
  * Esta respuesta nunca incluye las respuestas correctas.
  * El estudiante solamente recibe enunciados y opciones.
  */
-function datosQuizEstudiante(quiz) {
+function datosQuizEstudiante(quiz, usuario) {
     return {
         id: quiz._id,
         titulo: quiz.titulo,
         modulo: quiz.modulo,
-        temas: temasParaMostrar(quiz.temas),
+        temas: temasParaMostrar(quiz.temas, usuario),
         fechaLimite: quiz.fechaLimite,
         preguntas: quiz.preguntas.map((pregunta) => ({
             id: pregunta._id,
@@ -433,7 +440,7 @@ class evaluacionController {
                 return temasRequeridos(res);
             }
 
-            const temasDelModulo = await buscarTemasDelModulo(temas, modulo);
+            const temasDelModulo = await buscarTemasDelModulo(temas, modulo, req.usuario);
 
             if (!temasDelModulo) {
                 return temaInvalido(res);
@@ -490,7 +497,7 @@ class evaluacionController {
                 docente: req.usuario._id
             })
                 .populate("modulo", "clave titulo")
-                .populate("temas", "numero titulo")
+                .populate("temas", "numero titulo visibilidad eliminado")
                 .sort({ createdAt: -1 })
                 .lean();
 
@@ -499,7 +506,7 @@ class evaluacionController {
                     id: quiz._id,
                     titulo: quiz.titulo,
                     modulo: quiz.modulo,
-                    temas: temasParaMostrar(quiz.temas),
+                    temas: temasParaMostrar(quiz.temas, req.usuario),
                     fechaLimite: quiz.fechaLimite,
                     estado: quiz.estado,
                     habilitado: quiz.habilitado,
@@ -527,12 +534,12 @@ class evaluacionController {
             return errorNoEncontrado(res);
         }
 
-        await quiz.populate("temas", "numero titulo");
+        await quiz.populate("temas", "numero titulo visibilidad eliminado");
 
         return res.json({
             evaluacion: {
                 ...datosQuizDocente(quiz),
-                temas: temasParaMostrar(quiz.temas)
+                temas: temasParaMostrar(quiz.temas, req.usuario)
             }
         });
     } catch (error) {
@@ -655,7 +662,8 @@ class evaluacionController {
 
                 const temasDelModulo = await buscarTemasDelModulo(
                     req.body.temas,
-                    moduloActual
+                    moduloActual,
+                    req.usuario
                 );
 
                 if (!temasDelModulo) {
@@ -744,7 +752,8 @@ class evaluacionController {
             // Los temas guardados deben seguir siendo del módulo.
             const vigentes = await buscarTemasDelModulo(
                 quiz.temas.map(String),
-                modulo
+                modulo,
+                req.usuario
             );
 
             if (!vigentes || vigentes.length !== quiz.temas.length) {
@@ -887,7 +896,7 @@ class evaluacionController {
             const quices = await Evaluacion.find()
                 .populate("docente", "nombre correo")
                 .populate("modulo", "clave titulo")
-                .populate("temas", "numero titulo")
+                .populate("temas", "numero titulo visibilidad eliminado")
                 .sort({ createdAt: -1 })
                 .lean();
 
@@ -897,7 +906,7 @@ class evaluacionController {
                     titulo: quiz.titulo,
                     docente: quiz.docente,
                     modulo: quiz.modulo,
-                    temas: temasParaMostrar(quiz.temas),
+                    temas: temasParaMostrar(quiz.temas, req.usuario),
                     fechaLimite: quiz.fechaLimite,
                     estado: quiz.estado,
                     habilitado: quiz.habilitado,
@@ -983,7 +992,7 @@ class evaluacionController {
                     select: "titulo modulo temas fechaLimite estado habilitado",
                     populate: [
                         { path: "modulo", select: "clave titulo" },
-                        { path: "temas", select: "numero titulo" }
+                        { path: "temas", select: "numero titulo visibilidad eliminado" }
                     ]
                 })
                 .lean();
@@ -1003,7 +1012,7 @@ class evaluacionController {
                         id: quiz._id,
                         titulo: quiz.titulo,
                         modulo: quiz.modulo,
-                        temas: temasParaMostrar(quiz.temas),
+                        temas: temasParaMostrar(quiz.temas, req.usuario),
                         fechaLimite: quiz.fechaLimite,
                         vencido: quizVencido(quiz),
                         estado,
@@ -1030,7 +1039,7 @@ class evaluacionController {
                 estado: "publicado"
             })
                 .populate("modulo", "clave titulo")
-                .populate("temas", "numero titulo");
+                .populate("temas", "numero titulo visibilidad eliminado");
 
             if (!quiz) {
                 return errorNoEncontrado(res);
@@ -1059,7 +1068,7 @@ class evaluacionController {
 
             return res.json({
                 evaluacion: {
-                    ...datosQuizEstudiante(quiz),
+                    ...datosQuizEstudiante(quiz, req.usuario),
                     abiertoEn: abierto?.abiertoEn ?? null
                 }
             });

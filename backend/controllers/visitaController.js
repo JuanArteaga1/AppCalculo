@@ -1,6 +1,7 @@
 import Tema from "../schemas/temas.js";
 import Visita from "../schemas/visitas.js";
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
+import { filtroTemasVisibles } from "../lib/visibilidad.js";
 
 const SEMANAS = 8;
 const DIA_MS = 24 * 60 * 60 * 1000;
@@ -23,7 +24,7 @@ class visitaController {
             const modulo = String(req.body?.modulo ?? "");
             const tema = String(req.body?.tema ?? "");
 
-            if (!(await Tema.exists({ modulo, numero: tema }))) {
+            if (!(await Tema.exists({ modulo, numero: tema, ...filtroTemasVisibles(req.usuario) }))) {
                 return errorCliente(res, 404, "TEMA_NO_ENCONTRADO", "Ese tema no existe.");
             }
 

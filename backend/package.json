@@ -8,6 +8,8 @@
     "start": "node app.js",
     "dev": "node --watch app.js",
     "migrar-temas": "node scripts/migrarTemas.js",
+    "migrar-conceptos-previos": "node scripts/migrarConceptosPrevios.js",
+    "sincronizar-videos": "node scripts/sincronizarVideos.js",
     "crear-usuarios-prueba": "node scripts/crearUsuariosPrueba.js",
     "probar-correo": "node scripts/probarCorreo.js",
     "test": "node --test --test-concurrency=1"
