@@ -128,6 +128,15 @@ export default function Admin() {
 
   if (seccion === 'lecciones') return <Navigate to="/admin/evaluate" replace />;
 
+  // "temas" es la ruta de la API; en el panel el editor vive bajo "modulos".
+  if (seccion === 'temas') {
+    const destino = ['', detalle, tema]
+      .filter(Boolean)
+      .map((parte) => `/${encodeURIComponent(parte)}`)
+      .join('');
+    return <Navigate to={`/admin/modulos${destino}`} replace />;
+  }
+
   const activa = SECCIONES.some(([k]) => k === seccion) ? seccion : null;
   // Solo Módulos y Evalúate tienen subpáginas, y solo Módulos llega al tercer nivel.
   const rutaValida = activa
