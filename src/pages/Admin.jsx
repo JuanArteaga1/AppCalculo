@@ -982,12 +982,20 @@ function VistaEvaluate() {
   );
 }
 
+
 function VistaCreacion({ id }) {
   const [quiz, setQuiz] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
 
+  const [resultados, setResultados] = useState(null);
+  const [cargandoResultados, setCargandoResultados] = useState(true);
+  const [errorResultados, setErrorResultados] = useState('');
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState(null);
+
   useEffect(() => {
+    let vigente = true;
+
     const cargarQuiz = async () => {
       try {
         setCargando(true);
@@ -999,15 +1007,54 @@ function VistaCreacion({ id }) {
           (evaluacion) => evaluacion.id === id
         );
 
-        setQuiz(encontrado ?? null);
+        if (vigente) setQuiz(encontrado ?? null);
       } catch (err) {
-        setError(err.message || 'No se pudo cargar el quiz.');
+        if (vigente) {
+          setError(err.message || 'No se pudo cargar el quiz.');
+        }
       } finally {
-        setCargando(false);
+        if (vigente) setCargando(false);
       }
     };
 
     cargarQuiz();
+
+    return () => {
+      vigente = false;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    let vigente = true;
+
+    const cargarResultados = async () => {
+      try {
+        setCargandoResultados(true);
+        setErrorResultados('');
+        setResultados(null);
+        setEstudianteSeleccionado(null);
+
+        const datos = await api(
+          `/evaluaciones/administrador/${id}/notas`
+        );
+
+        if (vigente) setResultados(datos);
+      } catch (err) {
+        if (vigente) {
+          setErrorResultados(
+            err.message || 'No se pudieron cargar los resultados.'
+          );
+        }
+      } finally {
+        if (vigente) setCargandoResultados(false);
+      }
+    };
+
+    cargarResultados();
+
+    return () => {
+      vigente = false;
+    };
   }, [id]);
 
   const fechaFormato = (fecha) => {
@@ -1061,6 +1108,9 @@ function VistaCreacion({ id }) {
       : !quiz.habilitado
         ? 'oculta'
         : 'publicada';
+
+  const notas = resultados?.notas ?? [];
+  const estadisticas = resultados?.estadisticasPreguntas ?? [];
 
   return (
     <>
@@ -1149,9 +1199,7 @@ function VistaCreacion({ id }) {
                 className="item"
                 style={{ display: 'block' }}
               >
-                <b>
-                  Pregunta {indice + 1}
-                </b>
+                <b>Pregunta {indice + 1}</b>
 
                 <p>{pregunta.enunciado}</p>
 
@@ -1173,6 +1221,243 @@ function VistaCreacion({ id }) {
           </ol>
         )}
       </div>
+
+      {/* RESULTADOS Y ESTADÍSTICAS */}
+      <div className="admin-cabeza">
+        <div>
+          <h2>Resultados del quiz</h2>
+          <p>Estudiantes participantes y estadísticas de sus respuestas.</p>
+        </div>
+      </div>
+
+      {cargandoResultados ? (
+        <div className="tarjeta">
+          <div className="sesion-espera" role="status">
+            Cargando resultados...
+          </div>
+        </div>
+      ) : errorResultados ? (
+        <div className="admin-vacio">
+          <b>No se pudieron cargar los resultados</b>
+          <p className="suave-txt">{errorResultados}</p>
+        </div>
+      ) : (
+        <>
+          <section className="tira" aria-label="Resumen de resultados">
+            <div className="tira-dato">
+              <span className="tira-tit">
+                <FiUsers />Estudiantes que respondieron
+              </span>
+              <span className="tira-num">
+                {resultados?.cantidadRespuestas ?? 0}
+              </span>
+              <span className="tira-desc">Respuestas registradas</span>
+            </div>
+
+            <div className="tira-dato">
+              <span className="tira-tit">
+                <FiBarChart2 />Nota promedio
+              </span>
+              <span className="tira-num">
+                {resultados?.promedio != null
+                  ? Number(resultados.promedio).toFixed(1)
+                  : '—'}
+              </span>
+              <span className="tira-desc">Promedio de calificaciones</span>
+            </div>
+
+            <div className="tira-dato">
+              <span className="tira-tit">
+                <FiClipboard />Preguntas
+              </span>
+              <span className="tira-num">
+                {resultados?.evaluacion?.totalPreguntas ?? 0}
+              </span>
+              <span className="tira-desc">Total de preguntas del quiz</span>
+            </div>
+          </section>
+
+          <div className="tarjeta">
+            <div className="tarjeta-cabeza">
+              <h2>Estadísticas por pregunta</h2>
+              <p className="suave-txt">
+                Cantidad de respuestas correctas, incorrectas y porcentaje de fallos.
+              </p>
+            </div>
+
+            {estadisticas.length === 0 ? (
+              <div className="admin-vacio">
+                <p>No hay estadísticas disponibles.</p>
+              </div>
+            ) : (
+              <ol className="lista">
+                {estadisticas.map((pregunta, indice) => (
+                  <li
+                    key={pregunta.preguntaId || indice}
+                    className="item"
+                    style={{ display: 'block' }}
+                  >
+                    <b>Pregunta {indice + 1}</b>
+                    <p>{pregunta.enunciado}</p>
+
+                    <div className="ficha">
+                      <div>
+                        <dt>Correctas</dt>
+                        <dd>{pregunta.correctas}</dd>
+                      </div>
+
+                      <div>
+                        <dt>Incorrectas</dt>
+                        <dd>{pregunta.incorrectas}</dd>
+                      </div>
+
+                      <div>
+                        <dt>Porcentaje de fallos</dt>
+                        <dd>{pregunta.porcentajeFallos}%</dd>
+                      </div>
+
+                      <div>
+                        <dt>Respondidas</dt>
+                        <dd>{pregunta.respondidas}</dd>
+                      </div>
+
+                      <div>
+                        <dt>Sin responder</dt>
+                        <dd>{pregunta.sinResponder}</dd>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+
+          <div className="tarjeta">
+            <div className="tarjeta-cabeza">
+              <h2>Estudiantes participantes</h2>
+              <p className="suave-txt">
+                Consulta las calificaciones y los datos de cada estudiante.
+              </p>
+            </div>
+
+            {notas.length === 0 ? (
+              <div className="admin-vacio">
+                <b>Ningún estudiante ha respondido este quiz</b>
+                <p className="suave-txt">
+                  Cuando se registren respuestas, aparecerán aquí las notas y estadísticas.
+                </p>
+              </div>
+            ) : (
+              <div className="tabla-caja">
+                <table className="tabla-panel">
+                  <thead>
+                    <tr>
+                      <th>Estudiante</th>
+                      <th>Correo</th>
+                      <th>Fecha de respuesta</th>
+                      <th>Aciertos</th>
+                      <th>Nota</th>
+                      <th>Perfil</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {notas.map((respuesta, indice) => (
+                      <tr key={respuesta.estudiante?.id || indice}>
+                        <td>
+                          <b>
+                            {respuesta.estudiante?.nombre || 'Estudiante no disponible'}
+                          </b>
+                        </td>
+
+                        <td>{respuesta.estudiante?.correo || '—'}</td>
+
+                        <td className="suave-txt">
+                          {fechaFormato(respuesta.fechaRespuesta)}
+                        </td>
+
+                        <td className="num-celda">
+                          {respuesta.aciertos}/{respuesta.totalPreguntas}
+                        </td>
+
+                        <td>
+                          <b>{Number(respuesta.nota).toFixed(1)}</b>
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                            onClick={() => setEstudianteSeleccionado(respuesta)}
+                          >
+                            Ver perfil
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {estudianteSeleccionado && (
+            <div className="tarjeta">
+              <div className="cabeza-fila">
+                <div className="tarjeta-cabeza">
+                  <h2>Resultados del estudiante</h2>
+                  <p className="suave-txt">
+                    Información de su participación en este quiz.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                  onClick={() => setEstudianteSeleccionado(null)}
+                >
+                  Cerrar
+                </button>
+              </div>
+
+              <dl className="ficha">
+                <div>
+                  <dt>Nombre</dt>
+                  <dd>
+                    {estudianteSeleccionado.estudiante?.nombre || 'No disponible'}
+                  </dd>
+                </div>
+
+                <div className="dato-correo">
+                  <dt>Correo</dt>
+                  <dd>
+                    {estudianteSeleccionado.estudiante?.correo || 'No disponible'}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Nota obtenida</dt>
+                  <dd>
+                    {Number(estudianteSeleccionado.nota).toFixed(1)}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Respuestas correctas</dt>
+                  <dd>
+                    {estudianteSeleccionado.aciertos}/{estudianteSeleccionado.totalPreguntas}
+                  </dd>
+                </div>
+
+                <div>
+                  <dt>Fecha de respuesta</dt>
+                  <dd>{fechaFormato(estudianteSeleccionado.fechaRespuesta)}</dd>
+                </div>
+              </dl>
+            </div>
+          )}
+        </>
+      )}
     </>
   );
 }

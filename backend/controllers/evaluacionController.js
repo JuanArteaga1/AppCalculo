@@ -524,28 +524,28 @@ class evaluacionController {
 
     /** Consultar un quiz propio, incluyendo sus respuestas correctas. */
     async detalle(req, res) {
-    try {
-        const quiz = await buscarQuizDocente(
-            req.params.id,
-            req.usuario._id
-        );
+        try {
+            const quiz = await buscarQuizDocente(
+                req.params.id,
+                req.usuario._id
+            );
 
-        if (!quiz) {
-            return errorNoEncontrado(res);
-        }
-
-        await quiz.populate("temas", "numero titulo visibilidad eliminado");
-
-        return res.json({
-            evaluacion: {
-                ...datosQuizDocente(quiz),
-                temas: temasParaMostrar(quiz.temas, req.usuario)
+            if (!quiz) {
+                return errorNoEncontrado(res);
             }
-        });
-    } catch (error) {
-        return responderError(res, error, "Consultar quiz");
+
+            await quiz.populate("temas", "numero titulo visibilidad eliminado");
+
+            return res.json({
+                evaluacion: {
+                    ...datosQuizDocente(quiz),
+                    temas: temasParaMostrar(quiz.temas, req.usuario)
+                }
+            });
+        } catch (error) {
+            return responderError(res, error, "Consultar quiz");
+        }
     }
-}
 
     /**
      * Editar un borrador.
@@ -834,7 +834,8 @@ class evaluacionController {
         }
     }
 
-    /** Consultar notas y respuestas recibidas en un quiz propio. */
+
+    /** Consultar notas, estudiantes y estadísticas de un quiz propio. */
     async notas(req, res) {
         try {
             const quiz = await buscarQuizDocente(
@@ -854,6 +855,7 @@ class evaluacionController {
                 .sort({ fechaRespuesta: 1 })
                 .lean();
 
+            // Información individual de cada estudiante.
             const notas = respuestas.map((respuesta) => ({
                 estudiante: respuesta.estudiante
                     ? {
@@ -868,12 +870,54 @@ class evaluacionController {
                 nota: respuesta.nota
             }));
 
+            // Promedio general de las notas del quiz.
             const promedio = notas.length
                 ? Number((
-                    notas.reduce((suma, respuesta) => suma + respuesta.nota, 0) /
-                    notas.length
+                    notas.reduce(
+                        (suma, respuesta) => suma + respuesta.nota,
+                        0
+                    ) / notas.length
                 ).toFixed(1))
                 : null;
+
+            // Estadísticas individuales de cada pregunta.
+            const estadisticasPreguntas = quiz.preguntas.map((pregunta) => {
+                let correctas = 0;
+                let incorrectas = 0;
+
+                respuestas.forEach((respuesta) => {
+                    const respuestaEstudiante = respuesta.respuestas?.find(
+                        (r) => r.preguntaId.toString() === pregunta._id.toString()
+                    );
+
+                    if (!respuestaEstudiante) return;
+
+                    if (
+                        respuestaEstudiante.opcionSeleccionada ===
+                        pregunta.respuestaCorrecta
+                    ) {
+                        correctas++;
+                    } else {
+                        incorrectas++;
+                    }
+                });
+
+                const respondidas = correctas + incorrectas;
+
+                const porcentajeFallos = respondidas
+                    ? Number(((incorrectas / respondidas) * 100).toFixed(1))
+                    : 0;
+
+                return {
+                    preguntaId: pregunta._id,
+                    enunciado: pregunta.enunciado,
+                    correctas,
+                    incorrectas,
+                    respondidas,
+                    sinResponder: respuestas.length - respondidas,
+                    porcentajeFallos
+                };
+            });
 
             return res.json({
                 evaluacion: {
@@ -883,14 +927,21 @@ class evaluacionController {
                 },
                 cantidadRespuestas: notas.length,
                 promedio,
-                notas
+                notas,
+                estadisticasPreguntas
             });
+
         } catch (error) {
-            return responderError(res, error, "Consultar notas del quiz");
+            return responderError(
+                res,
+                error,
+                "Consultar notas y estadísticas del quiz"
+            );
         }
     }
 
-        /** Listar todos los quices para el panel del administrador. */
+
+    /** Listar todos los quices para el panel del administrador. */
     async listarAdministrador(req, res) {
         try {
             const quices = await Evaluacion.find()
@@ -933,7 +984,125 @@ class evaluacionController {
         }
     }
 
-        /** Habilitar o deshabilitar un quiz sin eliminarlo. */
+
+    /** Consultar notas, estudiantes y estadísticas de cualquier quiz desde el administrador. */
+    async notasAdministrador(req, res) {
+        try {
+            // Seguridad adicional: solamente el administrador puede consultar estos datos.
+            if (!esAdministrador(req.usuario)) {
+                return errorCliente(
+                    res,
+                    403,
+                    "ACCESO_DENEGADO",
+                    "No tienes permiso para consultar estos resultados."
+                );
+            }
+
+            if (!esIdValido(req.params.id)) {
+                return errorNoEncontrado(res);
+            }
+
+            const quiz = await Evaluacion.findById(req.params.id);
+
+            if (!quiz) {
+                return errorNoEncontrado(res);
+            }
+
+            const respuestas = await RespuestasQuiz.find({
+                evaluacion: quiz._id,
+                nota: { $ne: null }
+            })
+                .populate("estudiante", "nombre correo")
+                .sort({ fechaRespuesta: 1 })
+                .lean();
+
+            // Información individual de cada estudiante.
+            const notas = respuestas.map((respuesta) => ({
+                estudiante: respuesta.estudiante
+                    ? {
+                        id: respuesta.estudiante._id,
+                        nombre: respuesta.estudiante.nombre,
+                        correo: respuesta.estudiante.correo
+                    }
+                    : null,
+                fechaRespuesta: respuesta.fechaRespuesta,
+                aciertos: respuesta.aciertos,
+                totalPreguntas: quiz.preguntas.length,
+                nota: respuesta.nota
+            }));
+
+            // Promedio general de las notas del quiz.
+            const promedio = notas.length
+                ? Number((
+                    notas.reduce(
+                        (suma, respuesta) => suma + respuesta.nota,
+                        0
+                    ) / notas.length
+                ).toFixed(1))
+                : null;
+
+            // Estadísticas individuales de cada pregunta.
+            const estadisticasPreguntas = quiz.preguntas.map((pregunta) => {
+                let correctas = 0;
+                let incorrectas = 0;
+
+                respuestas.forEach((respuesta) => {
+                    const respuestaEstudiante = respuesta.respuestas?.find(
+                        (r) =>
+                            String(r.preguntaId) === String(pregunta._id)
+                    );
+
+                    if (!respuestaEstudiante) return;
+
+                    if (
+                        respuestaEstudiante.opcionSeleccionada ===
+                        pregunta.respuestaCorrecta
+                    ) {
+                        correctas++;
+                    } else {
+                        incorrectas++;
+                    }
+                });
+
+                const respondidas = correctas + incorrectas;
+
+                const porcentajeFallos = respondidas
+                    ? Number(((incorrectas / respondidas) * 100).toFixed(1))
+                    : 0;
+
+                return {
+                    preguntaId: pregunta._id,
+                    enunciado: pregunta.enunciado,
+                    correctas,
+                    incorrectas,
+                    respondidas,
+                    sinResponder: respuestas.length - respondidas,
+                    porcentajeFallos
+                };
+            });
+
+            return res.json({
+                evaluacion: {
+                    id: quiz._id,
+                    titulo: quiz.titulo,
+                    totalPreguntas: quiz.preguntas.length
+                },
+                cantidadRespuestas: notas.length,
+                promedio,
+                notas,
+                estadisticasPreguntas
+            });
+
+        } catch (error) {
+            return responderError(
+                res,
+                error,
+                "Consultar notas y estadísticas del quiz desde el administrador"
+            );
+        }
+    }
+
+    /** Habilitar o deshabilitar un quiz sin eliminarlo. */
     async cambiarHabilitado(req, res) {
         try {
             if (!esIdValido(req.params.id)) {

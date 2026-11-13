@@ -1240,6 +1240,7 @@ function DetalleMaestro({ evaluacion, onVolver }) {
   const [datos, setDatos] = useState(null);
   const [estado, setEstado] = useState('cargando');
   const [mensaje, setMensaje] = useState('');
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState(null);
 
   async function cargarNotas() {
     if (!evaluacion?.id) return;
@@ -1253,6 +1254,7 @@ function DetalleMaestro({ evaluacion, onVolver }) {
       );
 
       setDatos(resultado);
+      setEstudianteSeleccionado(null);
       setEstado('listo');
     } catch (error) {
       setMensaje(error.message);
@@ -1275,6 +1277,7 @@ function DetalleMaestro({ evaluacion, onVolver }) {
         );
 
         if (!vigente) return;
+
         setDatos(resultado);
         setEstado('listo');
       } catch (error) {
@@ -1344,13 +1347,13 @@ function DetalleMaestro({ evaluacion, onVolver }) {
 
       {estado === 'cargando' && (
         <div className="sesion-espera" role="status">
-          Cargando las notas...
+          Cargando resultados...
         </div>
       )}
 
       {estado === 'error' && (
         <div className="aviso-caja" role="alert">
-          <b>No se pudieron cargar las notas.</b>
+          <b>No se pudieron cargar los resultados.</b>
           <p>{mensaje}</p>
 
           <button
@@ -1365,16 +1368,17 @@ function DetalleMaestro({ evaluacion, onVolver }) {
 
       {estado === 'listo' && (
         <>
+          {/* Resumen general */}
           <div className="fila-3">
             <div className="tarjeta">
-              <span className="mini-label">Entregas recibidas</span>
+              <span className="mini-label">Estudiantes que respondieron</span>
               <span className="mini-num">
                 {datos.cantidadRespuestas}
               </span>
             </div>
 
             <div className="tarjeta">
-              <span className="mini-label">Promedio del quiz</span>
+              <span className="mini-label">Nota media del quiz</span>
               <span className="mini-num">
                 {datos.promedio !== null
                   ? datos.promedio.toFixed(1)
@@ -1391,6 +1395,57 @@ function DetalleMaestro({ evaluacion, onVolver }) {
             </div>
           </div>
 
+          {/* Estadísticas por pregunta */}
+          <div className="cabeza-fila">
+            <h2>Estadísticas por pregunta</h2>
+          </div>
+
+          {datos.estadisticasPreguntas?.length ? (
+            <div className="columna-tarjetas">
+              {datos.estadisticasPreguntas.map((pregunta, indice) => (
+                <div className="tarjeta" key={pregunta.preguntaId}>
+                  <h3>Pregunta {indice + 1}</h3>
+
+                  <p>{pregunta.enunciado}</p>
+
+                  <div className="fila-3">
+                    <div className="dato-estadistica">
+                      <span className="mini-label">Correctas</span>
+                      <strong className="mini-num">
+                        {pregunta.correctas}
+                      </strong>
+                    </div>
+
+                    <div className="dato-estadistica">
+                      <span className="mini-label">Incorrectas</span>
+                      <strong className="mini-num">
+                        {pregunta.incorrectas}
+                      </strong>
+                    </div>
+
+                    <div className="dato-estadistica">
+                      <span className="mini-label">Porcentaje de fallos</span>
+                      <strong className="mini-num">
+                        {pregunta.porcentajeFallos}%
+                      </strong>
+                    </div>
+                  </div>
+
+                  <small className="suave-txt">
+                    {pregunta.respondidas} respuestas registradas
+                    {' · '}
+                    {pregunta.sinResponder} sin responder
+                  </small>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="aviso-caja">
+              No hay estadísticas disponibles.
+            </div>
+          )}
+
+          {/* Tabla de estudiantes */}
           <div className="cabeza-fila">
             <h2>Estudiantes que respondieron</h2>
 
@@ -1399,7 +1454,7 @@ function DetalleMaestro({ evaluacion, onVolver }) {
               className="pnl-btn pnl-btn-secundario pnl-btn-chico"
               onClick={cargarNotas}
             >
-              Actualizar notas
+              Actualizar resultados
             </button>
           </div>
 
@@ -1416,24 +1471,24 @@ function DetalleMaestro({ evaluacion, onVolver }) {
                     <th>Fecha de entrega</th>
                     <th>Respuestas correctas</th>
                     <th>Nota</th>
+                    <th>Perfil</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {datos.notas.map((nota) => (
-                    <tr key={nota.estudiante.id}>
+                  {datos.notas.map((nota, indice) => (
+                    <tr key={nota.estudiante?.id ?? indice}>
                       <td>
                         <span className="alumno">
-                          {nota.estudiante.nombre}
+                          {nota.estudiante?.nombre ?? 'Estudiante no disponible'}
                         </span>
+
                         <small className="suave-txt">
-                          {nota.estudiante.correo}
+                          {nota.estudiante?.correo ?? 'Sin correo'}
                         </small>
                       </td>
 
-                      <td>
-                        {fechaFormato(nota.fechaRespuesta)}
-                      </td>
+                      <td>{fechaFormato(nota.fechaRespuesta)}</td>
 
                       <td>
                         {nota.aciertos} de {nota.totalPreguntas}
@@ -1444,10 +1499,71 @@ function DetalleMaestro({ evaluacion, onVolver }) {
                           {nota.nota.toFixed(1)}
                         </b>
                       </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                          onClick={() => setEstudianteSeleccionado(nota)}
+                        >
+                          Ver perfil
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Ficha del estudiante seleccionado */}
+          {estudianteSeleccionado && (
+            <div className="tarjeta">
+              <div className="cabeza-fila">
+                <h2>Perfil del estudiante</h2>
+
+                <button
+                  type="button"
+                  className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                  onClick={() => setEstudianteSeleccionado(null)}
+                >
+                  Cerrar
+                </button>
+              </div>
+
+              <p>
+                <b>Nombre:</b>{' '}
+                {estudianteSeleccionado.estudiante?.nombre ?? 'No disponible'}
+              </p>
+
+              <p>
+                <b>Correo:</b>{' '}
+                {estudianteSeleccionado.estudiante?.correo ?? 'No disponible'}
+              </p>
+
+              <div className="fila-3">
+                <div className="dato-estadistica">
+                  <span className="mini-label">Nota obtenida</span>
+                  <strong className="mini-num">
+                    {estudianteSeleccionado.nota.toFixed(1)} / 5.0
+                  </strong>
+                </div>
+
+                <div className="dato-estadistica">
+                  <span className="mini-label">Respuestas correctas</span>
+                  <strong className="mini-num">
+                    {estudianteSeleccionado.aciertos} de{' '}
+                    {estudianteSeleccionado.totalPreguntas}
+                  </strong>
+                </div>
+
+                <div className="dato-estadistica">
+                  <span className="mini-label">Fecha de entrega</span>
+                  <strong>
+                    {fechaFormato(estudianteSeleccionado.fechaRespuesta)}
+                  </strong>
+                </div>
+              </div>
             </div>
           )}
         </>
@@ -1455,4 +1571,3 @@ function DetalleMaestro({ evaluacion, onVolver }) {
     </section>
   );
 }
-
