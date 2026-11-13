@@ -15,6 +15,7 @@ docentes.use(requiereRol("docente"));
 administradores.use(requiereRol("administrador"));
 
 administradores.get("/", evaluacionController.listarAdministrador);
+administradores.get("/:id/notas", evaluacionController.notasAdministrador);
 administradores.patch("/:id/habilitado", evaluacionController.cambiarHabilitado);
 
 docentes.get("/", evaluacionController.listar);
