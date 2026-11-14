@@ -4,8 +4,11 @@ import { requiereRol } from "../middlewares/sesion.js";
 
 const route = express.Router();
 const estudiante = requiereRol("estudiante");
+const docente = requiereRol("docente");
 
 route.get("/", estudiante, progresoController.resumen);
+route.get("/docente/estudiantes", docente, progresoController.progresoEstudiantesDocente);
+
 route.post("/tema", estudiante, progresoController.registrarTema);
 route.get("/ejercicios", estudiante, progresoController.listarEjercicios);
 route.get("/ejercicios/:id", estudiante, progresoController.obtenerEjercicio);

@@ -8,6 +8,8 @@ import {
     filtroTemasVisibles,
     MODULO_CONCEPTOS_PREVIOS,
 } from "../lib/visibilidad.js";
+import Evaluacion from "../schemas/evaluaciones.js";
+import RespuestasQuiz from "../schemas/respuestasQuiz.js";
 
 const CAMPOS_TEMA = "modulo numero orden titulo";
 
@@ -87,6 +89,162 @@ class progresoController {
         }
     }
 
+        /** Consultar el progreso de los estudiantes que respondieron quices del docente. */
+    async progresoEstudiantesDocente(req, res) {
+        try {
+            // Solo se consultan quices pertenecientes al docente autenticado.
+            const quices = await Evaluacion.find({
+                docente: req.usuario._id
+            }).select("_id").lean();
+
+            if (!quices.length) {
+                return res.json({ estudiantes: [] });
+            }
+
+            // Identificar estudiantes que realmente respondieron esos quices.
+            const respuestas = await RespuestasQuiz.find({
+                evaluacion: { $in: quices.map((quiz) => quiz._id) },
+                nota: { $ne: null }
+            })
+                .populate("estudiante", "nombre correo")
+                .sort({ fechaRespuesta: -1 })
+                .lean();
+
+            const estudiantesPorId = new Map();
+
+            for (const respuesta of respuestas) {
+                const estudiante = respuesta.estudiante;
+
+                if (!estudiante) continue;
+
+                const id = String(estudiante._id);
+
+                if (!estudiantesPorId.has(id)) {
+                    estudiantesPorId.set(id, {
+                        id,
+                        nombre: estudiante.nombre ?? "",
+                        correo: estudiante.correo ?? ""
+                    });
+                }
+            }
+
+            const estudiantes = Array.from(estudiantesPorId.values());
+
+            if (!estudiantes.length) {
+                return res.json({ estudiantes: [] });
+            }
+
+            const idsEstudiantes = estudiantes.map((estudiante) => estudiante.id);
+
+            // Recuperar los progresos existentes sin crear documentos nuevos.
+            const [progresos, modulos, temas] = await Promise.all([
+                Progreso.find({
+                    usuario: { $in: idsEstudiantes }
+                }).lean(),
+
+                Modulo.find({
+                    clave: { $ne: MODULO_CONCEPTOS_PREVIOS }
+                }).sort({ orden: 1 }).lean(),
+
+                Tema.find(
+                    filtroTemasDelCurso(req.usuario)
+                ).select(CAMPOS_TEMA).sort({ orden: 1 }).lean()
+            ]);
+
+            const progresosPorUsuario = new Map(
+                progresos.map((progreso) => [
+                    String(progreso.usuario),
+                    progreso
+                ])
+            );
+
+            const estudiantesConProgreso = estudiantes.map((estudiante) => {
+                const progreso = progresosPorUsuario.get(estudiante.id);
+
+                const temasRegistrados = progreso?.temas ?? [];
+                const clavesVisibles = new Set(
+                    temas.map((tema) => `${tema.modulo}/${tema.numero}`)
+                );
+
+                const visitados = new Set(
+                    temasRegistrados
+                        .map((tema) => `${tema.modulo}/${tema.tema}`)
+                        .filter((clave) => clavesVisibles.has(clave))
+                );
+
+                const porModulo = modulos.map((modulo) => {
+                    const temasDelModulo = temas.filter(
+                        (tema) => tema.modulo === modulo.clave
+                    );
+
+                    const vistos = temasDelModulo.filter(
+                        (tema) => visitados.has(`${tema.modulo}/${tema.numero}`)
+                    ).length;
+
+                    const total = temasDelModulo.length;
+
+                    const siguiente = temasDelModulo.find(
+                        (tema) => !visitados.has(`${tema.modulo}/${tema.numero}`)
+                    );
+
+                    return {
+                        id: modulo.clave,
+                        nombre: modulo.titulo,
+                        pct: total ? Math.round((vistos / total) * 100) : 0,
+                        temas: `${vistos} de ${total} temas`,
+                        sigue: siguiente
+                            ? `${siguiente.numero} ${siguiente.titulo}`
+                            : (total ? "Módulo completado" : "Sin temas aún")
+                    };
+                });
+
+                const ultimo = [...temasRegistrados]
+                    .filter((tema) =>
+                        clavesVisibles.has(`${tema.modulo}/${tema.tema}`)
+                    )
+                    .sort(
+                        (a, b) =>
+                            new Date(b.ultimaVisita) - new Date(a.ultimaVisita)
+                    )[0] ?? null;
+
+                const totalTemas = temas.length;
+                const temasVisitados = visitados.size;
+
+                return {
+                    ...estudiante,
+                    pctGeneral: totalTemas
+                        ? Math.round((temasVisitados / totalTemas) * 100)
+                        : 0,
+                    totalTemas,
+                    temasVisitados,
+                    porModulo,
+                    ultimo: ultimo
+                        ? {
+                            modulo: ultimo.modulo,
+                            tema: ultimo.tema,
+                            titulo: ultimo.titulo || ultimo.tema,
+                            primeraVisita: ultimo.primeraVisita,
+                            ultimaVisita: ultimo.ultimaVisita
+                        }
+                        : null,
+                    videosVistos: progreso?.videos?.length ?? 0,
+                    ejerciciosGuardados: progreso?.ejercicios?.length ?? 0
+                };
+            });
+
+            return res.json({
+                estudiantes: estudiantesConProgreso
+            });
+
+        } catch (error) {
+            return errorSistema(
+                res,
+                "Consultar progreso de estudiantes del docente",
+                error
+            );
+        }
+    }
+    
     async registrarTema(req, res) {
         try {
             const modulo = recortar(req.body?.modulo, 40);
