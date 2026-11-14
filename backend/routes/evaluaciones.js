@@ -21,6 +21,9 @@ administradores.patch("/:id/habilitado", evaluacionController.cambiarHabilitado)
 docentes.get("/", evaluacionController.listar);
 docentes.post("/", evaluacionController.crear);
 
+// Listar estudiantes que han respondido quices del docente.
+docentes.get("/estudiantes", evaluacionController.listarEstudiantesDocente); 
+
 docentes.get("/:id", evaluacionController.detalle);
 docentes.put("/:id", evaluacionController.actualizar);
 docentes.post("/:id/publicar", evaluacionController.publicar);

@@ -941,6 +941,117 @@ class evaluacionController {
     }
 
 
+    /** Listar estudiantes que han respondido quices del docente, con su historial de notas. */
+    async listarEstudiantesDocente(req, res) {
+        try {
+            // Obtener exclusivamente los quices creados por el docente autenticado.
+            const quices = await Evaluacion.find({
+                docente: req.usuario._id
+            })
+                .select("_id titulo preguntas")
+                .lean();
+
+            if (!quices.length) {
+                return res.json({ estudiantes: [] });
+            }
+
+            // Relacionar cada quiz con su información.
+            const quicesPorId = new Map(
+                quices.map((quiz) => [
+                    String(quiz._id),
+                    {
+                        id: quiz._id,
+                        titulo: quiz.titulo,
+                        totalPreguntas: quiz.preguntas.length
+                    }
+                ])
+            );
+
+            // Obtener únicamente respuestas que ya tienen una nota.
+            const respuestas = await RespuestasQuiz.find({
+                evaluacion: { $in: quices.map((quiz) => quiz._id) },
+                nota: { $ne: null }
+            })
+                .populate("estudiante", "nombre correo")
+                .sort({ fechaRespuesta: -1 })
+                .lean();
+
+            // Agrupar las respuestas por estudiante.
+            const estudiantesPorId = new Map();
+
+            for (const respuesta of respuestas) {
+                const estudiante = respuesta.estudiante;
+
+                // Ignorar registros cuyo usuario ya no exista.
+                if (!estudiante) continue;
+
+                const estudianteId = String(estudiante._id);
+                const quiz = quicesPorId.get(String(respuesta.evaluacion));
+
+                if (!quiz) continue;
+
+                if (!estudiantesPorId.has(estudianteId)) {
+                    const nombre = estudiante.nombre ?? "";
+
+                    estudiantesPorId.set(estudianteId, {
+                        id: estudianteId,
+                        nombre,
+                        correo: estudiante.correo ?? "",
+                        iniciales: nombre
+                            .trim()
+                            .split(/\s+/)
+                            .slice(0, 2)
+                            .map((parte) => parte.charAt(0).toUpperCase())
+                            .join(""),
+                        notas: [],
+                        entregas: 0,
+                        promedio: 0,
+                        ultimoAcceso: respuesta.fechaRespuesta
+                    });
+                }
+
+                const datosEstudiante = estudiantesPorId.get(estudianteId);
+
+                datosEstudiante.notas.push({
+                    id: String(quiz.id),
+                    titulo: quiz.titulo,
+                    tipo: "Quiz",
+                    nota: respuesta.nota,
+                    fechaRespuesta: respuesta.fechaRespuesta,
+                    aciertos: respuesta.aciertos,
+                    totalPreguntas: quiz.totalPreguntas
+                });
+
+                datosEstudiante.entregas++;
+            }
+
+            // Calcular el promedio y la última actividad de cada estudiante.
+            const estudiantes = Array.from(estudiantesPorId.values()).map(
+                (estudiante) => {
+                    const suma = estudiante.notas.reduce(
+                        (total, registro) => total + registro.nota,
+                        0
+                    );
+
+                    estudiante.promedio = Number(
+                        (suma / estudiante.entregas).toFixed(1)
+                    );
+
+                    return estudiante;
+                }
+            );
+
+            return res.json({ estudiantes });
+
+        } catch (error) {
+            return responderError(
+                res,
+                error,
+                "Listar estudiantes del docente"
+            );
+        }
+    }
+
     /** Listar todos los quices para el panel del administrador. */
     async listarAdministrador(req, res) {
         try {
