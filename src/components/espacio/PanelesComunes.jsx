@@ -13,15 +13,17 @@ import {
   listarEjerciciosGuardados,
 } from '../../services/ejercicioGuardadoService';
 
+
 export function PanelLaboratorio({ rol }) {
   const [ejercicios, setEjercicios] = useState([]);
 
   useEffect(() => {
-    if (rol !== 'estudiante') return undefined;
     let vigente = true;
+
     listarEjerciciosGuardados().then((lista) => {
       if (vigente) setEjercicios(lista);
     });
+
     return () => {
       vigente = false;
     };
@@ -37,25 +39,17 @@ export function PanelLaboratorio({ rol }) {
     }
   };
 
-  if (rol !== 'estudiante') {
-    return (
-      <section className="panel">
-        <div className="panel-cabeza">
-          <h1>Laboratorio</h1>
-          <p>Las gráficas que preparaste para tus clases. Ábrelas para proyectarlas o compartirlas.</p>
-        </div>
-        <div className="aviso-caja">
-          El guardado de ejercicios del laboratorio está en el espacio del estudiante.
-        </div>
-      </section>
-    );
-  }
+  const esDocente = rol === 'maestro';
 
   return (
     <section className="panel">
       <div className="panel-cabeza">
         <h1>Laboratorio</h1>
-        <p>Las funciones que graficaste. Ábrelas para seguir explorando.</p>
+        <p>
+          {esDocente
+            ? 'Los laboratorios que has guardado. Ábrelos para preparar tus clases o continuar explorando.'
+            : 'Las funciones que graficaste. Ábrelas para seguir explorando.'}
+        </p>
       </div>
 
       {ejercicios.length === 0 ? (
@@ -67,17 +61,37 @@ export function PanelLaboratorio({ rol }) {
         <div className="fila-3">
           {ejercicios.map((g) => (
             <div key={g._id} className="tarjeta">
-              <span style={{ fontFamily: "'Courier New', monospace", fontSize: '15px', fontWeight: 700, color: '#3730A3' }}>
+              <span
+                style={{
+                  fontFamily: "'Courier New', monospace",
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  color: '#3730A3',
+                }}
+              >
                 {g.nombre}
               </span>
+
               <span className="suave-txt">
-                {(g.funciones ?? []).map((f) => f.entrada).filter(Boolean).join(' · ') || 'Sin funciones'}
+                {(g.funciones ?? [])
+                  .map((f) => f.entrada)
+                  .filter(Boolean)
+                  .join(' · ') || 'Sin funciones'}
               </span>
+
               <div className="acciones">
-                <Link className="pnl-btn pnl-btn-secundario" to={`/laboratorio?ejercicioId=${g._id}`}>
+                <Link
+                  className="pnl-btn pnl-btn-secundario"
+                  to={`/laboratorio?ejercicioId=${g._id}`}
+                >
                   Abrir
                 </Link>
-                <button type="button" className="pnl-btn pnl-btn-chico" onClick={() => quitar(g._id)}>
+
+                <button
+                  type="button"
+                  className="pnl-btn pnl-btn-chico"
+                  onClick={() => quitar(g._id)}
+                >
                   Quitar
                 </button>
               </div>
