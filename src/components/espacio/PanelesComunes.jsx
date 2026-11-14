@@ -103,43 +103,36 @@ export function PanelLaboratorio({ rol }) {
   );
 }
 
+
 export function PanelVideos({ rol }) {
   const [videos, setVideos] = useState([]);
   const [activo, setActivo] = useState(null);
 
   useEffect(() => {
-    if (rol !== 'estudiante') return undefined;
     let vigente = true;
+
     listarVideosVistos().then((lista) => {
       if (vigente) setVideos(lista);
     });
+
     return () => {
       vigente = false;
     };
   }, [rol]);
 
-  if (rol !== 'estudiante') {
-    return (
-      <section className="panel">
-        <div className="panel-cabeza">
-          <h1>Mis videos</h1>
-          <p>Los videos que asignaste al grupo. Puedes agregar más desde la videoteca.</p>
-        </div>
-        <div className="aviso-caja">
-          El historial de videos vistos se guarda en la cuenta del estudiante.
-        </div>
-      </section>
-    );
-  }
-
   const reproduciendo = videos.find((v) => v.youtubeId === activo);
   const idReproduciendo = extraerYoutubeId(reproduciendo?.youtubeId);
+  const esDocente = rol === 'maestro';
 
   return (
     <section className="panel">
       <div className="panel-cabeza">
         <h1>Mis videos</h1>
-        <p>Los que ya abriste, sin repetidos. Sigue explorando en la videoteca.</p>
+        <p>
+          {esDocente
+            ? 'Los videos que has abierto desde tu cuenta. Puedes volver a reproducirlos cuando quieras.'
+            : 'Los que ya abriste, sin repetidos. Sigue explorando en la videoteca.'}
+        </p>
       </div>
 
       {reproduciendo && (
@@ -150,7 +143,12 @@ export function PanelVideos({ rol }) {
             src={youtubeEmbed(idReproduciendo)}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            style={{ width: '100%', aspectRatio: '16 / 9', border: 0, borderRadius: 12 }}
+            style={{
+              width: '100%',
+              aspectRatio: '16 / 9',
+              border: 0,
+              borderRadius: 12,
+            }}
           />
         </div>
       )}
@@ -176,7 +174,9 @@ export function PanelVideos({ rol }) {
                 <b>{v.titulo}</b>
                 <span>{v.unidad || 'Videoteca'}</span>
               </span>
-              <span className="estado" data-e="calificado">Visto</span>
+              <span className="estado" data-e="calificado">
+                Visto
+              </span>
             </li>
           ))}
         </ul>

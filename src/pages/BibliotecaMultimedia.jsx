@@ -41,7 +41,7 @@ export default function BibliotecaMultimedia() {
   }, [recarga]);
 
   useEffect(() => {
-    if (usuario?.rol !== 'estudiante') return undefined;
+    if (!['estudiante', 'docente'].includes(usuario?.rol)) return undefined;
 
     let vigente = true;
 
@@ -58,7 +58,7 @@ export default function BibliotecaMultimedia() {
   const videoActual = datos.videos.find((video) => video.id === reproduciendo) ?? null;
 
   useEffect(() => {
-    if (usuario?.rol !== 'estudiante' || !videoActual) return;
+    if (!['estudiante', 'docente'].includes(usuario?.rol) || !videoActual) return;
 
     registrarVideoVisto({
       videoId: videoActual.videoId || videoActual.id,
@@ -81,13 +81,14 @@ export default function BibliotecaMultimedia() {
   }, [search, categoriaActiva, datos.videos]);
 
   const nombreModulo = (id) => datos.modulos.find((modulo) => modulo.id === id)?.titulo ?? id;
-  const estaVisto = (video) => usuario?.rol === 'estudiante' && Boolean(vistos[video.youtubeId]);
+  const estaVisto = (video) =>
+  ['estudiante', 'docente'].includes(usuario?.rol) && Boolean(vistos[video.youtubeId]);
 
   const toggleVisto = (video) => {
     const nuevo = !estaVisto(video);
     setVistos((previos) => ({ ...previos, [video.youtubeId]: nuevo }));
 
-    if (nuevo && usuario?.rol === 'estudiante') {
+    if (nuevo && ['estudiante', 'docente'].includes(usuario?.rol)) {
       registrarVideoVisto({
         videoId: video.videoId || video.id,
         youtubeId: video.youtubeId,
