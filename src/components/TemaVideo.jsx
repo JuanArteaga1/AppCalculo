@@ -20,7 +20,8 @@ export default function TemaVideo({ videos: lista = [], sinAviso = false, unidad
   const { usuario } = useSesion();
 
   useEffect(() => {
-    if (usuario?.rol !== 'estudiante' || !activeYoutubeId) return;
+    if (!['estudiante', 'docente'].includes(usuario?.rol) || !activeYoutubeId) return;
+    
     registrarVideoVisto({
       videoId: activeVideo?.id || '',
       youtubeId: activeYoutubeId,
