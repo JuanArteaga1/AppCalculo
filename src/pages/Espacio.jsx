@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fi';
 import { HiOutlineLightBulb } from 'react-icons/hi';
 import { MENUS, PERFILES } from '../data/mockEspacio';
+import { useSesion } from '../context/sesion';
 import { PanelAprenderEstudiante, PanelAprenderMaestro, PanelProgreso } from '../components/espacio/PanelesEstudiante';
 import { PanelAjustes, PanelLaboratorio, PanelTutor, PanelVideos } from '../components/espacio/PanelesComunes';
 import PanelEstudiantes from '../components/espacio/PanelEstudiantes';
@@ -31,6 +32,7 @@ const ICONOS = {
  */
 export default function Espacio() {
   const { rol, seccion } = useParams();
+  const { usuario } = useSesion();
 
   if (rol !== 'estudiante' && rol !== 'maestro') return <NoEncontrado />;
 
@@ -39,7 +41,24 @@ export default function Espacio() {
   if (seccion && !menu.some(([k]) => k === seccion)) return <NoEncontrado />;
 
   const activa = seccion ?? menu[0][0];
-  const perfil = PERFILES[rol];
+  /*const perfil = PERFILES[rol];*/
+  const perfil = rol === 'maestro'
+  ? {
+      nombre: usuario?.nombre || 'Docente',
+      iniciales: (usuario?.nombre || 'D')
+        .split(' ')
+        .filter(Boolean)
+        .map((parte) => parte[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase(),
+      sub: 'Docente',
+      nota: {
+        titulo: 'Mis módulos',
+        detalle: `${usuario?.modulosAsignados?.length ?? 0} módulos asignados`,
+      },
+    }
+  : PERFILES.estudiante;
 
   const paneles = {
     progreso: <PanelProgreso />,
