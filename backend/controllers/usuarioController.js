@@ -513,6 +513,9 @@ class usuarioController {
                     nombre: usuario.nombre,
                     correo: usuario.correo,
                     rol: usuario.rol,
+                    modulosAsignados: usuario.rol === "docente"
+                        ? usuario.modulosAsignados ?? []
+                        : []
                 },
             });
         } catch (error) {
@@ -565,7 +568,10 @@ class usuarioController {
                     id: usuario._id,
                     nombre: usuario.nombre,
                     correo: usuario.correo,
-                    rol: usuario.rol
+                    rol: usuario.rol,
+                    modulosAsignados: usuario.rol === "docente"
+                        ? usuario.modulosAsignados ?? []
+                        : []
                 }
             });
         } catch (error) {
