@@ -51,6 +51,10 @@ route.get('/carreras', usuarioController.carreras);
 route.post('/registro', limiteCorreos, usuarioController.registrarEstudiante);
 route.post('/confirmar', limiteEnlaces, usuarioController.confirmarCorreo);
 route.post('/reenviar-confirmacion', limiteCorreos, usuarioController.reenviarConfirmacion);
+// Recuperar acceso (spec-recuperar-acceso): pedir enlace, abrirlo y cambiar la contraseña.
+route.post('/recuperar-enlace', limiteCorreos, usuarioController.pedirRecuperacion);
+route.post('/recuperar', limiteEnlaces, usuarioController.validarRecuperacion);
+route.post('/restablecer', limiteEnlaces, usuarioController.restablecer);
 
 const soloAdmin = requiereRol('administrador');
 
