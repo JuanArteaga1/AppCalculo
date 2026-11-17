@@ -1,58 +1,110 @@
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
-import { promptTutor, ritmoTutor, validarPreguntaTutor } from "../lib/tutor.js";
+import { ErrorProveedor, preguntarAlModelo } from "../lib/ia/proveedor.js";
+import { moduloTutor, promptSistema } from "../lib/ia/promptSistema.js";
+import { MENSAJE_QUIZ_ABIERTO, coincideConQuizAbierto, revisarTexto } from "../lib/ia/guardrails.js";
+import { buscarFragmentos, nombreFuente } from "../lib/ia/rag.js";
+import {
+    claveDeUso,
+    devolverPregunta,
+    esperaTutor,
+    horaDeReinicio,
+    iaSinSesionActiva,
+    reservarPregunta,
+    rolDelTope,
+    topeDelRol,
+} from "../lib/ia/limites.js";
 
+/**
+ * Tutor con IA (spec-gestion-ia). Orden: texto → IA sin sesión → ritmo → quiz abierto
+ * → fuentes de la plataforma → tope del día → modelo. Sin fuentes, responde sin llamar
+ * al modelo ni gastar la pregunta. Si el modelo falla, la pregunta se devuelve.
+ */
 class tutorController {
     async preguntar(req, res) {
+        let clave = null;
+        let reservada = false;
+
         try {
-            const clave = process.env.OPENAI_API_KEY;
-
-            if (!clave) {
-                return errorCliente(res, 503, "SIN_CLAVE_IA", "El tutor no está configurado en el servidor.");
-            }
-
             const mensaje = String(req.body?.mensaje ?? "").trim();
-            const tema = String(req.body?.tema ?? "limites").trim() || "limites";
-            const invalida = validarPreguntaTutor(mensaje);
+            const modulo = moduloTutor(String(req.body?.tema ?? req.body?.modulo ?? "").trim());
 
-            if (invalida) {
-                return errorCliente(res, 400, "PREGUNTA_INVALIDA", invalida);
+            const rechazo = revisarTexto(mensaje);
+
+            if (rechazo) {
+                return errorCliente(res, rechazo.estado, rechazo.codigo, rechazo.mensaje);
             }
 
-            const espera = ritmoTutor(req.ip || "local");
+            const rol = rolDelTope(req.usuario);
+            clave = claveDeUso(req);
+
+            // CA-02: apagada para quien no inició sesión.
+            if (rol === "sinsesion" && !iaSinSesionActiva()) {
+                return errorCliente(res, 401, "IA_REQUIERE_SESION", "Inicia sesión para usar el tutor de IA.");
+            }
+
+            const espera = esperaTutor(clave);
 
             if (espera) {
-                return errorCliente(res, 429, "DEMASIADAS_PETICIONES", espera);
+                return errorCliente(res, 429, "DEMASIADAS_PETICIONES", `Espera ${espera} segundo(s) antes de otra pregunta.`);
             }
 
-            const respuestaIa = await fetch("https://api.openai.com/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${clave}`,
-                },
-                body: JSON.stringify({
-                    model: "o3-mini",
-                    messages: [
-                        { role: "system", content: promptTutor(tema) },
-                        { role: "user", content: mensaje },
-                    ],
-                    max_completion_tokens: 2000,
-                }),
+            // CA-06: un quiz con nota abierto no se resuelve ni se insinúa.
+            if (await coincideConQuizAbierto(mensaje)) {
+                return errorCliente(res, 403, "QUIZ_ABIERTO", MENSAJE_QUIZ_ABIERTO);
+            }
+
+            // CA-07 y CA-08: solo con fuentes de la plataforma; sin ellas, no se inventa.
+            const { fragmentos, sugerencia } = await buscarFragmentos(mensaje, modulo);
+
+            if (fragmentos.length === 0) {
+                const pista = sugerencia ? ` Te puede servir empezar por «${nombreFuente(sugerencia)}».` : "";
+
+                return res.json({
+                    respuesta: `No tengo ese contenido en la plataforma, así que no voy a inventar una respuesta.${pista}`,
+                    sinContenido: true,
+                    sugerencia,
+                    fuentes: [],
+                });
+            }
+
+            // CA-01 y CA-03: tope diario por rol, reservado de forma atómica.
+            const restantes = await reservarPregunta(clave, topeDelRol(rol));
+
+            if (restantes === null) {
+                return errorCliente(
+                    res,
+                    429,
+                    rol === "sinsesion" ? "LIMITE_SIN_SESION" : "LIMITE_DIARIO",
+                    rol === "sinsesion"
+                        ? `Ya hiciste tus ${topeDelRol(rol)} preguntas de hoy sin cuenta. Inicia sesión para seguir; el tope se reinicia el ${horaDeReinicio()} (hora de Colombia).`
+                        : `Llegaste al tope de preguntas de hoy. Se reinicia el ${horaDeReinicio()} (hora de Colombia).`
+                );
+            }
+
+            reservada = true;
+
+            const respuesta = await preguntarAlModelo({
+                sistema: promptSistema(modulo, fragmentos, nombreFuente),
+                pregunta: mensaje,
             });
 
-            if (!respuestaIa.ok) {
-                return errorCliente(res, 502, "TUTOR_NO_DISPONIBLE", "El tutor no pudo responder. Inténtalo en un momento.");
-            }
-
-            const datos = await respuestaIa.json();
-            const respuesta = datos.choices?.[0]?.message?.content?.trim();
-
-            if (!respuesta) {
-                return errorCliente(res, 502, "TUTOR_NO_DISPONIBLE", "La IA no devolvió una respuesta válida.");
-            }
-
-            return res.json({ respuesta });
+            return res.json({ respuesta, restantes, fuentes: fragmentos.map(({ fuente }) => fuente) });
         } catch (error) {
+            // CA-10: si el modelo falló, el estudiante no pierde la pregunta.
+            if (reservada) {
+                await devolverPregunta(clave).catch(() => {});
+            }
+
+            if (error instanceof ErrorProveedor) {
+                console.error(`Tutor IA: ${error.codigo}`);
+
+                if (error.codigo === "SIN_CLAVE") {
+                    return errorCliente(res, 503, "SIN_CLAVE_IA", "El tutor no está configurado en el servidor.");
+                }
+
+                return errorCliente(res, 502, "TUTOR_NO_DISPONIBLE", "El tutor no pudo responder ahora. No gastaste ninguna pregunta; inténtalo en un momento.");
+            }
+
             return errorSistema(res, "Tutor IA", error);
         }
     }

@@ -9,12 +9,34 @@ import {
   FiVideo,
 } from 'react-icons/fi';
 import { HiOutlineLightBulb } from 'react-icons/hi';
-import { MENUS, PERFILES } from '../data/mockEspacio';
+import { MENUS } from '../data/mockEspacio';
 import { useSesion } from '../context/sesion';
+import { useEvaluacionesEstudiante } from '../hooks/useEvaluacionesEstudiante';
 import { PanelAprenderEstudiante, PanelAprenderMaestro, PanelProgreso } from '../components/espacio/PanelesEstudiante';
 import { PanelAjustes, PanelLaboratorio, PanelTutor, PanelVideos } from '../components/espacio/PanelesComunes';
 import PanelEstudiantes from '../components/espacio/PanelEstudiantes';
 import NoEncontrado from './NoEncontrado';
+
+function inicialesDe(nombre = '') {
+  return nombre
+    .split(' ')
+    .filter(Boolean)
+    .map((parte) => parte[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function notaEstudiante(evaluaciones) {
+  const pendientes = evaluaciones.filter((e) => e.estado === 'pendiente');
+  if (pendientes.length === 0) {
+    return { titulo: 'Sin evaluate pendientes', detalle: 'Todo al día' };
+  }
+  if (pendientes.length === 1) {
+    return { titulo: '1 evaluate por hacer', detalle: pendientes[0].titulo };
+  }
+  return { titulo: `${pendientes.length} evaluate por hacer`, detalle: 'Revisa la sección Evalúate' };
+}
 
 const ICONOS = {
   progreso: FiTrendingUp,
@@ -33,6 +55,7 @@ const ICONOS = {
 export default function Espacio() {
   const { rol, seccion } = useParams();
   const { usuario } = useSesion();
+  const { evaluaciones } = useEvaluacionesEstudiante({ rol });
 
   if (rol !== 'estudiante' && rol !== 'maestro') return <NoEncontrado />;
 
@@ -40,25 +63,25 @@ export default function Espacio() {
 
   if (seccion && !menu.some(([k]) => k === seccion)) return <NoEncontrado />;
 
+  const esEstudiante = rol === 'estudiante';
   const activa = seccion ?? menu[0][0];
-  /*const perfil = PERFILES[rol];*/
-  const perfil = rol === 'maestro'
-  ? {
-      nombre: usuario?.nombre || 'Docente',
-      iniciales: (usuario?.nombre || 'D')
-        .split(' ')
-        .filter(Boolean)
-        .map((parte) => parte[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase(),
-      sub: 'Docente',
-      nota: {
-        titulo: 'Mis módulos',
-        detalle: `${usuario?.modulosAsignados?.length ?? 0} módulos asignados`,
-      },
-    }
-  : PERFILES.estudiante;
+
+  const perfil = esEstudiante
+    ? {
+        nombre: usuario?.nombre || 'Estudiante',
+        iniciales: inicialesDe(usuario?.nombre || 'E'),
+        sub: usuario?.correo ? `Estudiante · ${usuario.correo}` : 'Estudiante',
+        nota: notaEstudiante(evaluaciones),
+      }
+    : {
+        nombre: usuario?.nombre || 'Docente',
+        iniciales: inicialesDe(usuario?.nombre || 'D'),
+        sub: 'Docente',
+        nota: {
+          titulo: 'Mis módulos',
+          detalle: `${usuario?.modulosAsignados?.length ?? 0} módulos asignados`,
+        },
+      };
 
   const paneles = {
     progreso: <PanelProgreso />,

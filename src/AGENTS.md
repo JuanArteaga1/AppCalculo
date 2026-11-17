@@ -10,7 +10,7 @@
 | `components/` | Piezas compartidas y gráficas |
 | `context/` | Sesión del usuario |
 | `hooks/` | Datos del curso |
-| `services/` | API, alertas y OpenAI |
+| `services/` | API, alertas y tutor con IA (por el backend) |
 | `data/` | Respaldo de temas, glosario, videos y maquetas |
 | `lib/` | Lógica pura, también usada desde Node |
 | `styles/` | `panel.css`, sistema visual compartido |

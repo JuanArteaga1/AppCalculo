@@ -4,9 +4,12 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    {
+      "source": "/api/:ruta*",
+      "destination": "https://educalc-api.onrender.com/api/:ruta*"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

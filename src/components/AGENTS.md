@@ -4,6 +4,7 @@
 | Archivo o carpeta | Qué hace |
 | --- | --- |
 | `admin/` | Editor de temas y gráficas del panel |
+| `auth/` | Formularios de login, registro y recuperar acceso reutilizables |
 | `espacio/` | Paneles de estudiante y maestro |
 | `laboratorio/` | Laboratorio y utilidades matemáticas |
 | `tema/` | Render de un tema |
@@ -11,7 +12,7 @@
 | `RutaProtegida.jsx` | Muestra pantallas según sesión y rol |
 | `ErrorBoundary.jsx` | Captura errores de render; hoy nadie lo importa |
 | `AnimatedIcon.jsx`, `HeroAnimation.jsx` | Ícono animado y animación de portada |
-| `ChatSection.jsx`, `ChatbotWidget.jsx` | Tutor con OpenAI |
+| `ChatSection.jsx`, `ChatbotWidget.jsx` | Chat del tutor con IA (por `/api/tutor`), con «Iniciar sesión» al llegar al tope |
 | `SaberesRelacionados.jsx`, `TemaVideo.jsx` | Apoyos de la página del tema |
 | `TablaLimiteInteractiva.jsx`, `GraficaLimite.jsx` | Ejercicio animado de límites |
 | `AsintotasInteractivas.jsx`, `GraficaEstatica.jsx` | Ejercicio de asíntotas y curva fija |

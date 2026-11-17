@@ -7,11 +7,13 @@
 | `respuestasQuiz.js` | Un registro por estudiante y quiz: nace al abrirlo (`abiertoEn`); con nota, ya lo respondió |
 | `evaluaciones.js` | Quiz del docente: módulo, uno o varios `temas`, preguntas y estado |
 | `temas.js` | Tema: `bloques` publicados y `borrador` |
+| `conceptosPrevios.js` | Conceptos previos: `titulo`, `slug`, `contenido`, `publicado`, `orden` |
+| `iaUso.js` | Preguntas al tutor por clave (IP con hash o usuario) y día; sin el texto de la pregunta; se borra a los 3 días |
 | `versionesTema.js` | Copia por publicación; historial restaurable |
 | `visitas.js` | Contador por tema y día; sin datos de quien visita |
 | `usuarios.js` | Usuarios, roles, estados, frecuencia de uso, bloqueo y versión de sesión |
 | `invitaciones.js` | Invitaciones de docentes con token hash, vencimiento y fecha del primer abrir |
-| `restablecimientos.js` | Tokens de confirmación de correo y restablecimiento de contraseña |
+| `restablecimientos.js` | Tokens de confirmación de correo y de recuperar acceso (`abiertoEn` cuenta los 10 minutos) |
 
 ## Rutas y relaciones
 - Lo usan: `controllers/`, `models/`, `middlewares/sesion.js`, `scripts/`.

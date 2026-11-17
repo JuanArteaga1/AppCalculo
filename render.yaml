@@ -1,0 +1,58 @@
+# Blueprint de Render para el backend (Render > New > Blueprint, este mismo repo).
+# El frontend no va aquí: lo sirve Vercel y le pasa /api a este servicio (vercel.json).
+# Los secretos (sync: false) se escriben en el panel de Render, nunca en este archivo.
+services:
+  - type: web
+    name: educalc-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    region: oregon
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/salud
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CONFIAR_PROXY
+        value: "2"
+      - key: LOG_PETICIONES
+        value: "true"
+      - key: DEMO_ACCESO
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: USER_DB
+        sync: false
+      - key: PASS_DB
+        sync: false
+      - key: SERVER_DB
+        sync: false
+      - key: URL_APP
+        sync: false
+      - key: ORIGENES_PERMITIDOS
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_REMITENTE
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: ADMIN_CORREOS
+        sync: false
+      - key: DOCENTE_CORREOS
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { chatbotMensaje } from '../services/chatbotService';
+import { chatbotMensaje, enlaceIniciarSesion } from '../services/chatbotService';
 import renderMathInElement from 'katex/dist/contrib/auto-render';
 import 'katex/dist/katex.min.css';
 
@@ -49,17 +49,8 @@ export default function ChatbotWidget({ tema = 'limites', unidadTitulo = '' }) {
     const res = await chatbotMensaje(tema, userMsg);
 
     if (!res.ok) {
-      if (res.error === 'NO_API_KEY') {
-        setMessages(prev => [...prev, {
-          from: 'bot',
-          text: '⚠️ Para usar el chatbot, configura tu API key de OpenAI. Crea un archivo `.env` en la raíz con:\n\n`VITE_OPENAI_API_KEY=sk-tu-clave-aqui`\n\nLuego reinicia el servidor.',
-        }]);
-      } else {
-        setMessages(prev => [...prev, {
-          from: 'bot',
-          text: `❌ Error: ${res.error}\n\nPor favor intenta de nuevo en un momento.`,
-        }]);
-      }
+      // El backend explica el motivo; si pide sesión, se ofrece el enlace al ingreso.
+      setMessages(prev => [...prev, { from: 'bot', text: res.error, acceso: res.requiereSesion }]);
     } else {
       setMessages(prev => [...prev, { from: 'bot', text: res.respuesta }]);
     }
@@ -111,6 +102,9 @@ export default function ChatbotWidget({ tema = 'limites', unidadTitulo = '' }) {
                   {m.text.split('\n').map((line, idx) => (
                     <p key={idx} style={styles.msgLine}>{line}</p>
                   ))}
+                  {m.acceso && (
+                    <a className="pnl-btn pnl-btn-primario pnl-btn-chico" href={enlaceIniciarSesion()}>Iniciar sesión</a>
+                  )}
                 </div>
               </div>
             ))}

@@ -18,6 +18,8 @@ import {
 } from 'react-icons/fi';
 import { alerta, alertaError } from '../services/alertas';
 import EditorTema from '../components/admin/EditorTema';
+import AdminConceptosPrevios from './admin/AdminConceptosPrevios';
+import AdminConceptoPrevio from './admin/AdminConceptoPrevio';
 import { decimal, entero } from '../components/admin/formato';
 import { BarrasMagnitud, LineaSemanas } from '../components/admin/GraficasAdmin';
 import {
@@ -39,7 +41,7 @@ const SECCIONES = [
   ['modulos', 'Módulos', FiFolder, MODULOS.length],
   ['evaluate', 'Evalúate', FiClipboard, CREACIONES.length],
   ['recursos', 'Recursos', FiGrid, null],
-  ['usuarios', 'Usuarios', FiUsers, DOCENTES.length],
+  ['usuarios', 'Usuarios', FiUsers, null],
   ['papelera', 'Papelera', FiTrash2, null],
   ['configuracion', 'Configuración', FiSettings, null],
 ];
@@ -47,26 +49,19 @@ const SECCIONES = [
 /** Módulo especial del curso: no aparece en Cálculo I. */
 const MODULO_CONCEPTOS_PREVIOS = 'conceptos-previos';
 
-const moduloPorId = (id) => MODULOS.find((m) => m.id === id);
 const docentePorId = (id) => DOCENTES.find((d) => d.id === id);
-const creadoPor = (docente) => CREACIONES.filter((c) => c.docente === docente);
-const cuantos = (lista, tipo) => lista.filter((c) => c.tipo === tipo).length;
 const sinAcentos = (texto) => texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
-/** "3 lecciones · 2 quices · 1 examen", sin los tipos en cero. */
-function desglose(lista) {
-  const partes = [
-    [cuantos(lista, 'Lección'), 'lección', 'lecciones'],
-    [cuantos(lista, 'Quiz'), 'quiz', 'quices'],
-    [cuantos(lista, 'Examen'), 'examen', 'exámenes'],
-  ];
-  return partes.filter(([n]) => n > 0).map(([n, uno, varios]) => `${n} ${n === 1 ? uno : varios}`).join(' · ');
-}
-
-/** Módulos, temas y visitas reales. El panel los necesita en varias vistas. */
+/** Módulos, temas, visitas y docentes reales. El panel los necesita en varias vistas. */
 function pedirDatos() {
-  return Promise.all([api('/admin/temas'), api('/admin/visitas')])
-    .then(([curso, visitas]) => ({ estado: 'listo', curso, visitas }))
+  return Promise.all([api('/admin/temas'), api('/admin/visitas'), api('/admin/docentes'), api('/evaluaciones/administrador')])
+    .then(([curso, visitas, docentes, evaluaciones]) => ({
+      estado: 'listo',
+      curso,
+      visitas,
+      docentes: docentes.docentes ?? [],
+      evaluaciones: evaluaciones.evaluaciones ?? [],
+    }))
     .catch((e) => ({ estado: 'error', mensaje: e.message }));
 }
 
@@ -203,7 +198,7 @@ export default function Admin() {
   );
 }
 
-function VistaPanel({ curso, visitas }) {
+function VistaPanel({ curso, visitas, docentes, evaluaciones }) {
   const { semanas, porModulo, porTema } = visitas;
   const modulos = curso.modulos.map((m) => ({ ...m, color: COLOR_MODULO(m.id), visitas: visitasDe(m, porTema) }));
   const ordenados = [...modulos].sort((a, b) => b.visitas - a.visitas);
@@ -214,10 +209,10 @@ function VistaPanel({ curso, visitas }) {
   const [anterior, actual] = porSemana.slice(-2);
   const totalTemas = modulos.reduce((suma, m) => suma + m.temas.length, 0);
   const borradores = modulos.reduce((suma, m) => suma + m.temas.filter((t) => t.tieneBorrador).length, 0);
-  const pendientes = DOCENTES.filter((d) => d.estado === 'pendiente').length;
+  const pendientes = docentes.filter((d) => d.estado === 'pendiente').length;
 
-  const docentes = DOCENTES
-    .map((d) => ({ docente: d, creado: creadoPor(d.id) }))
+  const docentesConContenido = docentes
+    .map((d) => ({ docente: d, creado: evaluaciones.filter((e) => e.docente?.id === d.id) }))
     .sort((a, b) => b.creado.length - a.creado.length);
 
   return (
@@ -253,8 +248,8 @@ function VistaPanel({ curso, visitas }) {
         </Link>
         <Link className="tira-dato" to="/admin/usuarios">
           <span className="tira-tit"><FiUsers />Docentes activos</span>
-          <span className="tira-num">{DOCENTES.length - pendientes}</span>
-          <span className="tira-desc">Datos de ejemplo</span>
+          <span className="tira-num">{docentes.length - pendientes}</span>
+          <span className="tira-desc">{pendientes ? `${pendientes} pendientes de activar` : 'Todos activos'}</span>
         </Link>
       </section>
 
@@ -307,12 +302,12 @@ function VistaPanel({ curso, visitas }) {
           </div>
           <BarrasMagnitud
             columnaValor="Creado"
-            filas={docentes.map(({ docente, creado }) => ({
+            filas={docentesConContenido.map(({ docente, creado }) => ({
               clave: docente.id,
-              etiqueta: docente.nombre,
+              etiqueta: docente.nombre ?? docente.correo,
               valor: creado.length,
               color: 'var(--texto-2)',
-              detalle: creado.length ? desglose(creado) : 'Sin contenido todavía',
+              detalle: creado.length ? `${creado.length} evaluación${creado.length === 1 ? '' : 'es'}` : 'Sin contenido todavía',
               a: `/admin/evaluate?docente=${docente.id}`,
             }))}
           />
@@ -1813,88 +1808,43 @@ function RecursosLaboratorio() {
 }
 
 function RecursosConceptosPrevios() {
-  const [datos, setDatos] = useState({ estado: 'cargando' });
-  const [recarga, setRecarga] = useState(0);
+  const [vista, setVista] = useState('listado');
+  const [idEdicion, setIdEdicion] = useState(null);
 
-  useEffect(() => {
-    let vigente = true;
-
-    api('/admin/temas')
-      .then((respuesta) => {
-        if (!vigente) return;
-        const modulo = (respuesta.modulos ?? []).find((item) => item.id === MODULO_CONCEPTOS_PREVIOS) ?? null;
-        setDatos({ estado: 'listo', modulo });
-      })
-      .catch((e) => {
-        if (!vigente) return;
-        setDatos({ estado: 'error', mensaje: e.message });
-      });
-
-    return () => {
-      vigente = false;
-    };
-  }, [recarga]);
-
-  const reintentar = () => {
-    setDatos({ estado: 'cargando' });
-    setRecarga((valor) => valor + 1);
+  const irAListado = () => {
+    setIdEdicion(null);
+    setVista('listado');
   };
 
+  if (vista === 'nuevo') {
+    return (
+      <AdminConceptoPrevio
+        id="nuevo"
+        esNuevo
+        onGuardar={irAListado}
+        onCancelar={irAListado}
+      />
+    );
+  }
+
+  if (vista === 'editar') {
+    return (
+      <AdminConceptoPrevio
+        id={idEdicion}
+        onGuardar={irAListado}
+        onCancelar={irAListado}
+      />
+    );
+  }
+
   return (
-    <>
-      <div className="tarjeta">
-        <div className="tarjeta-cabeza">
-          <h2>Cómo funcionan</h2>
-          <p className="suave-txt">
-            Viven en el módulo especial «Conceptos previos», fuera de Cálculo I: no aparecen en el
-            curso ni en sus rutas. Se editan como cualquier tema y se muestran en la página pública.
-          </p>
-          <div className="fila-botones">
-            <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to="/conceptos-previos">
-              Ver página pública
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <Carga datos={datos} reintentar={reintentar}>
-        {(d) => {
-          if (!d.modulo || d.modulo.temas.length === 0) {
-            return (
-              <div className="admin-vacio">
-                <b>No hay conceptos previos</b>
-                <p className="suave-txt">
-                  Ejecuta <code>npm run migrar-conceptos-previos</code> en la carpeta backend para
-                  crear los temas iniciales.
-                </p>
-              </div>
-            );
-          }
-
-          return (
-            <ul className="lista">
-              {d.modulo.temas.map((tema) => (
-                <li key={tema.id} className="item">
-                  <span className="item-icono"><FiBookOpen /></span>
-                  <span className="item-txt">
-                    <b>{tema.titulo}</b>
-                    <span>Tema {tema.id}</span>
-                  </span>
-                  {tema.tieneBorrador && <Pastilla estado="borrador" />}
-                  {tema.visibilidad === 'privado' && <Pastilla estado="oculta" />}
-                  <Link
-                    className="pnl-btn pnl-btn-secundario pnl-btn-chico"
-                    to={rutaTema(MODULO_CONCEPTOS_PREVIOS, tema.id)}
-                  >
-                    Editar tema
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          );
-        }}
-      </Carga>
-    </>
+    <AdminConceptosPrevios
+      onCrear={() => setVista('nuevo')}
+      onEditar={(id) => {
+        setIdEdicion(id);
+        setVista('editar');
+      }}
+    />
   );
 }
 
@@ -2061,6 +2011,10 @@ function VistaPapelera({ recargar }) {
 }
 
 function VistaUsuarios() {
+  const [docentes, setDocentes] = useState([]);
+  const [evaluaciones, setEvaluaciones] = useState([]);
+  const [estado, setEstado] = useState('cargando');
+  const [recarga, setRecarga] = useState(0);
   const [busqueda, setBusqueda] = useState('');
   const [mostrarModal, setMostrarModal] = useState(false);
   const [correo, setCorreo] = useState('');
@@ -2069,9 +2023,53 @@ function VistaUsuarios() {
   const [error, setError] = useState('');
   const [resultado, setResultado] = useState(null);
 
+  useEffect(() => {
+    let vigente = true;
+
+    Promise.all([
+      api('/admin/docentes'),
+      api('/evaluaciones/administrador'),
+    ])
+      .then(([docentesData, evaluacionesData]) => {
+        if (!vigente) return;
+        setDocentes(docentesData.docentes ?? []);
+        setEvaluaciones(evaluacionesData.evaluaciones ?? []);
+        setEstado('listo');
+      })
+      .catch((err) => {
+        if (!vigente) return;
+        alertaError('No se pudieron cargar los docentes', err);
+        setEstado('error');
+      });
+
+    return () => {
+      vigente = false;
+    };
+  }, [recarga]);
+
+  const recargar = () => {
+    setEstado('cargando');
+    setRecarga((v) => v + 1);
+  };
+
   const texto = sinAcentos(busqueda.trim());
-  const filas = DOCENTES.filter((d) => sinAcentos(`${d.nombre} ${d.correo}`).includes(texto));
-  const activos = DOCENTES.filter((d) => d.estado === 'activo').length;
+  const filas = docentes.filter((d) => sinAcentos(`${d.nombre ?? ''} ${d.correo ?? ''}`).includes(texto));
+  const activos = docentes.filter((d) => d.estado === 'activo').length;
+
+  const contarPorDocente = (id) => evaluaciones.filter((e) => e.docente?.id === id).length;
+
+  const eliminar = async (id, nombre) => {
+    const confirmar = window.confirm(`¿Eliminar permanentemente a "${nombre ?? 'este docente'}"? Esta acción no se puede deshacer.`);
+    if (!confirmar) return;
+
+    try {
+      await api(`/usuarios/${id}`, { metodo: 'DELETE' });
+      alerta.ok('Docente eliminado');
+      recargar();
+    } catch (err) {
+      alertaError('No se pudo eliminar', err);
+    }
+  };
 
   const cerrarModal = () => {
     setMostrarModal(false);
@@ -2096,11 +2094,12 @@ function VistaUsuarios() {
 
       const respuesta = await api('/usuarios/invitar-docente', {
         metodo: 'POST',
-        cuerpo: { correo: correo.trim() }
+        cuerpo: { correo: correo.trim() },
       });
 
       setResultado(respuesta);
       setMensaje(respuesta.mensaje);
+      recargar();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -2108,12 +2107,27 @@ function VistaUsuarios() {
     }
   };
 
+  const nombreModulo = (id) => MODULOS.find((m) => m.id === id)?.titulo ?? id;
+
+  if (estado === 'cargando') {
+    return <div className="sesion-espera" role="status">Cargando docentes…</div>;
+  }
+
+  if (estado === 'error') {
+    return (
+      <div className="admin-vacio">
+        <b>No se pudieron cargar los docentes</b>
+        <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={recargar}>Reintentar</button>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="admin-cabeza">
         <div>
           <h1>Usuarios</h1>
-          <p>Docentes de la plataforma: {activos} activos de {DOCENTES.length}.</p>
+          <p>Docentes de la plataforma: {activos} activos de {docentes.length}.</p>
         </div>
         <button type="button" className="pnl-btn pnl-btn-primario" onClick={() => setMostrarModal(true)}>
           <FiPlus />Invitar docente
@@ -2224,41 +2238,44 @@ function VistaUsuarios() {
               <thead>
                 <tr>
                   <th>Docente</th>
-                  <th>Módulos</th>
-                  <th>Lecciones</th>
-                  <th>Quices</th>
-                  <th>Exámenes</th>
+                  <th>Módulos asignados</th>
+                  <th>Evaluaciones creadas</th>
                   <th>Último ingreso</th>
                   <th>Estado</th>
                   <th aria-label="Acciones" />
                 </tr>
               </thead>
               <tbody>
-                {filas.map((d) => {
-                  const creado = creadoPor(d.id);
-                  return (
-                    <tr key={d.id}>
-                      <td>
-                        <span className="alumno">
-                          <span>{d.nombre.split(' ').map((p) => p[0]).slice(0, 2).join('')}</span>
-                          <span className="alumno-datos" style={{ width: 'auto', height: 'auto', background: 'none' }}>
-                            <b>{d.nombre}</b>
-                            <small>{d.correo}</small>
-                          </span>
+                {filas.map((d) => (
+                  <tr key={d.id}>
+                    <td>
+                      <span className="alumno">
+                        <span>{(d.nombre ?? '').split(' ').map((p) => p[0]).slice(0, 2).join('')}</span>
+                        <span className="alumno-datos" style={{ width: 'auto', height: 'auto', background: 'none' }}>
+                          <b>{d.nombre ?? 'Sin nombre'}</b>
+                          <small>{d.correo}</small>
                         </span>
-                      </td>
-                      <td>{d.modulos.map((m) => moduloPorId(m).titulo).join(', ')}</td>
-                      <td className="num-celda">{cuantos(creado, 'Lección')}</td>
-                      <td className="num-celda">{cuantos(creado, 'Quiz')}</td>
-                      <td className="num-celda">{cuantos(creado, 'Examen')}</td>
-                      <td className="suave-txt">{d.acceso}</td>
-                      <td><Pastilla estado={d.estado} /></td>
-                      <td style={{ textAlign: 'right' }}>
+                      </span>
+                    </td>
+                    <td>{d.modulosAsignados.map((m) => nombreModulo(m)).join(', ') || 'Ninguno'}</td>
+                    <td className="num-celda">{contarPorDocente(d.id)}</td>
+                    <td className="suave-txt">{d.ultimoIngreso ? fechaCorta(d.ultimoIngreso) : '—'}</td>
+                    <td><Pastilla estado={d.estado} /></td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="fila-botones">
                         <Link className="pnl-btn pnl-btn-secundario pnl-btn-chico" to={`/admin/evaluate?docente=${d.id}`}>Ver lo creado</Link>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        <button
+                          type="button"
+                          className="pnl-btn pnl-btn-peligro pnl-btn-chico"
+                          onClick={() => eliminar(d.id, d.nombre)}
+                          aria-label="Eliminar docente"
+                        >
+                          <FiTrash2 aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

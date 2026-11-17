@@ -1,6 +1,6 @@
 import express from "express";
 import evaluacionController from "../controllers/evaluacionController.js";
-import { requiereRol } from "../middlewares/sesion.js";
+import { requiereRol, sesionOpcional } from "../middlewares/sesion.js";
 
 const route = express.Router();
 
@@ -31,10 +31,13 @@ docentes.delete("/:id", evaluacionController.eliminar);
 docentes.get("/:id/notas", evaluacionController.notas);
 
 // Rutas exclusivas para estudiantes.
+// Esta ruta permite peticiones sin sesión para mostrar el login wall (spec-quiz-login-wall).
+// El controlador valida el quiz antes de exigir sesión.
+estudiantes.get("/:id", sesionOpcional, evaluacionController.verParaEstudiante);
+
 estudiantes.use(requiereRol("estudiante"));
 
 estudiantes.get("/", evaluacionController.listarEstudiante);
-estudiantes.get("/:id", evaluacionController.verParaEstudiante);
 estudiantes.post("/:id/respuestas", evaluacionController.responder);
 estudiantes.get("/:id/resultado", evaluacionController.resultadoEstudiante);
 

@@ -19,53 +19,85 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ---
 
-## Despliegue en Vercel
+## Despliegue: frontend en Vercel, backend en Render
 
-La configuración vive en `vercel.json` (en esta carpeta) y en `../vercel.json`
-(por si Vercel apunta a la raíz del repositorio en vez de a `vite-project/`).
+Los dos salen de este mismo repositorio. El navegador solo habla con Vercel:
+`vercel.json` reenvía `/api/*` al backend de Render. Así la cookie de sesión es
+del mismo dominio que la app (funciona en iPhone, que bloquea cookies de
+terceros) y la CSP `connect-src 'self'` no se toca.
 
-### Ajustes en el panel de Vercel
+```
+Navegador ──> https://TU-APP.vercel.app ──/api/*──> https://educalc-api.onrender.com/api/*
+```
+
+### Vercel (frontend)
 
 | Campo | Valor |
 | --- | --- |
-| Framework Preset | Vite |
-| Root Directory | `vite-project` (si el repo es `App-Calculo`) o vacío (si el repo es `AppCalculo`) |
-| Build Command | `npm run build` |
-| Output Directory | `dist` |
-| Install Command | `npm install` |
+| Root Directory | vacío (la raíz del repo ya es esta carpeta) |
+| Production Branch | `main` |
+| Framework, Build, Output, Install | Los lee de `vercel.json` |
 
-Con `vercel.json` presente no hace falta tocar nada de esto a mano: Vercel lo lee del archivo.
+Variables de entorno: solo `VITE_DEMO_ESPACIOS=false`. Si quedó una
+`VITE_OPENAI_API_KEY` de antes, bórrala y revoca esa clave: estuvo a la vista en
+el bundle.
 
-### Rutas: por qué se caía al recargar
+**Rutas al recargar.** La app usa React Router en modo *history*: `/laboratorio`
+o `/calculo1/limites/1.1` no son archivos. El último `rewrites` de `vercel.json`
+entrega `index.html` para cualquier ruta que no exista como archivo, y el router
+la resuelve. Se quitó `cleanUrls`, que es para sitios de HTML estático y no hace
+falta en una SPA. Si una recarga sigue dando `404: NOT_FOUND` de Vercel, el
+despliegue no está leyendo este `vercel.json`: revisa Root Directory y que el
+despliegue de producción salga de `main`.
 
-La app usa React Router en modo *history*, así que `/laboratorio` o
-`/calculo1/limites/1.1` no existen como archivos en el servidor. Sin
-configuración, Vercel devolvía **404 NOT_FOUND** en cualquier recarga que no
-fuera la raíz. Lo resuelve el `rewrites` de `vercel.json`:
+**Backend.** El primer `rewrites` apunta a `https://educalc-api.onrender.com`. Si
+Render le pone otro nombre al servicio, cambia esa URL y vuelve a desplegar.
 
-```json
-"rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-```
+### Render (backend)
 
-Vercel busca primero el archivo real (los `/assets/*` y las imágenes se siguen
-sirviendo tal cual) y solo si no existe entrega `index.html`, que es donde el
-router resuelve la ruta.
+Desde el mismo repo, sin separar nada:
 
-### Variables de entorno
+1. Render → **New → Blueprint** → elige este repositorio. Lee `render.yaml`
+   (servicio `educalc-api`, carpeta `backend`, `npm ci` y `npm start`, salud en
+   `/api/salud`). Solo se vuelve a desplegar cuando cambia algo en `backend/`.
+2. Render pide los valores marcados `sync: false`. Los escribes en el panel,
+   nunca en el repo. `JWT_SECRET` lo genera Render.
+3. En MongoDB Atlas → Network Access, autoriza `0.0.0.0/0`: el plan gratis de
+   Render no tiene IP fija.
+4. Copia la URL del servicio a `vercel.json` si no es la de arriba.
 
-En Vercel → Settings → Environment Variables, añade:
+Sin Blueprint también sirve **New → Web Service** con Root Directory `backend`,
+Build `npm ci`, Start `npm start` y las mismas variables.
 
-```
-VITE_OPENAI_API_KEY = sk-...
-```
+| Variable | Valor |
+| --- | --- |
+| `NODE_ENV` | `production` (cookies `Secure`, sin atajos demo) |
+| `CONFIAR_PROXY` | `2` (Vercel y el balanceador de Render) |
+| `URL_APP` | `https://TU-APP.vercel.app`, sin barra final |
+| `ORIGENES_PERMITIDOS` | La misma URL de Vercel |
+| `USER_DB`, `PASS_DB`, `SERVER_DB` | Los de Atlas, o una sola `MONGO_URI` |
+| `JWT_SECRET` | Generado por Render |
+| `SMTP_*` | Ver «Correo en Render» |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Los de Google Cloud |
+| `ADMIN_CORREOS`, `DOCENTE_CORREOS` | Correos con rol fijo |
+| `GEMINI_API_KEY` | Clave del tutor |
 
-Debe existir en los entornos **Production**, **Preview** y **Development**, y
-hay que volver a desplegar para que el valor entre al bundle.
+En Google Cloud agrega la URI de redirección
+`https://TU-APP.vercel.app/api/usuarios/google/callback`.
 
-> **Cuidado:** todo lo que empieza por `VITE_` se incrusta en el JavaScript que
-> descarga el navegador. Cualquiera puede leer esa clave desde las herramientas
-> de desarrollo. Para uso real hay que mover la llamada a OpenAI a una función
-> serverless (`/api`) que guarde la clave en el servidor.
+**Correo en Render.** El plan gratis bloquea los puertos SMTP 25, 465 y 587, así
+que Gmail por el 587 no sale. Hay dos caminos sin tocar código:
+
+- Usar un proveedor que acepte el puerto **2525**, por ejemplo Brevo:
+  `SMTP_HOST=smtp-relay.brevo.com`, `SMTP_PORT=2525`, `SMTP_USER` y `SMTP_PASS`
+  de Brevo → SMTP & API, y un `SMTP_REMITENTE` verificado en Brevo.
+- Pasar el servicio a un plan pago de Render y dejar Gmail como está.
+
+**Limitaciones del plan gratis.**
+- Se duerme tras 15 minutos sin uso; la primera petición tarda cerca de un minuto.
+- El disco se borra al dormir o redesplegar: las imágenes subidas a
+  `CARPETA_ARCHIVOS` se pierden. Para conservarlas hace falta un disco de Render
+  (plan pago) o guardarlas fuera del servidor.
 
 ### Comprobar el build de producción en local
 
@@ -73,8 +105,8 @@ hay que volver a desplegar para que el valor entre al bundle.
 npm run build && npm run preview
 ```
 
-`vite preview` ya aplica el mismo *fallback* de SPA que Vercel, así que sirve
-para confirmar que las rutas profundas cargan antes de desplegar.
+`vite preview` aplica el mismo *fallback* de SPA que Vercel y también reenvía
+`/api` al backend local.
 
 ---
 
@@ -146,17 +178,11 @@ Google. Ambas listas admiten varios correos separados por comas.
 > `backend/.env`. La ruta `/api/usuarios/demo` responde 404 en producción y los
 > botones solo se muestran en desarrollo o con `VITE_DEMO_ESPACIOS=true`.
 
-### Producción en el servidor de la universidad
+### Producción
 
-1. Publica `backend/` en el servidor con `NODE_ENV=production` y `CONFIAR_PROXY=true`.
-2. Autoriza la IP del servidor en MongoDB Atlas.
-3. Agrega esta regla en `vercel.json`, **antes** de la regla de `index.html`:
-
-```json
-{ "source": "/api/:ruta*", "destination": "https://SERVIDOR/api/:ruta*" }
-```
-
-4. Respalda la carpeta de imágenes (`CARPETA_ARCHIVOS`): no se guarda en MongoDB.
+Ver «Despliegue: frontend en Vercel, backend en Render». Si un día el backend
+se muda al servidor de la universidad, basta cambiar la URL del primer
+`rewrites` de `vercel.json` y respaldar `CARPETA_ARCHIVOS`.
 
 ### Si la API no responde
 

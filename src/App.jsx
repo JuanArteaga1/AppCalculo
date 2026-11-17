@@ -5,7 +5,8 @@ import 'sileo/styles.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import SaberesPrevios from './pages/SaberesPrevios';
+import ConceptosPrevios from './pages/ConceptosPrevios';
+import ConceptoPrevioPage from './pages/ConceptoPrevioPage';
 import Calculo1 from './pages/Calculo1';
 import TemaPage from './pages/TemaPage';
 import BibliotecaMultimedia from './pages/BibliotecaMultimedia';
@@ -21,6 +22,7 @@ import './styles/panel.css';
 import QuizCompartido from './pages/QuizCompartido';
 import Registro from './pages/Registro';
 import Confirmar from './pages/Confirmar';
+import Recuperar from './pages/Recuperar';
 
 /**
  * Rutas que ocupan toda la pantalla, sin barra de navegación ni pie de página:
@@ -45,7 +47,8 @@ function Contenido() {
       <main style={{ flex: 1 }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/conceptos-previos" element={<SaberesPrevios />} />
+          <Route path="/conceptos-previos" element={<ConceptosPrevios />} />
+          <Route path="/conceptos-previos/:slug" element={<ConceptoPrevioPage />} />
           <Route path="/calculo1" element={<Calculo1 />} />
           <Route path="/calculo1/:unidadId" element={<Calculo1 />} />
           <Route path="/calculo1/:unidadId/:temaId" element={<TemaPage />} />
@@ -54,6 +57,7 @@ function Contenido() {
           <Route path="/acceso" element={<Acceso />} />
           <Route path="/registro" element={<Registro />} />
           <Route path="/confirmar" element={<Confirmar />} />
+          <Route path="/recuperar" element={<Recuperar />} />
           <Route path="/evaluate" element={<SeguirAprendiendo />} />
           <Route path="/espacio" element={<Navigate to="/espacio/estudiante/progreso" replace />} />
           <Route path="/espacio/:rol" element={<RutaEspacio><Espacio /></RutaEspacio>} />
@@ -62,14 +66,7 @@ function Contenido() {
           <Route path="/admin/:seccion" element={<ZonaAdmin />} />
           <Route path="/admin/:seccion/:detalle" element={<ZonaAdmin />} />
           <Route path="/admin/:seccion/:detalle/:tema" element={<ZonaAdmin />} />
-          <Route
-            path="/quiz/:id"
-            element={
-              <RutaProtegida roles={['estudiante']}>
-                <QuizCompartido />
-              </RutaProtegida>
-            }
-          />
+          <Route path="/quiz/:id" element={<QuizCompartido />} />
           {/* Dentro de la zona protegida, para no mostrar nada del panel sin sesión. */}
           <Route path="/admin/*" element={<ZonaAdmin />} />
 

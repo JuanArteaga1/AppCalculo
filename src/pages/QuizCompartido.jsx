@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { PreguntasQuiz } from '../components/espacio/EstructuraQuiz';
+import LoginWallQuiz from '../components/auth/LoginWallQuiz';
+import { destinoAlIngresar, useSesion } from '../context/sesion';
 import { alerta, alertaError } from '../services/alertas';
 import { api } from '../services/api';
 
@@ -45,6 +47,7 @@ function olvidar(id) {
  */
 export default function QuizCompartido() {
   const { id } = useParams();
+  const { usuario } = useSesion();
 
   const [vista, setVista] = useState('cargando');
   const [quiz, setQuiz] = useState(null);
@@ -65,6 +68,18 @@ export default function QuizCompartido() {
         setVista('responder');
       } catch (error) {
         if (!vigente) return;
+
+        // Login wall: el backend pide sesión después de validar el quiz.
+        if (error.codigo === 'SESION_REQUERIDA') {
+          setVista('login-wall');
+          return;
+        }
+
+        // Otro rol logueado: redirigir a su espacio (spec-quiz-login-wall BR-086.7).
+        if (error.codigo === 'SIN_PERMISO') {
+          setVista('redirigir-rol');
+          return;
+        }
 
         // Ya respondido: se muestra su resultado.
         if (error.codigo === 'QUIZ_YA_RESPONDIDO') {
@@ -92,7 +107,7 @@ export default function QuizCompartido() {
     return () => {
       vigente = false;
     };
-  }, [id]);
+  }, [id, usuario]);
 
   const marcar = (preguntaId, opcion) => {
     setRespuestas((actuales) => {
@@ -147,6 +162,15 @@ export default function QuizCompartido() {
         <div className="sesion-espera" role="status">Abriendo el quiz...</div>
       </section>
     );
+  }
+
+  if (vista === 'login-wall') {
+    return <LoginWallQuiz quizId={id} />;
+  }
+
+  if (vista === 'redirigir-rol') {
+    const destino = usuario ? destinoAlIngresar(usuario.rol, '') : '/acceso';
+    return <Navigate to={destino} replace />;
   }
 
   if (vista === 'error') {

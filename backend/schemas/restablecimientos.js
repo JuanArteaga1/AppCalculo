@@ -33,6 +33,13 @@ const restablecimientoSchema = new mongoose.Schema({
     usado: {
         type: Boolean,
         default: false
+    },
+
+    // Primer clic al enlace de recuperar: desde ahí corren 10 minutos
+    // (spec-recuperar-acceso BR-01). La confirmación de correo no lo usa.
+    abiertoEn: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true

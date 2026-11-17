@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FILTROS_TAREA, TAREAS } from '../data/mockTareas';
 import { useSesion } from '../context/sesion';
+import { useEvaluacionesEstudiante } from '../hooks/useEvaluacionesEstudiante';
+import VistaEvaluacionesEstudiante from '../components/espacio/VistaEvaluacionesEstudiante';
 
 /**
  * Página pública de práctica: la lista de talleres, quices y evaluaciones y,
@@ -10,8 +12,32 @@ import { useSesion } from '../context/sesion';
  */
 export default function SeguirAprendiendo() {
   const { usuario } = useSesion();
+  const { evaluaciones, cargando, error } = useEvaluacionesEstudiante({ rol: usuario?.rol });
   const [filtro, setFiltro] = useState('Todos');
   const [tareaId, setTareaId] = useState(null);
+
+  if (usuario?.rol === 'estudiante') {
+    if (cargando) {
+      return (
+        <div className="pagina-publica">
+          <div className="sesion-espera" role="status">Cargando tus evaluaciones…</div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="pagina-publica">
+          <div className="aviso-caja" role="alert">
+            <b>No se pudieron cargar las evaluaciones</b>
+            <p className="suave-txt" style={{ margin: '4px 0 0' }}>{error}</p>
+          </div>
+        </div>
+      );
+    }
+
+    return <VistaEvaluacionesEstudiante evaluaciones={evaluaciones} />;
+  }
 
   if (tareaId) {
     const tarea = TAREAS.find((t) => t.id === tareaId);

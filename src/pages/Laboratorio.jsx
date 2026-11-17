@@ -228,9 +228,8 @@ export default function Laboratorio() {
       setIA({
         cargando: false,
         texto: '',
-        error: res.error === 'NO_API_KEY'
-          ? 'Configura VITE_OPENAI_API_KEY en el archivo .env para usar la explicación con IA.'
-          : res.error,
+        // El backend ya explica el motivo: tope del día, guardrail o fallo del tutor.
+        error: res.error,
       });
     }
   }, [funcionActiva, herramienta, punto, incremento]);

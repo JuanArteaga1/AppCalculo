@@ -51,7 +51,7 @@ test("BR-04: si el envío falla no lanza y queda el enlace para copiarlo", async
     const resultado = await enviarEnlace("restablecimiento", PARA, "xyz");
 
     assert.equal(resultado.enviado, false);
-    assert.equal(resultado.enlace, "https://educalc.test/restablecer#xyz");
+    assert.equal(resultado.enlace, "https://educalc.test/recuperar#xyz");
 });
 
 test("Cada tipo usa su ruta y su vigencia; un tipo desconocido es un error", async () => {
@@ -63,7 +63,7 @@ test("Cada tipo usa su ruta y su vigencia; un tipo desconocido es un error", asy
 
     assert.ok(enviados[0].text.includes("/confirmar#t"));
     assert.match(enviados[0].text, /24 horas/);
-    assert.ok(enviados[1].text.includes("/restablecer#t"));
-    assert.match(enviados[1].text, /1 hora/);
+    assert.ok(enviados[1].text.includes("/recuperar#t"));
+    assert.match(enviados[1].text, /72 horas/);
     await assert.rejects(enviarEnlace("otro", PARA, "t"), /desconocida/);
 });

@@ -2,7 +2,7 @@ import usuariosModelo from "../models/usuarios.js";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
-import { abrirSesion, cerrarSesion } from "../middlewares/sesion.js";
+import { abrirSesion, cerrarSesion, invalidarSesiones } from "../middlewares/sesion.js";
 import mongoose from "mongoose";
 import Usuario from "../schemas/usuarios.js";
 import Modulo from "../schemas/modulos.js";
@@ -26,7 +26,7 @@ import Restablecimiento, {
     hashToken as hashRestablecimiento,
     generarTokenRestablecimiento
 } from "../schemas/restablecimientos.js";
-import { enviarAvisoCuentaExistente, enviarConfirmacionCorreo, enviarInvitacionDocente } from "../lib/correo.js";
+import { enviarAvisoCuentaExistente, enviarConfirmacionCorreo, enviarInvitacionDocente, enviarRestablecimiento } from "../lib/correo.js";
 import { motivoContrasenaInvalida } from "../lib/contrasenas.js";
 import { ESPECIALIZACIONES, PREGRADOS, esCarreraValida } from "../lib/carreras.js";
 
@@ -63,6 +63,36 @@ async function registrarFallo(id) {
 }
 
 const CONFIRMACION_MS = 24 * 60 * 60 * 1000;
+
+// Recuperar acceso (spec-recuperar-acceso BR-01): 72 horas desde el envío y
+// 10 minutos desde el primer clic, lo que ocurra primero.
+const RECUPERACION_MS = 72 * 60 * 60 * 1000;
+const RECUPERACION_ABIERTA_MS = 10 * 60 * 1000;
+const MENSAJE_RECUPERACION = "Si el correo está registrado, te llegará un enlace para cambiar tu contraseña. Revisa también la carpeta de spam.";
+const TOKEN_VALIDO = /^[a-f0-9]{64}$/;
+
+const enlaceRecuperacionExpirado = (res) => errorCliente(
+    res,
+    400,
+    "ENLACE_EXPIRADO",
+    "El enlace expiró, solicita uno nuevo."
+);
+
+function recuperacionVigente(registro) {
+    if (!registro || registro.usado) return false;
+
+    const ahora = Date.now();
+
+    if (registro.vence.getTime() <= ahora) return false;
+
+    return !registro.abiertoEn || ahora - registro.abiertoEn.getTime() <= RECUPERACION_ABIERTA_MS;
+}
+
+/** Hasta cuándo sirve un enlace abierto: lo primero entre las 72 horas y los 10 minutos. */
+function cierreRecuperacion(registro) {
+    const porApertura = registro.abiertoEn.getTime() + RECUPERACION_ABIERTA_MS;
+    return new Date(Math.min(porApertura, registro.vence.getTime()));
+}
 const INVITACION_VENCE_MS = 72 * 60 * 60 * 1000;
 const INVITACION_ABIERTA_MS = 10 * 60 * 1000;
 const CORREO_INSTITUCIONAL = /^[a-zA-Z0-9._%+-]+@uniautonoma\.edu\.co$/;
@@ -217,6 +247,31 @@ class usuarioController {
             return res.status(200).json(await usuariosModelo.getAll());
         } catch (e) {
             return responderError(res, e, "Listar usuarios");
+        }
+    }
+
+    /** Listado de docentes para el panel de administrador. */
+    async listarDocentes(req, res) {
+        try {
+            const docentes = await Usuario.find({ rol: "docente" })
+                .select("nombre correo estado modulosAsignados ingresos ultimoIngreso createdAt updatedAt")
+                .sort({ createdAt: -1 })
+                .lean();
+
+            return res.json({
+                docentes: docentes.map((d) => ({
+                    id: d._id,
+                    nombre: d.nombre,
+                    correo: d.correo,
+                    estado: d.estado,
+                    modulosAsignados: d.modulosAsignados ?? [],
+                    ingresos: d.ingresos ?? 0,
+                    ultimoIngreso: d.ultimoIngreso,
+                    creado: d.createdAt,
+                })),
+            });
+        } catch (error) {
+            return errorSistema(res, "Listar docentes", error);
         }
     }
 
@@ -781,6 +836,137 @@ class usuarioController {
             });
         } catch (error) {
             return responderError(res, error, "Validar invitación");
+        }
+    }
+
+    /**
+     * Pide el enlace para recuperar acceso. Responde igual exista o no la cuenta
+     * (BR-04); solo una cuenta activa recibe el enlace (BR-07).
+     */
+    async pedirRecuperacion(req, res) {
+        try {
+            const { correo } = req.body ?? {};
+            const correoLimpio = typeof correo === "string" ? correo.trim().toLowerCase() : "";
+
+            if (!CORREO_INSTITUCIONAL.test(correoLimpio)) {
+                return errorCliente(res, 400, "CORREO_INVALIDO", "Usa tu correo institucional (@uniautonoma.edu.co).");
+            }
+
+            const usuario = await Usuario.findOne({ correo: correoLimpio, estado: "activo" });
+
+            if (usuario) {
+                // Pedir otro anula los anteriores (BR-02).
+                await Restablecimiento.updateMany(
+                    { usuario: usuario._id, tipo: "restablecer", usado: false },
+                    { $set: { usado: true } }
+                );
+
+                const token = generarTokenRestablecimiento();
+
+                await Restablecimiento.create({
+                    usuario: usuario._id,
+                    tipo: "restablecer",
+                    tokenHash: hashRestablecimiento(token),
+                    vence: new Date(Date.now() + RECUPERACION_MS)
+                });
+
+                // El enlace solo viaja por correo: nunca vuelve en la respuesta.
+                await enviarRestablecimiento({ correo: usuario.correo, token });
+            }
+
+            return res.status(202).json({ mensaje: MENSAJE_RECUPERACION });
+        } catch (error) {
+            return responderError(res, error, "Pedir recuperación de acceso");
+        }
+    }
+
+    /** Abre el enlace: guarda el primer clic y devuelve hasta cuándo sirve (BR-01). */
+    async validarRecuperacion(req, res) {
+        try {
+            const { token } = req.body ?? {};
+
+            if (typeof token !== "string" || !TOKEN_VALIDO.test(token)) {
+                return enlaceRecuperacionExpirado(res);
+            }
+
+            const tokenHash = hashRestablecimiento(token);
+            let registro = await Restablecimiento.findOne({ tokenHash, tipo: "restablecer" });
+
+            if (!recuperacionVigente(registro)) {
+                return enlaceRecuperacionExpirado(res);
+            }
+
+            if (!registro.abiertoEn) {
+                // Solo el primer clic cuenta, aunque se abra dos veces a la vez.
+                await Restablecimiento.updateOne(
+                    { _id: registro._id, abiertoEn: null },
+                    { $set: { abiertoEn: new Date() } }
+                );
+                registro = await Restablecimiento.findById(registro._id);
+            }
+
+            return res.status(200).json({
+                abiertoEn: registro.abiertoEn,
+                cierre: cierreRecuperacion(registro)
+            });
+        } catch (error) {
+            return responderError(res, error, "Abrir enlace de recuperación");
+        }
+    }
+
+    /** Cambia la contraseña con el enlace; el enlace queda usado y se cierran las sesiones (BR-02, BR-06). */
+    async restablecer(req, res) {
+        try {
+            const { token, contrasena } = req.body ?? {};
+
+            if (typeof token !== "string" || !TOKEN_VALIDO.test(token)) {
+                return enlaceRecuperacionExpirado(res);
+            }
+
+            // Una contraseña inválida no gasta el enlace.
+            const motivo = motivoContrasenaInvalida(contrasena);
+
+            if (motivo) {
+                return errorCliente(res, 400, "CONTRASENA_INVALIDA", motivo);
+            }
+
+            const tokenHash = hashRestablecimiento(token);
+            const registro = await Restablecimiento.findOne({ tokenHash, tipo: "restablecer" });
+
+            if (!recuperacionVigente(registro)) {
+                return enlaceRecuperacionExpirado(res);
+            }
+
+            // Se marca usado en la misma operación: dos envíos a la vez cambian una sola vez.
+            const tomado = await Restablecimiento.findOneAndUpdate(
+                { _id: registro._id, usado: false },
+                { $set: { usado: true, abiertoEn: registro.abiertoEn ?? new Date() } }
+            );
+
+            if (!tomado) {
+                return enlaceRecuperacionExpirado(res);
+            }
+
+            const usuario = await Usuario.findOneAndUpdate(
+                { _id: registro.usuario, estado: "activo" },
+                {
+                    $set: {
+                        contrasena: await bcrypt.hash(contrasena, 10),
+                        intentosFallidos: 0,
+                        bloqueadoHasta: null
+                    }
+                }
+            );
+
+            if (!usuario) {
+                return enlaceRecuperacionExpirado(res);
+            }
+
+            await invalidarSesiones(usuario._id);
+
+            return res.status(200).json({ mensaje: "Tu contraseña cambió. Ingresa con la nueva." });
+        } catch (error) {
+            return responderError(res, error, "Restablecer contraseña");
         }
     }
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { chatbotMensaje } from '../services/chatbotService';
+import { chatbotMensaje, enlaceIniciarSesion } from '../services/chatbotService';
 import { guardarChat } from '../services/progresoService';
 import { useSesion } from '../context/sesion';
 import renderMathInElement from 'katex/dist/contrib/auto-render';
@@ -64,12 +64,9 @@ export default function ChatSection({
     setLoading(true);
 
     const res = await chatbotMensaje(tema, userMsg);
-    const texto = !res.ok
-      ? (res.error === 'NO_API_KEY'
-        ? '⚠️ El tutor no está configurado en el servidor. Avisa a quien administra la plataforma.'
-        : `❌ Error: ${res.error}\n\nPor favor intenta de nuevo en un momento.`)
-      : res.respuesta;
-    const siguientes = [...conUsuario, { from: 'bot', text: texto }];
+    // Si falla, el backend explica el motivo; si pide sesión, se ofrece el enlace al ingreso.
+    const texto = res.ok ? res.respuesta : res.error;
+    const siguientes = [...conUsuario, { from: 'bot', text: texto, acceso: !res.ok && res.requiereSesion }];
 
     setMessages(siguientes);
     setLoading(false);
@@ -127,6 +124,9 @@ export default function ChatSection({
                 {m.text.split('\n').map((line, idx) => (
                   <p key={idx} style={styles.line}>{line}</p>
                 ))}
+                {m.acceso && (
+                  <a className="pnl-btn pnl-btn-primario pnl-btn-chico" href={enlaceIniciarSesion()}>Iniciar sesión</a>
+                )}
               </div>
             </div>
           ))}
