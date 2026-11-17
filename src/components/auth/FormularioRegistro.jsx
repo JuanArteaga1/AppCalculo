@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import { alerta, alertaError } from '../../services/alertas';
+import CampoContrasena from './CampoContrasena';
 
 export default function FormularioRegistro({ alRegistrado, alError, alLogin }) {
   const [registro, setRegistro] = useState({
@@ -179,10 +180,9 @@ export default function FormularioRegistro({ alRegistrado, alError, alLogin }) {
 
       <div className="campo">
         <label htmlFor="clave-reg">Contraseña</label>
-        <input
+        <CampoContrasena
           id="clave-reg"
-          type="password"
-          placeholder="Mínimo 10 caracteres"
+                    placeholder="Mínimo 10 caracteres"
           autoComplete="new-password"
           minLength={10}
           value={registro.contrasena}

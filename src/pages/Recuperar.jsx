@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { alerta, alertaError } from '../services/alertas';
 import { api } from '../services/api';
+import CampoContrasena from '../components/auth/CampoContrasena';
 
 /** El token va después de # en el enlace del correo: así nunca llega a un servidor ni a sus registros. */
 const leerToken = () => window.location.hash.slice(1);
@@ -185,10 +186,9 @@ export default function Recuperar() {
 
             <div className="campo">
               <label htmlFor="rec-contrasena">Nueva contraseña</label>
-              <input
+              <CampoContrasena
                 id="rec-contrasena"
-                type="password"
-                placeholder="Mínimo 10 caracteres"
+                                placeholder="Mínimo 10 caracteres"
                 autoComplete="new-password"
                 minLength={10}
                 value={datos.contrasena}
@@ -200,10 +200,9 @@ export default function Recuperar() {
 
             <div className="campo">
               <label htmlFor="rec-confirmar">Confirmar nueva contraseña</label>
-              <input
+              <CampoContrasena
                 id="rec-confirmar"
-                type="password"
-                placeholder="Repite la contraseña"
+                                placeholder="Repite la contraseña"
                 autoComplete="new-password"
                 value={datos.confirmar}
                 onChange={campo('confirmar')}
