@@ -25,9 +25,13 @@ registrarMongo();
 
 const app = express();
 
-// Detrás del proxy de Vercel la IP real viene en una cabecera.
-if (process.env.CONFIAR_PROXY === "true") {
-    app.set("trust proxy", 1);
+// Detrás de proxies la IP real viene en X-Forwarded-For. CONFIAR_PROXY es el número
+// de saltos de confianza: en Render detrás de Vercel son 2 (Vercel y el balanceador
+// de Render). "true" equivale a 1. Sin esto, todos comparten la IP del proxy y los
+// límites de intentos serían globales.
+const saltosProxy = process.env.CONFIAR_PROXY === "true" ? 1 : Number.parseInt(process.env.CONFIAR_PROXY ?? "", 10);
+if (Number.isInteger(saltosProxy) && saltosProxy > 0) {
+    app.set("trust proxy", saltosProxy);
 }
 
 const origenes = (process.env.ORIGENES_PERMITIDOS || "http://localhost:5173")
@@ -57,13 +61,16 @@ app.use('/api/ejercicios-guardados', routesEjerciciosGuardados);
 app.use('/api/admin', routesAdmin);
 app.use("/api/evaluaciones", routesEvaluaciones);
 app.post('/api/visitas', limiteVisitas, sesionOpcional, visitaController.registrar);
-app.post('/api/tutor', limiteVisitas, tutorController.preguntar);
+app.post('/api/tutor', limiteVisitas, sesionOpcional, tutorController.preguntar);
 app.use('/api/archivos', express.static(CARPETA_ARCHIVOS, {
     dotfiles: "deny",
     index: false,
     maxAge: "7d",
     setHeaders: (res) => res.set("Cross-Origin-Resource-Policy", "cross-origin"),
 }));
+
+// Chequeo de salud para Render: responde sin tocar MongoDB ni revelar datos.
+app.get('/api/salud', (req, res) => res.json({ ok: true }));
 
 app.use('/api', (req, res) => errorCliente(res, 404, "RUTA_NO_ENCONTRADA", "Esa ruta no existe."));
 
