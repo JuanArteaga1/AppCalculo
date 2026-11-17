@@ -178,3 +178,26 @@ test("RF-05b y CA-11 docente: el docente ve la estructura con la correcta, y las
     assert.equal((await pedir(`/evaluaciones/docente/${otro}`, { metodo: "DELETE", cookie: docente })).estado, 200);
     assert.equal(await RespuestasQuiz.countDocuments({ evaluacion: otro }), 0);
 });
+
+test("EG-088 / CA-05: cada estudiante solo ve sus propios evaluate", async () => {
+    const id = await quizPublicado();
+    const estudianteA = await conSesion("estudiante");
+    const estudianteB = await conSesion("estudiante");
+
+    const abrirA = await pedir(`/evaluaciones/estudiante/${id}`, { cookie: estudianteA });
+    assert.equal(abrirA.estado, 200);
+
+    const respuestaA = await pedir("/evaluaciones/estudiante", { cookie: estudianteA });
+    const respuestaB = await pedir("/evaluaciones/estudiante", { cookie: estudianteB });
+
+    assert.ok(respuestaA.cuerpo, "La respuesta del estudiante A debe tener cuerpo.");
+    assert.ok(respuestaB.cuerpo, "La respuesta del estudiante B debe tener cuerpo.");
+
+    const listaA = respuestaA.cuerpo.evaluaciones ?? [];
+    const listaB = respuestaB.cuerpo.evaluaciones ?? [];
+
+    assert.equal(listaA.length, 1);
+    assert.equal(listaA[0].id, id);
+    assert.equal(listaA[0].estado, "pendiente");
+    assert.equal(listaB.length, 0);
+});

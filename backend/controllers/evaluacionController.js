@@ -1325,6 +1325,29 @@ class evaluacionController {
                 return errorNoEncontrado(res);
             }
 
+            // Sin sesión: validar disponibilidad antes de pedir login (spec-quiz-login-wall BR-086.5, BR-086.6).
+            if (!req.usuario) {
+                if (!quiz.habilitado || quizVencido(quiz)) {
+                    return quizNoDisponible(res, quiz);
+                }
+
+                return errorCliente(
+                    res,
+                    401,
+                    "SESION_REQUERIDA",
+                    "Inicia sesión para continuar."
+                );
+            }
+
+            if (req.usuario.rol !== "estudiante") {
+                return errorCliente(
+                    res,
+                    403,
+                    "SIN_PERMISO",
+                    "No tienes permiso para esta acción."
+                );
+            }
+
             const registro = await RespuestasQuiz.findOne({
                 evaluacion: quiz._id,
                 estudiante: req.usuario._id
