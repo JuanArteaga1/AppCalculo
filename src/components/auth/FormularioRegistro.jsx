@@ -3,6 +3,11 @@ import { api } from '../../services/api';
 import { alerta, alertaError } from '../../services/alertas';
 import CampoContrasena from './CampoContrasena';
 
+// Igual que el backend, sin importar mayúsculas (el backend lo pasa a minúsculas).
+// Va aquí y no en el atributo `pattern`: en JSX las barras de un atributo no se
+// interpretan, el `\\.` llegaba con dos barras y la regla no aceptaba ningún correo.
+const CORREO_INSTITUCIONAL = /^[a-z0-9._%+-]+@uniautonoma\.edu\.co$/i;
+
 export default function FormularioRegistro({ alRegistrado, alError, alLogin }) {
   const [registro, setRegistro] = useState({
     nombre: '',
@@ -58,6 +63,11 @@ export default function FormularioRegistro({ alRegistrado, alError, alLogin }) {
   const enviar = async (e) => {
     e.preventDefault();
 
+    if (!CORREO_INSTITUCIONAL.test(registro.correo.trim())) {
+      alerta.aviso('Revisa tu correo', 'Usa tu correo institucional, que termina en @uniautonoma.edu.co.');
+      return;
+    }
+
     if (!registro.carrera) {
       alerta.aviso('Revisa tus datos', 'Elige tu carrera de la lista.');
       return;
@@ -75,7 +85,7 @@ export default function FormularioRegistro({ alRegistrado, alError, alLogin }) {
         metodo: 'POST',
         cuerpo: {
           nombre: registro.nombre,
-          correo: registro.correo,
+          correo: registro.correo.trim(),
           carrera: registro.carrera,
           contrasena: registro.contrasena,
           aceptarPolitica: true,
@@ -147,8 +157,6 @@ export default function FormularioRegistro({ alRegistrado, alError, alLogin }) {
           type="email"
           placeholder="nombre.apellido@uniautonoma.edu.co"
           autoComplete="email"
-          pattern=".+@uniautonoma\\.edu\\.co"
-          title="Usa tu correo @uniautonoma.edu.co"
           value={registro.correo}
           onChange={cambiar('correo')}
           required
