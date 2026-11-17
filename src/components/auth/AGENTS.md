@@ -7,10 +7,11 @@
 | `FormularioRegistro.jsx` | Formulario de registro del estudiante con carrera |
 | `FormularioRecuperar.jsx` | Formulario de recuperar acceso por correo |
 | `LoginWallQuiz.jsx` | Pantalla de dos columnas para el login wall de `/quiz/:id` |
+| `CampoContrasena.jsx` | Input de contraseña con botón de ojo para mostrarla u ocultarla |
 
 ## Rutas y relaciones
 - Importa de: `services/api.js`, `services/alertas.js`, `context/sesion.js`.
-- Lo usan: `pages/Acceso.jsx`, `pages/QuizCompartido.jsx`.
+- Lo usan: `pages/Acceso.jsx`, `pages/QuizCompartido.jsx`; `CampoContrasena` también `pages/Registro.jsx` y `pages/Recuperar.jsx`.
 
 ## Estilo y convenciones
 - Reciben callbacks (`alEntrar`, `alCambiarModo`) y props de configuración en lugar de depender de la ruta.
@@ -18,6 +19,7 @@
 - No llaman a `useSearchParams` ni a `Navigate`: eso queda en las páginas.
 
 ## No hacer
+- Poner un `<input type="password">` suelto: usa `CampoContrasena`.
 - Agregar lógica de ruta o redirección aquí.
 - Depender de `window.location` para la URL de retorno.
 

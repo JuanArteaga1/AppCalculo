@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { destinoAlIngresar, useSesion } from '../context/sesion';
 import { alerta, alertaError } from '../services/alertas';
 import { api } from '../services/api';
+import CampoContrasena from '../components/auth/CampoContrasena';
 
 // Tras abrir el enlace por primera vez, hay 10 minutos para registrarse (spec-login BR-01).
 const VIGENCIA_ABIERTA_MS = 10 * 60 * 1000;
@@ -175,10 +176,9 @@ export default function Registro() {
 
             <div className="campo">
               <label htmlFor="reg-contrasena">Contraseña</label>
-              <input
+              <CampoContrasena
                 id="reg-contrasena"
-                type="password"
-                placeholder="Mínimo 10 caracteres"
+                                placeholder="Mínimo 10 caracteres"
                 autoComplete="new-password"
                 minLength={10}
                 value={datos.contrasena}
@@ -190,10 +190,9 @@ export default function Registro() {
 
             <div className="campo">
               <label htmlFor="reg-confirmar">Confirma la contraseña</label>
-              <input
+              <CampoContrasena
                 id="reg-confirmar"
-                type="password"
-                placeholder="Repite la contraseña"
+                                placeholder="Repite la contraseña"
                 autoComplete="new-password"
                 value={datos.confirmar}
                 onChange={campo('confirmar')}

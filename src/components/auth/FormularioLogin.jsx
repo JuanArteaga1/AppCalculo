@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { api } from '../../services/api';
 import { alerta, alertaError } from '../../services/alertas';
+import CampoContrasena from './CampoContrasena';
 
 export default function FormularioLogin({
   alEntrar,
@@ -69,10 +70,9 @@ export default function FormularioLogin({
 
       <div className="campo">
         <label htmlFor="clave">Contraseña</label>
-        <input
+        <CampoContrasena
           id="clave"
-          type="password"
-          placeholder="••••••••"
+                    placeholder="••••••••"
           autoComplete="current-password"
           value={contrasena}
           onChange={(e) => setContrasena(e.target.value)}

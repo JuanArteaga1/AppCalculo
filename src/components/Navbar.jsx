@@ -90,7 +90,10 @@ export default function Navbar() {
                 </button>
 
                 {menuUsuario && (
-                  <div className="menu-usuario">
+                  <div
+                    className="menu-usuario"
+                    ref={(menu) => menu?.scrollIntoView({ block: 'nearest' })}
+                  >
                     <Link to={inicio} onClick={cerrar}>{usuario?.rol === 'administrador' ? 'Panel de administración' : 'Mi espacio'}</Link>
                     <button
                       type="button"
@@ -263,10 +266,12 @@ if (typeof document !== 'undefined' && !document.getElementById('css-navbar')) {
     .usuario-txt { display: flex; flex-direction: column; line-height: 1.1; text-align: left; }
     .usuario-txt b { font-size: 12.5px; color: #3730A3; font-weight: 700; }
     .usuario-txt span { font-size: 10.5px; color: #64628A; }
+    /* En el celular el menú va dentro del panel desplegable, debajo de la ficha:
+       flotando quedaba fuera del panel (que tiene overflow) y no se podía tocar. */
     .menu-usuario {
-      position: absolute; right: 0; top: calc(100% + 8px); min-width: 190px; z-index: 5;
+      position: static; margin-top: 6px; min-width: 0;
       background: #FFFFFF; border: 1px solid #E6E5F5; border-radius: 14px;
-      box-shadow: 0 8px 28px rgba(37,35,80,0.12); padding: 6px;
+      padding: 6px;
       display: flex; flex-direction: column;
     }
     .menu-usuario a, .menu-usuario button {
@@ -316,6 +321,10 @@ if (typeof document !== 'undefined' && !document.getElementById('css-navbar')) {
       }
       .nav-links .nav-acciones .nav-btn { flex: none; height: 46px; padding: 0 22px; font-size: 14px; }
       .nav-usuario { flex: none; }
+      .menu-usuario {
+        position: absolute; right: 0; top: calc(100% + 8px); min-width: 190px; z-index: 5;
+        margin-top: 0; box-shadow: 0 8px 28px rgba(37,35,80,0.12);
+      }
     }
   `;
   document.head.appendChild(style);
