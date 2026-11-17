@@ -6,6 +6,7 @@ import multer from "multer";
 import temaController from "../controllers/temaController.js";
 import videoController from "../controllers/videoController.js";
 import visitaController from "../controllers/visitaController.js";
+import conceptosPreviosController from "../controllers/conceptosPreviosController.js";
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
 import { requiereRol } from "../middlewares/sesion.js";
 import usuarioController from "../controllers/usuarioController.js";
@@ -52,6 +53,7 @@ const route = express.Router();
 // Todo lo de este archivo es solo para el administrador.
 route.use(requiereRol("administrador"));
 route.put("/docentes/:id/modulos", usuarioController.asignarModulos);
+route.get("/docentes", usuarioController.listarDocentes);
 
 route.get("/visitas", visitaController.resumen);
 route.post("/archivos", subirImagen);
@@ -71,5 +73,12 @@ route.delete("/temas/:modulo/:numero/definitivo", temaController.eliminarDefinit
 route.delete("/temas/:modulo/:numero", temaController.eliminar);
 route.get("/temas/:modulo/:numero/versiones", temaController.versiones);
 route.post("/temas/:modulo/:numero/versiones/:version/restaurar", temaController.restaurar);
+
+route.get("/conceptos-previos", conceptosPreviosController.listaAdmin);
+route.post("/conceptos-previos", conceptosPreviosController.crear);
+route.get("/conceptos-previos/:id", conceptosPreviosController.detalleAdmin);
+route.put("/conceptos-previos/:id", conceptosPreviosController.actualizar);
+route.patch("/conceptos-previos/:id/publicado", conceptosPreviosController.cambiarPublicado);
+route.delete("/conceptos-previos/:id", conceptosPreviosController.eliminar);
 
 export default route;

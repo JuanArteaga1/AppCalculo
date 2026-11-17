@@ -6,5 +6,6 @@ const route = express.Router();
 
 route.use(sesionOpcional);
 route.get("/", conceptosPreviosController.lista);
+route.get("/:slug", conceptosPreviosController.detalle);
 
 export default route;
