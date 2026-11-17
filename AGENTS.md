@@ -11,7 +11,8 @@
 | `index.html` | Entrada; declara la Content-Security-Policy |
 | `vite.config.js` | Proxy `/api` a `BACKEND_URL` o `localhost:5100` |
 | `eslint.config.js` | Lint con reglas de React Compiler |
-| `vercel.json` | Rutas desconocidas a `index.html` y cabeceras |
+| `vercel.json` | Proxy de `/api` al backend en Render, rutas desconocidas a `index.html` y cabeceras |
+| `render.yaml` | Blueprint de Render para desplegar `backend/` desde este repo |
 | `package.json`, `package-lock.json` | Dependencias del frontend |
 | `.env.example` | Variables `VITE_*` del frontend |
 | `.gitignore` | Ignora `.env`, `dist` y `backend/uploads` |

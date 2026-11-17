@@ -11,12 +11,17 @@
 | `login-bloqueo.test.js` | Bloqueo tras 5 intentos fallidos y su mensaje propio (spec-login CA-10) |
 | `registro-estudiante.test.js` | Registro del estudiante, confirmación y reenvío (spec-login CA-15, CA-16, CA-18, BR-11, BR-12); puerto 5195, sin SMTP |
 | `quiz-estudiante.test.js` | Lista del estudiante, responder, margen de 5 minutos, correctas al vencer y notas del docente (spec-estudiante tarea D, spec-docente CA-18); puerto 5194 |
+| `quiz-login-wall.test.js` | Login wall de `/quiz/:id`: sesión requerida, 404, quiz no disponible y permisos (spec-quiz-login-wall CA-01, CA-04 a CA-09); puerto 5192 |
+| `conceptos-previos.test.js` | Conceptos previos: CRUD admin, listado/detalle público y permisos (spec-conceptos-previos CA-01 a CA-10); puerto 5191 |
+| `docentes.test.js` | Listado de docentes para administrador y permisos; puerto 5190 |
+| `recuperar-acceso.test.js` | Recuperar acceso: enlace de 72 horas y 10 minutos desde el clic, un solo uso, cierre de sesiones (spec-recuperar-acceso); puerto 5193, sin SMTP |
+| `tutor-ia.test.js` | Tutor IA: topes por rol, guardrails, quiz abierto y fallo del proveedor (spec-gestion-ia CA-01 a CA-08 y CA-10; crea temas temporales 9.97 y 9.98 de Límites y los borra); Gemini falso en el puerto 5191, backend en 5192 y 5190 |
 | `invitaciones.test.js` | Invitaciones y registro de docentes (spec-login CA-02, CA-03, CA-07 a CA-09) |
 | `google.test.js` | Dominio, roles por correo, retorno seguro y configuración de Google; sin red |
 
 ## Rutas y relaciones
 - Usan la base del `.env` del backend: las cuentas temporales se borran al terminar.
-- Cada archivo usa su propio puerto (5194 a 5199, sin repetir): el límite de 10 ingresos por IP es por proceso.
+- Cada archivo usa su propio puerto (5190 a 5199, sin repetir): el límite de 10 ingresos por IP es por proceso.
 - `npm test` corre un archivo a la vez (`--test-concurrency=1`): cada archivo borra al terminar todas las cuentas `test.login.`, y en paralelo borraba las de los demás.
 
 ## Estilo y convenciones

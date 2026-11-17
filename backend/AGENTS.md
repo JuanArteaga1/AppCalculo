@@ -3,13 +3,14 @@
 ## Contiene
 | Archivo o carpeta | Qué hace |
 | --- | --- |
-| `app.js` | Arranque, middlewares, rutas bajo `/api`, 404 y errores |
+| `app.js` | Arranque, proxy de confianza (`CONFIAR_PROXY`), middlewares, rutas bajo `/api`, `/api/salud`, 404 y errores |
 | `routes/` | Rutas y permisos |
 | `controllers/` | Lógica de cada recurso |
 | `middlewares/` | Sesión, roles y registro de peticiones |
 | `schemas/` | Modelos de Mongoose |
 | `models/` | Acceso a usuarios |
 | `lib/` | Contrato de errores, validación, contraseñas y correo saliente |
+| `assets/` | Archivos que usa el servidor: `correo/logo-uniautonoma.png`, el logo de los correos (480 px, 11 KB) |
 | `config/` | Conexión a MongoDB |
 | `scripts/` | Migración, primer administrador, cuentas de prueba y prueba del correo |
 | `tests/` | Tests con `node --test`, uno por criterio |

@@ -3,9 +3,10 @@
 ## Contiene
 | Archivo | Qué hace |
 | --- | --- |
-| `usuarios.js` | `/api/usuarios`: login, Google OAuth (`/google` y `/google/callback`), atajo de prueba `/demo` (solo con `DEMO_ACCESO=true`), registro del estudiante, confirmación y reenvío (con límite), carreras, validación de invitación de docente, logout, me y CRUD de administrador |
+| `usuarios.js` | `/api/usuarios`: login, Google OAuth (`/google` y `/google/callback`), atajo de prueba `/demo` (solo con `DEMO_ACCESO=true`), registro del estudiante, confirmación y reenvío, recuperar acceso (con límite), carreras, validación de invitación de docente, logout, me y CRUD de administrador |
 | `temas.js` | `/api/temas`: curso y tema publicado, públicos |
-| `admin.js` | `/api/admin`: visitas, imágenes y edición de temas |
+| `conceptosPrevios.js` | `/api/conceptos-previos`: listado y detalle público de conceptos previos |
+| `admin.js` | `/api/admin`: visitas, imágenes, edición de temas y conceptos previos |
 
 ## Rutas y relaciones
 - Importa de: `controllers/`, `middlewares/`, `lib/`.

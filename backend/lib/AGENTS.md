@@ -7,7 +7,8 @@
 | `validarBloques.js` | Lista blanca de bloques, videos, prácticas y encabezado |
 | `contrasenas.js` | Reglas de contraseña: mínimo 10 caracteres y sin las más comunes |
 | `carreras.js` | Lista cerrada de pregrados y especializaciones (spec-login BR-11) |
-| `correo.js` | Envío por SMTP de invitación, confirmación y restablecimiento, con enlace de respaldo |
+| `correo.js` | Envío por SMTP de invitación, confirmación, recuperar acceso y aviso de cuenta existente, con una plantilla común y el logo adjunto en línea (`cid`) |
+| `ia/` | Tutor con IA: `proveedor.js` (única llamada a Gemini), `promptSistema.js`, `guardrails.js`, `limites.js` (topes por rol y día) y `rag.js` (fragmentos de temas públicos y conceptos previos publicados, nunca del borrador) |
 | `google.js` | Dominio institucional, correos con rol fijo, URL de retorno y configuración de OAuth |
 
 ## Rutas y relaciones
