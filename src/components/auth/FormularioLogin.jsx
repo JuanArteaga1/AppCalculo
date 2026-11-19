@@ -91,7 +91,7 @@ export default function FormularioLogin({
       {pendiente && (
         <div className="aviso-caja" role="status">
           <b>Tu cuenta aún no está confirmada.</b>
-          <p>Abre el enlace que te enviamos a {pendiente}. Si no te llegó, te mandamos otro.</p>
+          <p>Abre el enlace que te enviamos a {pendiente}. Si no lo ves, revisa la carpeta de spam; si no te llegó, te mandamos otro.</p>
           <button
             type="button"
             className="pnl-btn pnl-btn-secundario pnl-btn-chico"

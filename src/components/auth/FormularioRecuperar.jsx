@@ -31,7 +31,7 @@ export default function FormularioRecuperar({ alEnviado, alError, alLogin }) {
     <form className="acceso-form" onSubmit={enviar}>
       <h2>Recuperar acceso</h2>
       <p className="suave-txt">
-        Escribe tu correo institucional y te enviamos un enlace para crear una contraseña nueva.
+        Escribe tu correo institucional y te enviamos un enlace para crear una contraseña nueva. Si no lo ves en tu bandeja, revisa la carpeta de spam.
         Vence a las 72 horas, y una vez lo abras tienes 10 minutos para usarlo.
       </p>
 
