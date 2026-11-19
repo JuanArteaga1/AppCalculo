@@ -14,7 +14,8 @@ const PARTICLES = Array.from({ length: 20 }, () => ({
 // y la mascota, con transparencia, se funde con el fondo de la página.
 const CAROUSEL_ITEMS = [
   { src: '/gift2.gif', alt: 'Gráfica animada de derivada', fondo: '#312E81' },
-  { src: '/Quimerito.png', alt: 'Quimerito - Mascota universitaria', fondo: '#F8F8FE' },
+  // La mascota es más alta que el recuadro: se difumina abajo para que no se vea cortada.
+  { src: '/Quimerito.png', alt: 'Quimerito - Mascota universitaria', fondo: '#F8F8FE', difuminar: true },
 ];
 
 const SWIPE_THRESHOLD = 50;
@@ -104,7 +105,7 @@ export default function Home() {
                   transform: i === currentSlide ? 'scale(1)' : 'scale(0.95)',
                 }}>
                   <img
-                    className="carousel-image"
+                    className={`carousel-image${item.difuminar ? ' carousel-image--difuminada' : ''}`}
                     src={item.src}
                     alt={item.alt}
                   />
@@ -293,6 +294,16 @@ export default function Home() {
           object-fit: contain;
           object-position: center;
           display: block;
+        }
+        /* Mascota de la cabeza a la cintura: la caja de la imagen mide 190 % del
+           recuadro, pegada arriba, así la cintura (≈48 % del PNG) cae cerca del borde
+           inferior; de ahí para abajo se funde con el fondo y no se ve. */
+        .carousel-image.carousel-image--difuminada {
+          height: 190%;
+          object-fit: contain;
+          object-position: center top;
+          -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 37%, transparent 46%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 37%, transparent 46%);
         }
         .carousel-btn {
           position: absolute;

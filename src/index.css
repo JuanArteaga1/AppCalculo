@@ -26,6 +26,13 @@
   --color-success: #059669;
   --color-warning: #B45309;
   --color-danger: #DC2626;
+  /* retroalimentación suave: fondo y borde claros, texto con contraste AA */
+  --color-success-soft: #ECFDF5;
+  --color-success-border: #A7F3D0;
+  --color-success-text: #047857;
+  --color-danger-soft: #FEF2F2;
+  --color-danger-border: #FECACA;
+  --color-danger-text: #B91C1C;
 
   /* alias heredados (no romper estilos antiguos) */
   --color-primary-dark: var(--color-primary-deep);
