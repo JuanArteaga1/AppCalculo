@@ -59,7 +59,9 @@ export function PreguntasQuiz({ preguntas, correcta, elegida }) {
 export function EstructuraQuizDocente({ id }) {
   const [quiz, setQuiz] = useState(null);
   const [error, setError] = useState('');
-  const [codigoQR, setCodigoQR] = useState('');
+  // El QR se guarda con el enlace que lo generó: si el enlace cambia, deja de mostrarse
+  // sin tener que vaciarlo dentro del efecto (React Compiler no lo permite).
+  const [qr, setQr] = useState({ enlace: '', imagen: '' });
   const [mensajeCompartir, setMensajeCompartir] = useState('');
 
   const enlaceQuiz = quiz?.estado === 'publicado'
@@ -84,10 +86,7 @@ export function EstructuraQuizDocente({ id }) {
 
   // Generar el QR cuando el quiz esté publicado.
   useEffect(() => {
-    if (!enlaceQuiz) {
-      setCodigoQR('');
-      return undefined;
-    }
+    if (!enlaceQuiz) return undefined;
 
     let vigente = true;
 
@@ -96,7 +95,7 @@ export function EstructuraQuizDocente({ id }) {
       margin: 2
     })
       .then((imagen) => {
-        if (vigente) setCodigoQR(imagen);
+        if (vigente) setQr({ enlace: enlaceQuiz, imagen });
       })
       .catch(() => {
         if (vigente) {
@@ -108,6 +107,8 @@ export function EstructuraQuizDocente({ id }) {
       vigente = false;
     };
   }, [enlaceQuiz]);
+
+  const codigoQR = enlaceQuiz && qr.enlace === enlaceQuiz ? qr.imagen : '';
 
   const copiarEnlace = async () => {
     try {
