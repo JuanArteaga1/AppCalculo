@@ -11,6 +11,7 @@
 | `login-bloqueo.test.js` | Bloqueo tras 5 intentos fallidos y su mensaje propio (spec-login CA-10) |
 | `registro-estudiante.test.js` | Registro del estudiante, confirmación y reenvío (spec-login CA-15, CA-16, CA-18, BR-11, BR-12); puerto 5195, sin SMTP |
 | `quiz-estudiante.test.js` | Lista del estudiante, responder, margen de 5 minutos, correctas al vencer y notas del docente (spec-estudiante tarea D, spec-docente CA-18); puerto 5194 |
+| `docente-estudiantes.test.js` | El docente quita a un estudiante de su lista, lo vuelve a mostrar y no puede ocultar a quien no respondió (spec-docente 1.5); puerto 5186 |
 | `quiz-login-wall.test.js` | Login wall de `/quiz/:id`: sesión requerida, 404, quiz no disponible y permisos (spec-quiz-login-wall CA-01, CA-04 a CA-09); puerto 5192 |
 | `conceptos-previos.test.js` | Conceptos previos: CRUD admin, listado/detalle público y permisos (spec-conceptos-previos CA-01 a CA-10); puerto 5191 |
 | `docentes.test.js` | Listado de docentes para administrador y permisos; puerto 5190 |

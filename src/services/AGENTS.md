@@ -6,6 +6,7 @@
 | `api.js` | Toda llamada al backend; lanza `ErrorApi` |
 | `temasService.js` | Curso y temas desde la API, sin respaldo local; visitas |
 | `alertas.js` | Toda alerta Sileo: duración y Deshacer |
+| `exportarCsv.js` | Descarga tablas para Excel (CSV con `;`, coma decimal y BOM); `exportarNotasQuiz` |
 | `chatbotService.js` | Tutor con IA: solo `POST /api/tutor`, sin claves; dice cuándo ofrecer «Iniciar sesión» |
 | `openaiService.js` | Resolución del laboratorio: valida la expresión y pregunta al tutor del backend |
 

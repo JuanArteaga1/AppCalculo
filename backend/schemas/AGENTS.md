@@ -11,7 +11,7 @@
 | `iaUso.js` | Preguntas al tutor por clave (IP con hash o usuario) y día; sin el texto de la pregunta; se borra a los 3 días |
 | `versionesTema.js` | Copia por publicación; historial restaurable |
 | `visitas.js` | Contador por tema y día; sin datos de quien visita |
-| `usuarios.js` | Usuarios, roles, estados, frecuencia de uso, bloqueo y versión de sesión |
+| `usuarios.js` | Usuarios, roles, estados, frecuencia de uso, bloqueo, versión de sesión y `estudiantesOcultos` del docente |
 | `invitaciones.js` | Invitaciones de docentes con token hash, vencimiento y fecha del primer abrir |
 | `restablecimientos.js` | Tokens de confirmación de correo y de recuperar acceso (`abiertoEn` cuenta los 10 minutos) |
 

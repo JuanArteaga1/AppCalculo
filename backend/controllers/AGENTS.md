@@ -4,8 +4,8 @@
 | Archivo | Qué hace |
 | --- | --- |
 | `temaController.js` | Curso, borrador, publicación, versiones y restauración |
-| `conceptosPreviosController.js` | Conceptos previos: CRUD para administrador y listado/detalle público |
-| `evaluacionController.js` | Quices: crear, editar y publicar con temas del módulo (400), 403 si es de otro docente; notas y respuestas |
+| `conceptosPreviosController.js` | Conceptos previos: CRUD para administrador (el slug sale del título) y listado/detalle público |
+| `evaluacionController.js` | Quices: crear, editar y publicar con temas del módulo (400), 403 si es de otro docente; notas y respuestas; el docente oculta o vuelve a mostrar estudiantes de su lista |
 | `usuarioController.js` | Login, Google OAuth con `state` y roles por correo, atajo de sesión de prueba, sesión, registro del estudiante con confirmación de correo, recuperar acceso, invitación de docentes y CRUD de usuarios |
 | `tutorController.js` | `POST /api/tutor`: guardrails, tope por rol, quiz abierto y modelo; devuelve la pregunta al contador si falla |
 | `visitaController.js` | Registro y resumen de visitas |
