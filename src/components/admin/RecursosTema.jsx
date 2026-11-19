@@ -19,9 +19,9 @@ function Controles({ i, total, nombre, cambiar, lista }) {
   );
 }
 
-function Seccion({ titulo, cantidad, ayuda, children }) {
+function Seccion({ id, titulo, cantidad, ayuda, children }) {
   return (
-    <details className="tarjeta editor-recurso">
+    <details id={id} className="tarjeta editor-recurso">
       <summary>
         <FiChevronRight className="editor-recurso-flecha" aria-hidden="true" />
         {titulo}
@@ -60,6 +60,7 @@ export function EditorVideos({ videos, cambiar }) {
 
   return (
     <Seccion
+      id="editor-videos"
       titulo="Videos del tema"
       cantidad={videos.length}
       ayuda="El primero es el que se reproduce al abrir el tema. Agrega los que quieras: solo enlaces de YouTube."
@@ -125,6 +126,7 @@ export function EditorPracticas({ practicas, cambiar, herramienta }) {
 
   return (
     <Seccion
+      id="editor-practicas"
       titulo="Ejercicios de práctica"
       cantidad={practicas.length}
       ayuda="El estudiante elige uno y el laboratorio se abre con esa función. El enunciado se le muestra arriba."

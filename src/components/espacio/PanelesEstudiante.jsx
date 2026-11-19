@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { alerta, alertaReintentar } from '../../services/alertas';
 import { EstructuraQuizDocente } from './EstructuraQuiz';
+import { exportarNotasQuiz } from '../../services/exportarCsv';
 import QRCode from 'qrcode';
 import { unidades } from '../../data/temas';
 import { obtenerProgreso } from '../../services/progresoService';
@@ -1449,13 +1450,23 @@ function DetalleMaestro({ evaluacion, onVolver }) {
           <div className="cabeza-fila">
             <h2>Estudiantes que respondieron</h2>
 
-            <button
-              type="button"
-              className="pnl-btn pnl-btn-secundario pnl-btn-chico"
-              onClick={cargarNotas}
-            >
-              Actualizar resultados
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="pnl-btn pnl-btn-primario pnl-btn-chico"
+                onClick={() => exportarNotasQuiz(evaluacion.titulo, datos.notas)}
+                disabled={datos.notas.length === 0}
+              >
+                Exportar a Excel
+              </button>
+              <button
+                type="button"
+                className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                onClick={cargarNotas}
+              >
+                Actualizar resultados
+              </button>
+            </div>
           </div>
 
           {datos.notas.length === 0 ? (
