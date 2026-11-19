@@ -1,7 +1,8 @@
 
 import { useEffect, useState } from 'react';
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch, FiUserX } from 'react-icons/fi';
 import { api } from '../../services/api';
+import { alertaDeshacer, alertaError } from '../../services/alertas';
 import { Anillo } from './PanelesEstudiante';
 
 const inicialesNombre = (nombre = '') =>
@@ -34,6 +35,8 @@ export default function PanelEstudiantes() {
   const [busqueda, setBusqueda] = useState('');
   const [abierto, setAbierto] = useState(null);
   const [estudiantes, setEstudiantes] = useState([]);
+  const [ocultos, setOcultos] = useState([]);
+  const [recarga, setRecarga] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
 
@@ -87,6 +90,7 @@ export default function PanelEstudiantes() {
         });
 
         setEstudiantes(lista);
+        setOcultos(respuestaEvaluaciones.ocultos ?? []);
       } catch (err) {
         if (activo) {
           setError(err.message || 'No fue posible cargar los estudiantes.');
@@ -101,7 +105,39 @@ export default function PanelEstudiantes() {
     return () => {
       activo = false;
     };
-  }, []);
+  }, [recarga]);
+
+  // Quitar solo lo oculta de la lista del docente: la cuenta y las notas siguen.
+  const mostrar = async (estudiante) => {
+    try {
+      await api(`/evaluaciones/docente/estudiantes/${estudiante.id}/mostrar`, { metodo: 'POST' });
+      setOcultos((actual) => actual.filter((o) => o.id !== estudiante.id));
+      // Del listado de ocultos solo llegan nombre y correo: se recarga para traer su progreso.
+      if (estudiante.pctGeneral === undefined) {
+        setRecarga((n) => n + 1);
+      } else {
+        setEstudiantes((actual) => (actual.some((e) => e.id === estudiante.id) ? actual : [...actual, estudiante]));
+      }
+    } catch (err) {
+      alertaError('No se pudo volver a mostrar al estudiante', err);
+    }
+  };
+
+  const quitar = async (estudiante) => {
+    try {
+      await api(`/evaluaciones/docente/estudiantes/${estudiante.id}`, { metodo: 'DELETE' });
+      setEstudiantes((actual) => actual.filter((e) => e.id !== estudiante.id));
+      setOcultos((actual) => [...actual, estudiante]);
+      setAbierto(null);
+      alertaDeshacer(
+        'Estudiante quitado de tu lista',
+        `${estudiante.nombre || estudiante.correo} ya no aparece aquí. Sus notas siguen guardadas.`,
+        () => mostrar(estudiante),
+      );
+    } catch (err) {
+      alertaError('No se pudo quitar al estudiante', err);
+    }
+  };
 
   const termino = busqueda.trim().toLowerCase();
 
@@ -172,6 +208,7 @@ export default function PanelEstudiantes() {
         <PerfilEstudiante
           estudiante={estudiante}
           onVolver={() => setAbierto(null)}
+          onQuitar={() => quitar(estudiante)}
         />
       );
     }
@@ -281,13 +318,22 @@ export default function PanelEstudiantes() {
                       </small>
                     </td>
 
-                    <td style={{ textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                       <button
                         type="button"
                         className="pnl-btn pnl-btn-secundario pnl-btn-chico"
                         onClick={() => setAbierto(e.id)}
                       >
                         Ver perfil
+                      </button>{' '}
+                      <button
+                        type="button"
+                        className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                        onClick={() => quitar(e)}
+                        aria-label={`Quitar a ${e.nombre || e.correo} de mi lista`}
+                        title="Quitar de mi lista"
+                      >
+                        <FiUserX aria-hidden="true" /> Quitar
                       </button>
                     </td>
                   </tr>
@@ -307,11 +353,37 @@ export default function PanelEstudiantes() {
           </table>
         </div>
       </div>
+
+      {ocultos.length > 0 && (
+        <details className="tarjeta">
+          <summary>
+            <b>Estudiantes quitados de tu lista ({ocultos.length})</b>
+          </summary>
+          <p className="suave-txt">No aparecen arriba ni cuentan en el promedio del grupo. Sus notas siguen guardadas.</p>
+          <ul className="lista">
+            {ocultos.map((o) => (
+              <li key={o.id} className="item">
+                <span className="item-txt">
+                  <b>{o.nombre || 'Sin nombre'}</b>
+                  <span>{o.correo}</span>
+                </span>
+                <button
+                  type="button"
+                  className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                  onClick={() => mostrar(o)}
+                >
+                  Volver a mostrar
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </section>
   );
 }
 
-function PerfilEstudiante({ estudiante, onVolver }) {
+function PerfilEstudiante({ estudiante, onVolver, onQuitar }) {
   const pct = estudiante.pctGeneral;
 
   const ultimaActividad =
@@ -340,6 +412,11 @@ function PerfilEstudiante({ estudiante, onVolver }) {
           <span className="suave-txt">
             Última actividad: {formatearFecha(ultimaActividad)}
           </span>
+          <div>
+            <button type="button" className="pnl-btn pnl-btn-secundario pnl-btn-chico" onClick={onQuitar}>
+              <FiUserX aria-hidden="true" /> Quitar de mi lista
+            </button>
+          </div>
         </div>
 
         <div className="ficha-nota">

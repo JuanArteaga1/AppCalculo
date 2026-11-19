@@ -3,6 +3,7 @@ import Evaluacion from "../schemas/evaluaciones.js";
 import RespuestasQuiz from "../schemas/respuestasQuiz.js";
 import Modulo from "../schemas/modulos.js";
 import Tema from "../schemas/temas.js";
+import Usuario from "../schemas/usuarios.js";
 import { errorCliente, errorSistema } from "../lib/respuestas.js";
 import { esAdministrador, filtroTemasVisibles, soloTemasVisibles } from "../lib/visibilidad.js";
 
@@ -311,6 +312,42 @@ async function buscarQuizParaGuardar(req, res) {
     }
 
     return quiz;
+}
+
+/**
+ * Oculta ($addToSet) o vuelve a mostrar ($pull) a un estudiante en la lista del docente.
+ * Solo se puede ocultar a quien respondió alguno de sus quices: así un docente no
+ * puede sondear qué ids de usuario existen.
+ */
+async function cambiarOculto(req, res, operacion) {
+    try {
+        const { estudianteId } = req.params;
+
+        if (!esIdValido(estudianteId)) {
+            return errorCliente(res, 404, "ESTUDIANTE_NO_ENCONTRADO", "Ese estudiante no está en tu lista.");
+        }
+
+        if (operacion === "$addToSet") {
+            const quices = await Evaluacion.find({ docente: req.usuario._id }).select("_id").lean();
+            const respondio = await RespuestasQuiz.exists({
+                estudiante: estudianteId,
+                evaluacion: { $in: quices.map((q) => q._id) },
+            });
+
+            if (!respondio) {
+                return errorCliente(res, 404, "ESTUDIANTE_NO_ENCONTRADO", "Ese estudiante no está en tu lista.");
+            }
+        }
+
+        await Usuario.updateOne(
+            { _id: req.usuario._id },
+            { [operacion]: { estudiantesOcultos: new mongoose.Types.ObjectId(String(estudianteId)) } },
+        );
+
+        return res.status(204).end();
+    } catch (error) {
+        return responderError(res, error, "Ocultar o mostrar estudiante");
+    }
 }
 
 async function buscarQuizDocente(id, docenteId) {
@@ -952,8 +989,11 @@ class evaluacionController {
                 .lean();
 
             if (!quices.length) {
-                return res.json({ estudiantes: [] });
+                return res.json({ estudiantes: [], ocultos: [] });
             }
+
+            const docente = await Usuario.findById(req.usuario._id).select("estudiantesOcultos").lean();
+            const idsOcultos = new Set((docente?.estudiantesOcultos ?? []).map(String));
 
             // Relacionar cada quiz con su información.
             const quicesPorId = new Map(
@@ -1026,7 +1066,7 @@ class evaluacionController {
             }
 
             // Calcular el promedio y la última actividad de cada estudiante.
-            const estudiantes = Array.from(estudiantesPorId.values()).map(
+            const todos = Array.from(estudiantesPorId.values()).map(
                 (estudiante) => {
                     const suma = estudiante.notas.reduce(
                         (total, registro) => total + registro.nota,
@@ -1041,7 +1081,14 @@ class evaluacionController {
                 }
             );
 
-            return res.json({ estudiantes });
+            // Los que el docente quitó de su lista van aparte, solo con lo necesario
+            // para volver a mostrarlos.
+            const estudiantes = todos.filter((e) => !idsOcultos.has(e.id));
+            const ocultos = todos
+                .filter((e) => idsOcultos.has(e.id))
+                .map(({ id, nombre, correo, iniciales }) => ({ id, nombre, correo, iniciales }));
+
+            return res.json({ estudiantes, ocultos });
 
         } catch (error) {
             return responderError(
@@ -1050,6 +1097,16 @@ class evaluacionController {
                 "Listar estudiantes del docente"
             );
         }
+    }
+
+    /** El docente quita a un estudiante de su lista. No borra la cuenta ni sus notas. */
+    async ocultarEstudiante(req, res) {
+        return cambiarOculto(req, res, "$addToSet");
+    }
+
+    /** El docente vuelve a mostrar a un estudiante que había quitado. */
+    async mostrarEstudiante(req, res) {
+        return cambiarOculto(req, res, "$pull");
     }
 
     /** Listar todos los quices para el panel del administrador. */

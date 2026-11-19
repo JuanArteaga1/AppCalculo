@@ -22,7 +22,10 @@ docentes.get("/", evaluacionController.listar);
 docentes.post("/", evaluacionController.crear);
 
 // Listar estudiantes que han respondido quices del docente.
-docentes.get("/estudiantes", evaluacionController.listarEstudiantesDocente); 
+docentes.get("/estudiantes", evaluacionController.listarEstudiantesDocente);
+// Quitar de la lista del docente (solo la oculta) y volver a mostrar.
+docentes.delete("/estudiantes/:estudianteId", evaluacionController.ocultarEstudiante);
+docentes.post("/estudiantes/:estudianteId/mostrar", evaluacionController.mostrarEstudiante);
 
 docentes.get("/:id", evaluacionController.detalle);
 docentes.put("/:id", evaluacionController.actualizar);
