@@ -61,6 +61,13 @@ const usuarioSchema = new mongoose.Schema({
     // Va dentro del JWT: subirla invalida todas las sesiones abiertas.
     versionSesion: { type: Number, default: 0 },
 
+    // Docente: estudiantes que quitó de su lista. Solo los oculta de su vista;
+    // las notas siguen guardadas y el estudiante no se entera.
+    estudiantesOcultos: {
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Usuario" }],
+        default: [],
+    },
+
     modulosAsignados: {
         type: [{
             type: String,

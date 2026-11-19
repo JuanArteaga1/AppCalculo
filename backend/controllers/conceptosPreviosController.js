@@ -11,18 +11,36 @@ function normalizarSlug(slug) {
     return typeof slug === "string" ? slug.trim().toLowerCase() : "";
 }
 
-function validarCampos({ titulo, slug, orden, contenido }) {
+/**
+ * Slug a partir del título: sin tildes, en minúsculas y con guiones.
+ * "Límites y Funciones" → "limites-y-funciones". El docente no lo escribe.
+ */
+export function slugDesdeTitulo(titulo) {
+    const slug = String(titulo ?? "")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80)
+        .replace(/-+$/, "");
+
+    return SLUG_VALIDO.test(slug) ? slug : "concepto";
+}
+
+/** Primer slug libre: "derivada", "derivada-2", "derivada-3"... */
+async function slugDisponible(base) {
+    for (let n = 1; ; n += 1) {
+        const candidato = n === 1 ? base : `${base}-${n}`;
+        if (!(await ConceptoPrevio.exists({ slug: candidato }))) return candidato;
+    }
+}
+
+function validarCampos({ titulo, orden, contenido }) {
     const errores = [];
 
     if (typeof titulo !== "string" || !titulo.trim()) {
         errores.push("El título es obligatorio.");
-    }
-
-    const slugLimpio = normalizarSlug(slug);
-    if (!slugLimpio) {
-        errores.push("El slug es obligatorio.");
-    } else if (!SLUG_VALIDO.test(slugLimpio)) {
-        errores.push("El slug solo puede contener letras minúsculas, números y guiones.");
     }
 
     const ordenNumero = Number(orden);
@@ -34,7 +52,7 @@ function validarCampos({ titulo, slug, orden, contenido }) {
         errores.push("El contenido debe ser una lista de bloques.");
     }
 
-    return { errores, slugLimpio, ordenNumero };
+    return { errores, ordenNumero };
 }
 
 function datosPublicos(concepto) {
@@ -134,8 +152,8 @@ class ConceptosPreviosController {
     /** Crear un concepto previo. */
     async crear(req, res) {
         try {
-            const { titulo, slug, orden, contenido, publicado } = req.body ?? {};
-            const validacion = validarCampos({ titulo, slug, orden, contenido });
+            const { titulo, orden, contenido, publicado } = req.body ?? {};
+            const validacion = validarCampos({ titulo, orden, contenido });
 
             if (validacion.errores.length > 0) {
                 return errorCliente(res, 400, "DATOS_INVALIDOS", validacion.errores.join(" "));
@@ -152,9 +170,10 @@ class ConceptosPreviosController {
                 throw error;
             }
 
+            // El slug sale del título y no cambia al editar, para no romper enlaces.
             const concepto = await ConceptoPrevio.create({
                 titulo: titulo.trim(),
-                slug: validacion.slugLimpio,
+                slug: await slugDisponible(slugDesdeTitulo(titulo)),
                 contenido: bloquesValidados,
                 orden: validacion.ordenNumero,
                 publicado: typeof publicado === "boolean" ? publicado : false,
@@ -179,8 +198,8 @@ class ConceptosPreviosController {
                 return errorNoEncontrado(res);
             }
 
-            const { titulo, slug, orden, contenido, publicado } = req.body ?? {};
-            const validacion = validarCampos({ titulo, slug, orden, contenido });
+            const { titulo, orden, contenido, publicado } = req.body ?? {};
+            const validacion = validarCampos({ titulo, orden, contenido });
 
             if (validacion.errores.length > 0) {
                 return errorCliente(res, 400, "DATOS_INVALIDOS", validacion.errores.join(" "));
@@ -198,7 +217,6 @@ class ConceptosPreviosController {
             }
 
             concepto.titulo = titulo.trim();
-            concepto.slug = validacion.slugLimpio;
             concepto.orden = validacion.ordenNumero;
             concepto.contenido = bloquesValidados;
 

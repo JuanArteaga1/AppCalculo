@@ -7,7 +7,6 @@ import ListaBloques from '../../components/admin/ListaBloques';
 import ContenidoTema from '../../components/tema/ContenidoTema';
 import NoEncontrado from '../../pages/NoEncontrado';
 
-const SLUG_VALIDO = /^[a-z0-9-]+$/;
 
 function datosIniciales() {
   return {
@@ -78,12 +77,6 @@ export default function AdminConceptoPrevio({
       errores.push('El título es obligatorio.');
     }
 
-    if (!formulario.slug.trim()) {
-      errores.push('El slug es obligatorio.');
-    } else if (!SLUG_VALIDO.test(formulario.slug)) {
-      errores.push('El slug solo puede contener letras minúsculas, números y guiones.');
-    }
-
     if (!Number.isFinite(Number(formulario.orden))) {
       errores.push('El orden debe ser un número.');
     }
@@ -103,7 +96,6 @@ export default function AdminConceptoPrevio({
 
     const cuerpo = {
       titulo: formulario.titulo.trim(),
-      slug: formulario.slug.trim().toLowerCase(),
       orden: Number(formulario.orden),
       contenido: formulario.contenido,
       publicado: formulario.publicado,
@@ -177,17 +169,12 @@ export default function AdminConceptoPrevio({
             />
           </div>
 
-          <div className="campo">
-            <label htmlFor="slug">Slug</label>
-            <input
-              id="slug"
-              type="text"
-              value={formulario.slug}
-              onChange={(e) => cambiar('slug', e.target.value.toLowerCase())}
-              placeholder="nombre-del-concepto"
-            />
-            <span className="campo-ayuda">Solo letras minúsculas, números y guiones. Aparece en la URL.</span>
-          </div>
+          {/* La dirección la arma el servidor con el título al crear y no cambia después. */}
+          {!esNuevo && formulario.slug && (
+            <p className="campo-ayuda" style={{ margin: 0 }}>
+              Dirección pública: <code>/conceptos-previos/{formulario.slug}</code>
+            </p>
+          )}
 
           <div className="campo">
             <label htmlFor="orden">Orden</label>

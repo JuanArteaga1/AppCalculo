@@ -31,6 +31,7 @@ import { unidades } from '../data/temas';
 import { extraerYoutubeId, youtubeThumb, leerVideosLocales, quitarVideoLocal } from '../data/videos';
 import { useSesion } from '../context/sesion';
 import { api } from '../services/api';
+import { exportarNotasQuiz } from '../services/exportarCsv';
 import NoEncontrado from './NoEncontrado';
 
 /** Nombres de los módulos para Evalúate y Usuarios, que aún usan datos de ejemplo. */
@@ -371,6 +372,8 @@ function VistaModulos({ curso, visitas }) {
 const PREFIJO_MODULO = { limites: '1', derivadas: '2', aplicaciones: '3', 'conceptos-previos': 'CP' };
 
 const rutaTema = (modulo, numero) => `/admin/temas/${encodeURIComponent(modulo)}/${encodeURIComponent(numero)}`;
+// Pantalla del editor (no la API): `seccion` abre los videos o los ejercicios del tema.
+const rutaEditor = (modulo, numero, seccion) => `/admin/modulos/${encodeURIComponent(modulo)}/${encodeURIComponent(numero)}${seccion ? `#editor-${seccion}` : ''}`;
 
 /** Sugiere el siguiente número del módulo: 1.11, 2.9, CP.2… */
 function siguienteNumero(modulo) {
@@ -1333,6 +1336,15 @@ function VistaCreacion({ id }) {
               <p className="suave-txt">
                 Consulta las calificaciones y los datos de cada estudiante.
               </p>
+              {notas.length > 0 && (
+                <button
+                  type="button"
+                  className="pnl-btn pnl-btn-secundario pnl-btn-chico"
+                  onClick={() => exportarNotasQuiz(quiz.titulo, notas)}
+                >
+                  Exportar a Excel
+                </button>
+              )}
             </div>
 
             {notas.length === 0 ? (
@@ -1690,9 +1702,9 @@ function RecursosVideoteca() {
                       </span>
                       <Link
                         className="pnl-btn pnl-btn-secundario pnl-btn-chico"
-                        to={rutaTema(video.modulo, video.numero)}
+                        to={rutaEditor(video.modulo, video.numero, 'videos')}
                       >
-                        Editar tema
+                        Editar videos
                       </Link>
                     </li>
                   ))}
@@ -1778,9 +1790,9 @@ function RecursosLaboratorio() {
                       {tema.visibilidad === 'privado' && <Pastilla estado="oculta" />}
                       <Link
                         className="pnl-btn pnl-btn-secundario pnl-btn-chico"
-                        to={rutaTema(modulo.id, tema.id)}
+                        to={rutaEditor(modulo.id, tema.id, 'practicas')}
                       >
-                        Editar tema
+                        Editar ejercicios
                       </Link>
                     </div>
 

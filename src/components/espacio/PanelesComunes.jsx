@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPlay } from 'react-icons/fi';
+import { FiPlay, FiX } from 'react-icons/fi';
 import { ChatEstudiante } from '../ChatSection';
 import { extraerYoutubeId, youtubeEmbed } from '../../data/videos';
 import { alerta, alertaError } from '../../services/alertas';
@@ -120,8 +120,6 @@ export function PanelVideos({ rol }) {
     };
   }, [rol]);
 
-  const reproduciendo = videos.find((v) => v.youtubeId === activo);
-  const idReproduciendo = extraerYoutubeId(reproduciendo?.youtubeId);
   const esDocente = rol === 'maestro';
 
   return (
@@ -135,24 +133,6 @@ export function PanelVideos({ rol }) {
         </p>
       </div>
 
-      {reproduciendo && (
-        <div className="tarjeta">
-          <h2>{reproduciendo.titulo}</h2>
-          <iframe
-            title={reproduciendo.titulo}
-            src={youtubeEmbed(idReproduciendo)}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            style={{
-              width: '100%',
-              aspectRatio: '16 / 9',
-              border: 0,
-              borderRadius: 12,
-            }}
-          />
-        </div>
-      )}
-
       {videos.length === 0 ? (
         <div className="aviso-caja">
           Aún no has visto videos.{' '}
@@ -160,25 +140,46 @@ export function PanelVideos({ rol }) {
         </div>
       ) : (
         <ul className="lista">
-          {videos.map((v) => (
-            <li key={v.youtubeId} className="item">
-              <button
-                type="button"
-                className="item-play"
-                aria-label={`Reproducir ${v.titulo}`}
-                onClick={() => setActivo(v.youtubeId)}
-              >
-                <FiPlay />
-              </button>
-              <span className="item-txt">
-                <b>{v.titulo}</b>
-                <span>{v.unidad || 'Videoteca'}</span>
-              </span>
-              <span className="estado" data-e="calificado">
-                Visto
-              </span>
-            </li>
-          ))}
+          {videos.map((v) => {
+            const abierto = activo === v.youtubeId;
+
+            // El reproductor se abre debajo del video elegido, no arriba de la lista:
+            // así no hay que subir a buscarlo ni se pierde el lugar al volver.
+            return (
+              <li key={v.youtubeId} className="item item-video" data-abierto={abierto || undefined}>
+                <button
+                  type="button"
+                  className="item-play"
+                  aria-label={abierto ? `Cerrar ${v.titulo}` : `Reproducir ${v.titulo}`}
+                  aria-expanded={abierto}
+                  onClick={() => setActivo(abierto ? null : v.youtubeId)}
+                >
+                  {abierto ? <FiX /> : <FiPlay />}
+                </button>
+                <span className="item-txt">
+                  <b>{v.titulo}</b>
+                  <span>{v.unidad || 'Videoteca'}</span>
+                </span>
+                <span className="estado" data-e="calificado">
+                  {abierto ? 'Reproduciendo' : 'Visto'}
+                </span>
+
+                {abierto && (
+                  <div
+                    className="item-video-reproductor"
+                    ref={(el) => el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })}
+                  >
+                    <iframe
+                      title={v.titulo}
+                      src={youtubeEmbed(extraerYoutubeId(v.youtubeId))}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

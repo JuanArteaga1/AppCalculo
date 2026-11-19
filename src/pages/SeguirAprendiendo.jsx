@@ -208,14 +208,17 @@ function Ejercicio({ tarea, onSalir }) {
           {tarea.preguntas.map((q, k) => {
             const bien = respuestas[k] === q.ok;
             return (
-              <div key={q.p} className="pregunta">
+              <div key={q.p} className="pregunta" data-resultado={bien ? 'bien' : 'mal'}>
                 <b>{k + 1}. {q.p}</b>
-                <span className="estado" data-e={bien ? 'calificado' : 'pendiente'}>
-                  {bien ? 'Correcta' : 'Incorrecta'}
+                <span className="estado" data-e={bien ? 'correcta' : 'incorrecta'}>
+                  {bien ? '✓ Correcta' : '✗ Incorrecta'}
                 </span>
                 <p className="suave-txt">
-                  Tu respuesta: {respuestas[k] != null ? q.ops[respuestas[k]] : 'sin responder'}
-                  {!bien && <> · Correcta: <b>{q.ops[q.ok]}</b></>}
+                  Tu respuesta:{' '}
+                  <span className={bien ? 'respuesta-bien' : 'respuesta-mal'}>
+                    {respuestas[k] != null ? q.ops[respuestas[k]] : 'sin responder'}
+                  </span>
+                  {!bien && <> · Correcta: <span className="respuesta-bien">{q.ops[q.ok]}</span></>}
                 </p>
                 <p className="suave-txt">{q.pista}</p>
               </div>

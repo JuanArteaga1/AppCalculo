@@ -104,7 +104,7 @@ export default function Espacio() {
           </div>
         </div>
 
-        <nav className="menu-lat">
+        <nav className="menu-lat" aria-label={esEstudiante ? 'Secciones de tu espacio' : 'Secciones del espacio docente'}>
           {menu.map(([clave, texto]) => {
             const Icono = ICONOS[clave];
             return (
@@ -112,6 +112,9 @@ export default function Espacio() {
                 key={clave}
                 to={`/espacio/${rol}/${clave}`}
                 aria-current={clave === activa ? 'page' : undefined}
+                // En el celular el menú es una fila con desplazamiento: la pestaña
+                // activa se trae a la vista para que nunca quede escondida.
+                ref={clave === activa ? (el) => el?.scrollIntoView({ block: 'nearest', inline: 'nearest' }) : undefined}
               >
                 <Icono />
                 {texto}

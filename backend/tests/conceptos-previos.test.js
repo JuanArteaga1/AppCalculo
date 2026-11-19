@@ -76,17 +76,26 @@ test("CA-02 y CA-03: el administrador crea un concepto previo con bloques valida
     assert.equal(respuesta.cuerpo.concepto.contenido.length, 1);
 });
 
-test("CA-03: el backend rechaza slug duplicado", async () => {
-    await ConceptoPrevio.create({ titulo: "Existente", slug: "duplicado", contenido: [], orden: 1 });
+test("CA-03: el slug sale del título, sin tildes, y no se repite", async () => {
+    await ConceptoPrevio.create({ titulo: "Límites y Funciones", slug: "limites-y-funciones", contenido: [], orden: 1 });
 
     const respuesta = await pedir("/admin/conceptos-previos", {
         metodo: "POST",
         cookie: admin,
-        cuerpo: { titulo: "Otro", slug: "duplicado", orden: 2, contenido: [] },
+        cuerpo: { titulo: "  Límites y Funciones ", slug: "ignorado", orden: 2, contenido: [] },
     });
 
-    assert.equal(respuesta.estado, 409);
-    assert.equal(respuesta.cuerpo.error, "SLUG_DUPLICADO");
+    assert.equal(respuesta.estado, 201);
+    assert.equal(respuesta.cuerpo.concepto.slug, "limites-y-funciones-2");
+
+    const editado = await pedir(`/admin/conceptos-previos/${respuesta.cuerpo.concepto.id}`, {
+        metodo: "PUT",
+        cookie: admin,
+        cuerpo: { titulo: "Otro título", orden: 2, contenido: [] },
+    });
+
+    assert.equal(editado.estado, 200);
+    assert.equal(editado.cuerpo.concepto.slug, "limites-y-funciones-2", "al editar el slug no cambia");
 });
 
 test("CA-03: el backend rechaza bloques de tipo desconocido", async () => {

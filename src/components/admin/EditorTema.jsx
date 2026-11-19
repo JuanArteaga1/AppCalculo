@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiExternalLink, FiTrash2 } from 'react-icons/fi';
 import { alerta, alertaDeshacer, alertaError, cerrarAlerta } from '../../services/alertas';
 import { api } from '../../services/api';
@@ -68,6 +68,17 @@ export default function EditorTema({ modulo, numero }) {
       vigente = false;
     };
   }, [modulo, numero, aplicar]);
+
+  // Desde Recursos se llega con #editor-videos o #editor-practicas: abre esa sección
+  // y la lleva a la vista, para no buscarla bajo los bloques del tema.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (estado !== 'listo' || !hash) return;
+    const seccion = document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (!seccion) return;
+    if (seccion.tagName === 'DETAILS') seccion.open = true;
+    seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [estado, hash]);
 
   const editar = (parche) => {
     edicion.current += 1;

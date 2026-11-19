@@ -1021,7 +1021,7 @@ class usuarioController {
 
             return res.status(201).json({
                 mensaje: enviado
-                    ? "Invitación enviada correctamente."
+                    ? "Invitación enviada. Pídele al docente que revise también la carpeta de spam."
                     : "No se pudo enviar el correo, pero la invitación quedó creada.",
                 usuario: {
                     id: usuario._id,
